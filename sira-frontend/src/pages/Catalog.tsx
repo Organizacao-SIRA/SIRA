@@ -1,0 +1,123 @@
+import React, { useState, useEffect } from 'react';
+import { Search, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
+import { fetchCatalogBooks } from '../services/api';
+import { CatalogCard } from '../components/CatalogCard'; // Certifique-se de que o caminho está correto
+
+export const Catalog = ({ viewDetails }: { viewDetails: (item: any) => void }) => {
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todas');
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  const categories = ['Todas', 'Ciências da Computação', 'Administração Pública', 'Direito'];
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadData = async () => {
+      setLoading(true);
+      setIsBlocked(false);
+      
+      try {
+        const data = await fetchCatalogBooks(selectedCategory);
+        
+        if (isMounted) {
+          // Se a API retornar vazio mas uma categoria foi selecionada, pode ser o Erro 429
+          if (data.length === 0 && selectedCategory !== 'Todas') {
+            setIsBlocked(true);
+          }
+          setItems(data);
+        }
+      } catch (error) {
+        if (isMounted) setItems([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [selectedCategory]);
+
+  const filteredItems = items.filter(item => 
+    item.title?.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+    item.authors?.toLowerCase().includes(catalogSearch.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn min-h-[calc(100vh-68px)]">
+      {/* Cabeçalho da Página */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#003157]">Catálogo Acadêmico</h1>
+        <p className="text-gray-500 mt-1 font-medium">
+          Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos.
+        </p>
+      </div>
+
+      {/* Barra de Filtros e Busca */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input 
+            type="text" 
+            placeholder="Pesquisar por título ou autor..." 
+            value={catalogSearch}
+            onChange={(e) => setCatalogSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#1351B4] focus:ring-1 focus:ring-[#1351B4] transition-colors text-sm"
+          />
+        </div>
+        
+        <div className="w-full md:w-auto flex items-center gap-3">
+          <span className="text-sm font-bold text-gray-700 whitespace-nowrap">Categoria:</span>
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-[#1351B4] text-sm text-[#003157] font-medium w-full md:w-56 cursor-pointer"
+          >
+            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Área de Conteúdo */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-32">
+          <Loader2 className="animate-spin text-[#1351B4] w-12 h-12" />
+          <p className="text-sm font-bold text-gray-400 mt-4 uppercase tracking-widest">Consultando bases integradas...</p>
+        </div>
+      ) : isBlocked && items.length === 0 ? (
+        /* Aviso de Bloqueio de API */
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-8 rounded-r-xl shadow-sm max-w-2xl mx-auto text-center">
+          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-amber-900">Limite de Acesso Temporário</h3>
+          <p className="text-amber-800 mt-2">
+            As APIs externas (Google/Semantic) atingiram o limite de requisições. 
+            Aguarde um minuto e tente carregar outra categoria.
+          </p>
+        </div>
+      ) : (
+        /* Grid de Itens usando o CatalogCard */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredItems.length > 0 ? (
+            filteredItems.map(item => (
+              <CatalogCard 
+                key={item.id} 
+                book={item} 
+                viewDetails={viewDetails} 
+              />
+            ))
+          ) : (
+            /* Estado Vazio */
+            <div className="col-span-full py-24 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
+              <BookOpen className="w-16 h-16 mx-auto text-gray-200 mb-4" />
+              <h3 className="text-lg font-bold text-gray-400 uppercase">Nenhum material encontrado</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Tente ajustar os termos da pesquisa ou mudar a categoria.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
