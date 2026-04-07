@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sira-postgres
+    environment:
+      POSTGRES_USER: sira_user
+      POSTGRES_PASSWORD: sira_password
+      POSTGRES_DB: sira_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
