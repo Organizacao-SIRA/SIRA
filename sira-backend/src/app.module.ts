@@ -1,4 +1,6 @@
 import { Module, Get, Controller } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { MaterialsModule } from './materials/materials.module';
 
 @Controller()
 class AppController {
@@ -13,7 +15,10 @@ class AppController {
 }
 
 @Module({
-  imports: [],
+  imports: [
+    HttpModule,
+    MaterialsModule
+  ],
   controllers: [AppController],
   providers: [],
 })
