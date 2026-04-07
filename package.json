@@ -1,0 +1,18 @@
+{
+  "name": "sira-monorepo",
+  "private": true,
+  "description": "SIRA - Sistema Inteligente de Recomendações Acadêmicas (Monorepo)",
+  "workspaces": [
+    "sira-frontend",
+    "sira-backend"
+  ],
+  "scripts": {
+    "dev:back": "npm run dev -w sira-backend",
+    "dev:front": "npm run dev -w sira-frontend",
+    "dev": "npm run dev:back & npm run dev:front",
+    "build:back": "npm run build -w sira-backend",
+    "build:front": "npm run build -w sira-frontend",
+    "build": "npm run build:back && npm run build:front",
+    "lint": "npm run lint -w sira-frontend && npm run lint -w sira-backend"
+  }
+}
