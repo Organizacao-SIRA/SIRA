@@ -3,14 +3,65 @@ services:
     image: postgres:17-alpine
     container_name: sira-postgres
     environment:
-      POSTGRES_USER: sira_user
-      POSTGRES_PASSWORD: sira_password
-      POSTGRES_DB: sira_db
+      POSTGRES_USER: ${POSTGRES_USER:-sira_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sira_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sira_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sira_user -d sira_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
+    networks:
+      - sira-network
+
+  backend:
+    build:
+      context: ./sira-backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: sira-backend
+    environment:
+      DATABASE_URL: postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public
+      PORT: 3000
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./sira-backend/src:/app/src
+      - /app/node_modules # Protege a node_modules do container
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sira-network
+    restart: always
+
+  frontend:
+    build:
+      context: ./sira-frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: sira-frontend
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./sira-frontend/src:/app/src
+      - ./sira-frontend/public:/app/public
+      - /app/node_modules # Evita que a pasta node_modules local apague a do container
+    networks:
+      - sira-network
+    restart: always
+
+networks:
+  sira-network:
+    driver: bridge
 
 volumes:
   postgres_data:

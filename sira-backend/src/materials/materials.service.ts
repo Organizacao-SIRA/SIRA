@@ -50,7 +50,11 @@ export class MaterialsService {
         abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
         image: item.volumeInfo?.imageLinks?.thumbnail || null,
       }));
-    } catch {
+    } catch (error) {
+      this.logger.error(`Erro ao buscar no Google Books: ${error.message}`);
+      if (error.response) {
+        this.logger.error(`Status: ${error.response.status} - Data: ${JSON.stringify(error.response.data)}`);
+      }
       return [];
     }
   }
@@ -70,7 +74,11 @@ export class MaterialsService {
         relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
         abstract: item.abstract || 'Resumo acadêmico indisponível.',
       }));
-    } catch {
+    } catch (error) {
+      this.logger.error(`Erro ao buscar no Semantic Scholar: ${error.message}`);
+      if (error.response) {
+        this.logger.error(`Status: ${error.response.status} - Data: ${JSON.stringify(error.response.data)}`);
+      }
       return [];
     }
   }
