@@ -32,7 +32,7 @@ docker-compose up --build
 Após a finalização do processo, os serviços estarão disponíveis nos seguintes endereços:
 
 *   **Frontend:** [http://localhost:5173](http://localhost:5173)
-*   **Backend (Saúde da API):** [http://localhost:3000/health](http://localhost:3000/health)
+*   **Backend (Saúde da API):** [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
 *   **Documentação Swagger:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 
 ### 3. Desenvolvimento em Tempo Real
