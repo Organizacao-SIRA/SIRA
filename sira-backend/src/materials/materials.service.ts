@@ -8,25 +8,37 @@ export class MaterialsService {
   private readonly logger = new Logger(MaterialsService.name);
   private readonly GOOGLE_BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes';
   private readonly SEMANTIC_SCHOLAR_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
+  
+  // Cache Simples em Memória (Platform Engineering Pattern para economia de custos/quota)
+  private cache = new Map<string, { data: MaterialDto[], timestamp: number }>();
+  private readonly CACHE_TTL = 3600 * 1000; // 1 hora em milissegundos
 
   constructor(private readonly httpService: HttpService) {}
 
   async search(query: string): Promise<MaterialDto[]> {
-    if (!query || query.length < 2) return [];
+    if (!query || query.trim().length < 2) return [];
+
+    const cacheKey = query.toLowerCase().trim();
+    const cached = this.cache.get(cacheKey);
+    
+    if (cached && (Date.now() - cached.timestamp < this.CACHE_TTL)) {
+      this.logger.log(`Retornando resultados em cache para: "${query}"`);
+      return cached.data;
+    }
 
     try {
       this.logger.log(`Iniciando busca acadêmica para: "${query}"`);
 
-      // Execução Paralela para Performance (Platform Engineering Best Practice)
       const [googleData, semanticData] = await Promise.all([
         this.fetchGoogleBooks(query),
         this.fetchSemanticScholar(query),
       ]);
 
-      const results = [...googleData, ...semanticData];
+      const results = [...googleData, ...semanticData]
+        .sort((a, b) => b.relevance - a.relevance);
       
-      // Ordenar por relevância (Simulado por enquanto, futuramente alimentado pela IA)
-      return results.sort((a, b) => b.relevance - a.relevance);
+      this.cache.set(cacheKey, { data: results, timestamp: Date.now() });
+      return results;
     } catch (error) {
       this.logger.error(`Erro na busca acadêmica: ${error.message}`);
       return [];
@@ -34,10 +46,11 @@ export class MaterialsService {
   }
 
   private async fetchGoogleBooks(query: string): Promise<MaterialDto[]> {
+    const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
+    const url = `${this.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=8${apiKey ? `&key=${apiKey}` : ''}`;
+
     try {
-      const response = await firstValueFrom(
-        this.httpService.get(`${this.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=8`)
-      );
+      const response = await firstValueFrom(this.httpService.get(url));
 
       return (response.data.items || []).map((item: any) => ({
         id: `gb-${item.id}`,
@@ -52,17 +65,20 @@ export class MaterialsService {
       }));
     } catch (error) {
       this.logger.error(`Erro ao buscar no Google Books: ${error.message}`);
-      if (error.response) {
-        this.logger.error(`Status: ${error.response.status} - Data: ${JSON.stringify(error.response.data)}`);
+      if (error.response?.status === 429) {
+        this.logger.warn('Google Books API: Limite de requisições excedido. Considere adicionar uma API_KEY.');
       }
       return [];
     }
   }
 
   private async fetchSemanticScholar(query: string): Promise<MaterialDto[]> {
+    const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
+    const headers = apiKey ? { 'x-api-key': apiKey } : {};
+    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,abstract,venue`;
+
     try {
-      const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,abstract,venue`;
-      const response = await firstValueFrom(this.httpService.get(url));
+      const response = await firstValueFrom(this.httpService.get(url, { headers }));
 
       return (response.data.data || []).map((item: any) => ({
         id: `ss-${item.paperId}`,
@@ -76,8 +92,8 @@ export class MaterialsService {
       }));
     } catch (error) {
       this.logger.error(`Erro ao buscar no Semantic Scholar: ${error.message}`);
-      if (error.response) {
-        this.logger.error(`Status: ${error.response.status} - Data: ${JSON.stringify(error.response.data)}`);
+      if (error.response?.status === 429) {
+        this.logger.warn('Semantic Scholar API: Limite de requisições excedido. Considere adicionar uma API_KEY.');
       }
       return [];
     }

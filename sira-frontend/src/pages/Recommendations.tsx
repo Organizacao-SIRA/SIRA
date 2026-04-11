@@ -4,34 +4,9 @@ import {
   ChevronRight, Filter as FilterIcon, Search
 } from 'lucide-react';
 
-const mockFallback = [
-  {
-    id: 'mock-1',
-    type: 'article',
-    title: 'Aplicações de Processamento de Linguagem Natural na Gestão Pública',
-    authors: 'Silva, J., & Santos, M.',
-    year: 2024,
-    source: 'Semantic Scholar',
-    relevance: 98,
-    abstract: 'Este artigo explora como modelos de linguagem de grande escala e embeddings estão a ser utilizados para otimizar processos de triagem de documentos em instituições governamentais...',
-    aiJustification: 'Altamente relevante para a sua pesquisa atual.'
-  },
-  {
-    id: 'mock-2',
-    type: 'book',
-    title: 'Inteligência Artificial e o Futuro do Estado',
-    authors: 'Oliveira, R. (Ed.)',
-    year: 2023,
-    source: 'Google Books',
-    relevance: 92,
-    abstract: 'Uma obra abrangente que discute os impactos éticos, práticos e legais da adoção de sistemas de recomendação automatizada na administração pública.',
-    aiJustification: 'Recomendado para sua fundamentação teórica estratégica.'
-  }
-];
-
 export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavorite, isFavorite }: any) => {
   
-  const displayResults = results && results.length > 0 ? results : mockFallback;
+  const displayResults = results || [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
