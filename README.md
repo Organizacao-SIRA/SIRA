@@ -21,8 +21,19 @@ O SIRA é um sistema de recomendações acadêmicas desenvolvido em uma arquitet
 
 Certifique-se de ter o **Docker** instalado em sua máquina.
 
-### 1. Clonar e Iniciar
-Na raiz do projeto, execute o comando abaixo para construir as imagens e subir os containers:
+### 1. Configurar Variáveis de Ambiente
+Antes de subir os containers, é necessário criar os arquivos `.env` a partir dos exemplos fornecidos:
+
+```bash
+# Na raiz do projeto:
+cp sira-backend/.env.example sira-backend/.env
+cp sira-frontend/.env.example sira-frontend/.env
+```
+
+*Nota: No arquivo `sira-backend/.env`, você pode precisar configurar chaves de API externas (como `GOOGLE_BOOKS_API_KEY`) para habilitar todas as funcionalidades de busca.*
+
+### 2. Clonar e Iniciar
+Agora, execute o comando abaixo para construir as imagens e subir os containers:
 
 ```bash
 docker-compose up --build
