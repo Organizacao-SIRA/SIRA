@@ -6,7 +6,8 @@ if [ -f "./prisma/schema.prisma" ]; then
   if [ "$NODE_ENV" = "production" ]; then
     npx prisma migrate deploy
   else
-    npx prisma migrate dev
+    # Em desenvolvimento, usa o nome 'init' e evita perguntas interativas
+    npx prisma migrate dev --name init --skip-seed || true
   fi
 fi
 
