@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# Se houver schema.prisma, tenta rodar as migrations
+# Se houver schema.prisma, tenta sincronizar o banco
 if [ -f "./prisma/schema.prisma" ]; then
-  echo "Prisma schema found. Checking for migrations..."
+  echo "Prisma schema found. Syncing database..."
   if [ "$NODE_ENV" = "production" ]; then
     npx prisma migrate deploy
   else
-    # Em desenvolvimento, usa o nome 'init' e evita perguntas interativas
-    npx prisma migrate dev --name init --skip-seed || true
+    # Em desenvolvimento, usamos db push para evitar prompts interativos que travam o container
+    npx prisma db push --skip-generate
   fi
 fi
 

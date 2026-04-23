@@ -1,6 +1,9 @@
 import { Module, Get, Controller } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { MaterialsModule } from './materials/materials.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Controller()
 class AppController {
@@ -17,7 +20,10 @@ class AppController {
 @Module({
   imports: [
     HttpModule,
-    MaterialsModule
+    MaterialsModule,
+    UsersModule,
+    AuthModule,
+    PrismaModule
   ],
   controllers: [AppController],
   providers: [],

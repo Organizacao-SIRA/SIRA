@@ -1,11 +1,35 @@
-import React from 'react';
-import { User, Lock, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { loginUser } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginProps {
   setCurrentScreen: (screen: string) => void;
 }
 
 export const Login = ({ setCurrentScreen }: LoginProps) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await loginUser({ email, password });
+      login(response.user, response.access_token);
+      setCurrentScreen('home');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao tentar fazer login.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
       <div className="w-full max-w-sm">
@@ -16,17 +40,23 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
                 <User className="w-6 h-6 text-[#1351B4]" />
               </div>
               <h2 className="text-2xl font-bold text-[#003157]">Acesse o SIRA+</h2>
-              <p className="text-gray-500 mt-1 text-xs font-medium">Entre com a sua conta para continuar
-</p>
+              <p className="text-gray-500 mt-1 text-xs font-medium">Entre com a sua conta para continuar</p>
             </div>
 
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setCurrentScreen('home'); }}>
+            <form className="space-y-4" onSubmit={handleLogin}>
+              {error && (
+                <div className="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100 font-medium text-center">
+                  {error}
+                </div>
+              )}
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">E-mail</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input 
-                    type="text" 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Digite seu e-mail" 
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1351B4] transition-all"
                     required 
@@ -43,6 +73,8 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input 
                     type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Sua senha" 
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1351B4] transition-all"
                     required 
@@ -52,10 +84,11 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
 
               <button 
                 type="submit" 
-                className="w-full bg-[#1351B4] hover:bg-[#003157] text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 mt-2"
+                disabled={isLoading}
+                className="w-full bg-[#1351B4] hover:bg-[#003157] disabled:bg-gray-400 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 mt-2"
               >
-                Entrar no sistema
-                <ArrowRight className="w-4 h-4" />
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Entrar no sistema'}
+                {!isLoading && <ArrowRight className="w-4 h-4" />}
               </button>
             </form>
           </div>

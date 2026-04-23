@@ -3,16 +3,15 @@ FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
-# Copia o script de entrada aqui para estar disponível em todos os estágios
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN npm ci
+RUN npm install
 
 # Estágio 2: Desenvolvimento (Com Hot Reload)
 FROM base AS development
 ENV NODE_ENV=development
 COPY . .
-RUN if [ -f "./prisma/schema.prisma" ]; then npx prisma generate; fi
+RUN npx prisma generate
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "run", "dev"]

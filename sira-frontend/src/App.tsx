@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { searchAcademicContent } from './services/api';
 import { Home } from './pages/Home';
 import { Recommendations } from './pages/Recommendations';
@@ -10,8 +10,10 @@ import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
+  const { isAuthenticated, user } = useAuth();
   const [currentScreen, setCurrentScreen] = useState('home');
   const [previousScreen, setPreviousScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -35,6 +37,24 @@ export default function App() {
     wantsBooks: true,
     wantsArticles: true
   });
+
+  useEffect(() => {
+    if (!isAuthenticated && currentScreen !== 'register') {
+      setCurrentScreen('login');
+    } else if (isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
+      setCurrentScreen('home');
+    }
+  }, [isAuthenticated, currentScreen]);
+
+  useEffect(() => {
+    if (user) {
+      setProfileData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
 
   const handleSearch = async (e: any) => {
     e.preventDefault();
