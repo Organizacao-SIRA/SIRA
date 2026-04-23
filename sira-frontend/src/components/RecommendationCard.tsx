@@ -42,10 +42,10 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
       </button>
       <button 
         onClick={() => toggleFavorite(item)}
-        className={`flex items-center justify-center w-10 h-10 rounded border transition-colors ${
+        className={`flex items-center justify-center w-10 h-10 rounded border transition-colors cursor-pointer ${
           isFavorite 
             ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' 
-            : 'bg-white border-gray-300 text-gray-400 hover:border-[#1351B4] hover:text-[#1351B4]'
+            : 'bg-white border-gray-200 text-gray-400 hover:border-[#1351B4] hover:text-[#1351B4]'
         }`}
       >
         <Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} />

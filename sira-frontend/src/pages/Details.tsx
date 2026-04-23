@@ -157,7 +157,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
           <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
             <button 
               onClick={() => toggleFavorite(item)}
-              className={`w-full py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 isFavorite(item.id) 
                   ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' 
                   : 'bg-white border-gray-200 text-gray-700 hover:border-[#1351B4]'

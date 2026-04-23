@@ -38,6 +38,7 @@ services:
       - "3000:3000"
     volumes:
       - ./sira-backend/src:/app/src
+      - ./sira-backend/prisma:/app/prisma
       - /app/node_modules # Garante que as dependências do container não sejam sobrescritas
     depends_on:
       postgres:

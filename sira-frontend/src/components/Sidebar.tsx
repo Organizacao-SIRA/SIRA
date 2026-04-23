@@ -30,7 +30,7 @@ export const Sidebar = ({
       {/* Cabeçalho do Menu para Mobile */}
       <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center md:hidden">
         <span className="font-bold text-[#003157]">Menu Principal</span>
-        <button onClick={() => setIsSidebarOpen(false)} className="text-gray-500 hover:text-red-500 text-2xl">
+        <button onClick={() => setIsSidebarOpen(false)} className="cursor-pointer text-gray-500 hover:text-red-500 text-2xl">
           &times;
         </button>
       </div>
@@ -50,7 +50,7 @@ export const Sidebar = ({
                     setCurrentScreen(item.id);
                     if (window.innerWidth < 768) setIsSidebarOpen(false); 
                   }}
-                  className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+                  className={`w-full cursor-pointer flex items-center px-6 py-3 text-sm font-medium transition-colors ${
                     isActive 
                       ? 'bg-[#F2F5FD] text-[#1351B4] border-l-4 border-[#1351B4]' 
                       : 'text-gray-700 hover:bg-gray-100 border-l-4 border-transparent'

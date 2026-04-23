@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { searchAcademicContent } from './services/api';
+import { searchAcademicContent, fetchFavorites, addFavorite, removeFavoriteApi } from './services/api';
 import { Home } from './pages/Home';
 import { Recommendations } from './pages/Recommendations';
 import { Favorites } from './pages/Favorites';
@@ -19,7 +19,6 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Tipagem 'any[]' evita os erros vermelhos de "never" que vimos na foto
   const [results, setResults] = useState<any[]>([]); 
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +36,24 @@ export default function App() {
     wantsBooks: true,
     wantsArticles: true
   });
+
+  // Carregar favoritos ao autenticar
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFavorites();
+    } else {
+      setFavorites([]);
+    }
+  }, [isAuthenticated]);
+
+  const loadFavorites = async () => {
+    try {
+      const data = await fetchFavorites();
+      setFavorites(data);
+    } catch (error) {
+      console.error('Erro ao carregar favoritos:', error);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated && currentScreen !== 'register') {
@@ -77,11 +94,20 @@ export default function App() {
     setCurrentScreen('details');
   };
 
-  const toggleFavorite = (item: any) => {
-    setFavorites(prev => {
-      const isFav = prev.some(f => f.id === item.id);
-      return isFav ? prev.filter(f => f.id !== item.id) : [...prev, item];
-    });
+  const toggleFavorite = async (item: any) => {
+    const isFav = favorites.some(f => f.id === item.id);
+    
+    try {
+      if (isFav) {
+        await removeFavoriteApi(item.id);
+        setFavorites(prev => prev.filter(f => f.id !== item.id));
+      } else {
+        await addFavorite(item);
+        setFavorites(prev => [...prev, item]);
+      }
+    } catch (error) {
+      console.error('Erro ao alternar favorito:', error);
+    }
   };
 
   const isFavorite = (id: any) => favorites.some(f => f.id === id);
@@ -118,7 +144,7 @@ export default function App() {
           {currentScreen === 'home' && <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />}
           {currentScreen === 'results' && <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
           {currentScreen === 'details' && <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
-          {currentScreen === 'catalog' && <Catalog viewDetails={viewDetails} />}
+          {currentScreen === 'catalog' && <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
           {currentScreen === 'favorites' && <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'profile' && <Profile profileData={profileData} setProfileData={setProfileData} />}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}

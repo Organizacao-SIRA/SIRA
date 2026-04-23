@@ -1,17 +1,34 @@
 import React from 'react';
-import { BookOpen, FileText, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, ChevronRight, Star } from 'lucide-react';
 
 interface CatalogCardProps {
   book: any;
   viewDetails: (item: any) => void;
+  toggleFavorite: (item: any) => void;
+  isFavorite: boolean;
 }
 
-export const CatalogCard = ({ book, viewDetails }: CatalogCardProps) => {
+export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: CatalogCardProps) => {
   const isArticle = book.type === 'article';
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group relative">
       
+      {/* Botão de Favoritar (Posicionado no Canto Superior Esquerdo) */}
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleFavorite(book);
+        }}
+        className={`absolute top-2 left-2 z-20 p-2 rounded-full backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
+          isFavorite 
+            ? 'bg-[#1351B4] border-[#1351B4] text-white' 
+            : 'bg-white/40 border-white/20 text-white hover:bg-white hover:text-[#1351B4]'
+        }`}
+      >
+        <Star className="w-4 h-4" fill={isFavorite ? 'currentColor' : 'none'} />
+      </button>
+
       {/* Capa do Material Acadêmico */}
       <div className={`h-40 flex flex-col items-center justify-center p-4 text-center relative overflow-hidden ${
         isArticle 

@@ -31,6 +31,36 @@ export const registerUser = async (data: any) => {
   return response.json();
 };
 
+export const fetchFavorites = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao buscar favoritos');
+  return response.json();
+};
+
+export const addFavorite = async (material: any) => {
+  const response = await fetch(`${API_BASE_URL}/favorites`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(material),
+  });
+  if (!response.ok) throw new Error('Erro ao adicionar aos favoritos');
+  return response.json();
+};
+
+export const removeFavoriteApi = async (materialId: string) => {
+  const response = await fetch(`${API_BASE_URL}/favorites/${materialId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao remover dos favoritos');
+  return response.json();
+};
+
 /**
  * Busca Principal (Recommendations / Home) via Backend SIRA
  */
