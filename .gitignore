@@ -26,6 +26,7 @@ FRONTEND_REQUIREMENTS.md
 .vscode/*
 !.vscode/extensions.json
 .idea
+.codex
 .DS_Store
 *.suo
 *.ntvs*
