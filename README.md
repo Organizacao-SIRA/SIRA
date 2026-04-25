@@ -49,18 +49,37 @@ GOOGLE_BOOKS_API_KEY=""
 SEMANTIC_SCHOLAR_API_KEY=""
 ```
 
+Observacao: no ambiente Docker, o backend acessa o banco por `postgres:5432`. A porta publicada para acesso a partir da sua maquina host e `localhost:5433`.
+
 ### 3. Subir o Ambiente
 ```bash
-docker-compose up --build
+docker-compose up -d --build
 ```
+
+Esse comando faz o build das imagens e sobe os containers em background, liberando o terminal para outros comandos.
 
 ### 4. Acessar os Serviços
 - **Interface:** [http://localhost:5173](http://localhost:5173)
-- **Documentação Swagger:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
-- **Healthcheck:** [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
+- **Documentação Swagger:** [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
+- **Healthcheck:** [http://localhost:3002/api/v1/health](http://localhost:3002/api/v1/health)
+- **PostgreSQL no host:** `localhost:5433`
+
+### 5. Acompanhar os Logs
+Para acompanhar os logs em tempo real, abra 2 terminais separados:
+
+Terminal 1, frontend:
+```bash
+docker-compose logs -f frontend
+```
+
+Terminal 2, backend:
+```bash
+docker-compose logs -f backend
+```
 
 ---
 
 **Comandos Úteis:**
 - Resetar banco de dados: `docker-compose down -v`
+- Ver status dos containers: `docker-compose ps`
 - Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`

@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sira_password}
       POSTGRES_DB: ${POSTGRES_DB:-sira_db}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     # Verifica se o banco está pronto para aceitar conexões
@@ -35,7 +35,7 @@ services:
       PORT: 3000
       NODE_ENV: development
     ports:
-      - "3000:3000"
+      - "3002:3000"
     volumes:
       - ./sira-backend/src:/app/src
       - ./sira-backend/prisma:/app/prisma
@@ -56,6 +56,8 @@ services:
     container_name: sira-frontend
     env_file:
       - ./sira-frontend/.env
+    environment:
+      VITE_API_URL: http://localhost:3002
     ports:
       - "5173:5173"
     volumes:
