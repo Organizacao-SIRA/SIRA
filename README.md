@@ -24,7 +24,7 @@ O SIRA+ é um ecossistema acadêmico moderno projetado para agregar, recomendar 
 ## 🏗️ Padrões de Platform Engineering
 
 1.  **Zero-Dependency Security:** Uso de módulos nativos do Node.js para criptografia, eliminando vulnerabilidades de pacotes de terceiros e problemas de compilação C++ em containers.
-2.  **Hot Reload Full-Stack:** Volumes montados para pastas de código (`src`) e modelos de dados (`prisma`), permitindo desenvolvimento ágil sem reinicialização de containers.
+2.  **Hot Reload Full-Stack:** Docker Compose Watch para sincronização automática de código e rebuild apenas quando necessário.
 3.  **Dockerização Otimizada:** Imagens multi-stage para manter o ambiente de produção leve e seguro, rodando sob usuário não-root.
 4.  **Resiliência de Inicialização:** Sistema de healthcheck garantindo que a API só inicie após o banco de dados estar pronto para conexões.
 
@@ -53,10 +53,10 @@ Observacao: no ambiente Docker, o backend acessa o banco por `postgres:5432`. A 
 
 ### 3. Subir o Ambiente
 ```bash
-docker-compose up -d --build
+docker compose up --watch
 ```
 
-Esse comando faz o build das imagens e sobe os containers em background, liberando o terminal para outros comandos.
+Esse comando faz o build das imagens, sobe os containers e ativa o hot reload para desenvolvimento.
 
 ### 4. Acessar os Serviços
 - **Interface:** [http://localhost:5173](http://localhost:5173)
@@ -65,21 +65,14 @@ Esse comando faz o build das imagens e sobe os containers em background, liberan
 - **PostgreSQL no host:** `localhost:5433`
 
 ### 5. Acompanhar os Logs
-Para acompanhar os logs em tempo real, abra 2 terminais separados:
-
-Terminal 1, frontend:
-```bash
-docker-compose logs -f frontend
-```
-
-Terminal 2, backend:
-```bash
-docker-compose logs -f backend
-```
+Se quiser acompanhar os logs separadamente, abra 2 terminais:
+- Frontend: `docker compose logs -f frontend`
+- Backend: `docker compose logs -f backend`
 
 ---
 
 **Comandos Úteis:**
-- Resetar banco de dados: `docker-compose down -v`
-- Ver status dos containers: `docker-compose ps`
+- Recriar containers apos mudar `.env`: `docker compose up -d --build`
+- Resetar banco de dados: `docker compose down -v`
+- Ver status dos containers: `docker compose ps`
 - Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`

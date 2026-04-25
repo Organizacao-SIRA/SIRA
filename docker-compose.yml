@@ -36,13 +36,32 @@ services:
       NODE_ENV: development
     ports:
       - "3002:3000"
-    volumes:
-      - ./sira-backend/src:/app/src
-      - ./sira-backend/prisma:/app/prisma
-      - /app/node_modules # Garante que as dependências do container não sejam sobrescritas
     depends_on:
       postgres:
         condition: service_healthy # Aguarda o healthcheck do postgres passar
+    develop:
+      watch:
+        - path: ./sira-backend/src
+          action: sync
+          target: /app/src
+          initial_sync: true
+        - path: ./sira-backend/nest-cli.json
+          action: sync+restart
+          target: /app/nest-cli.json
+        - path: ./sira-backend/tsconfig.json
+          action: sync+restart
+          target: /app/tsconfig.json
+        - path: ./sira-backend/prisma.config.ts
+          action: sync+restart
+          target: /app/prisma.config.ts
+        - path: ./sira-backend/prisma
+          action: rebuild
+        - path: ./sira-backend/package.json
+          action: rebuild
+        - path: ./sira-backend/package-lock.json
+          action: rebuild
+        - path: ./sira-backend/Dockerfile
+          action: rebuild
     networks:
       - sira-network
     restart: always
@@ -60,10 +79,43 @@ services:
       VITE_API_URL: http://localhost:3002
     ports:
       - "5173:5173"
-    volumes:
-      - ./sira-frontend/src:/app/src
-      - ./sira-frontend/public:/app/public
-      - /app/node_modules # Evita que a node_modules local apague a do container
+    develop:
+      watch:
+        - path: ./sira-frontend/src
+          action: sync
+          target: /app/src
+          initial_sync: true
+        - path: ./sira-frontend/public
+          action: sync
+          target: /app/public
+          initial_sync: true
+        - path: ./sira-frontend/index.html
+          action: sync
+          target: /app/index.html
+        - path: ./sira-frontend/vite.config.ts
+          action: sync+restart
+          target: /app/vite.config.ts
+        - path: ./sira-frontend/tsconfig.json
+          action: sync+restart
+          target: /app/tsconfig.json
+        - path: ./sira-frontend/tsconfig.app.json
+          action: sync+restart
+          target: /app/tsconfig.app.json
+        - path: ./sira-frontend/tsconfig.node.json
+          action: sync+restart
+          target: /app/tsconfig.node.json
+        - path: ./sira-frontend/tailwind.config.js
+          action: sync+restart
+          target: /app/tailwind.config.js
+        - path: ./sira-frontend/postcss.config.js
+          action: sync+restart
+          target: /app/postcss.config.js
+        - path: ./sira-frontend/package.json
+          action: rebuild
+        - path: ./sira-frontend/package-lock.json
+          action: rebuild
+        - path: ./sira-frontend/Dockerfile
+          action: rebuild
     networks:
       - sira-network
     restart: always
