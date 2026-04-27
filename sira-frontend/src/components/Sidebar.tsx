@@ -1,24 +1,27 @@
 import { Library, Sparkles, Bookmark, UserCircle } from 'lucide-react';
+import type { AuthUser } from '../types';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean) => void;
   currentScreen: string;
   setCurrentScreen: (screen: string) => void;
+  user: AuthUser | null;
 }
 
-export const Sidebar = ({ 
-  isSidebarOpen, 
-  setIsSidebarOpen, 
-  currentScreen, 
-  setCurrentScreen 
+export const Sidebar = ({
+  isSidebarOpen,
+  setIsSidebarOpen,
+  currentScreen,
+  setCurrentScreen,
+  user,
 }: SidebarProps) => {
-  
+
   const menuItems = [
     { id: 'catalog', label: 'Catálogo de Livros', icon: Library },
-    { id: 'home', label: 'Recomendações', icon: Sparkles },
+    { id: 'ai-recommendations', label: 'Recomendações', icon: Sparkles },
     { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
-    { id: 'profile', label: 'Meu Perfil', icon: UserCircle },
+    ...(user ? [{ id: 'profile', label: 'Meu Perfil', icon: UserCircle }] : []),
   ];
 
   return (
@@ -40,8 +43,8 @@ export const Sidebar = ({
           {menuItems.map((item) => {
             const Icon = item.icon;
             // Define se o item está ativo (Home também engloba resultados e detalhes)
-            const isActive = currentScreen === item.id || 
-              (item.id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
+            const isActive = currentScreen === item.id ||
+              (item.id === 'ai-recommendations' && currentScreen === 'results');
             
             return (
               <li key={item.id}>

@@ -22,6 +22,11 @@ dist-ssr
 BACKEND_REQUIREMENTS.md
 FRONTEND_REQUIREMENTS.md
 
+# Local docs & context
+contexto/
+CHANGELOG.md
+RESUMO_ALTERACOES.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

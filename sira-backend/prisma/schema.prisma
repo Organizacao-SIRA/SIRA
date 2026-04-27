@@ -10,13 +10,31 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  name      String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  favorites Favorite[]
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  password            String
+  name                String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  favorites           Favorite[]
+  searchHistory       SearchHistory[]
+  recommendationCache RecommendationCache?
+}
+
+model RecommendationCache {
+  userId      String   @id
+  items       Json
+  basedOn     Json
+  generatedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model SearchHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  query     String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Material {

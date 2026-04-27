@@ -1,15 +1,14 @@
 #!/bin/sh
+set -e
 
-# Se houver schema.prisma, tenta rodar as migrations
 if [ -f "./prisma/schema.prisma" ]; then
-  echo "Prisma schema found. Checking for migrations..."
+  echo "Applying database schema..."
   if [ "$NODE_ENV" = "production" ]; then
     npx prisma migrate deploy
   else
-    # Em desenvolvimento, usa o nome 'init' e evita perguntas interativas
-    npx prisma migrate dev --name init --skip-seed || true
+    npx prisma db push
   fi
+  echo "Database schema applied successfully."
 fi
 
-# Executa o comando principal (CMD do Dockerfile)
 exec "$@"

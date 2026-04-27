@@ -65,6 +65,24 @@ services:
       - sira-network
     restart: always
 
+  # pgAdmin - Interface gráfica para o PostgreSQL (opcional)
+  # Para subir: docker-compose --profile tools up
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sira-pgadmin
+    profiles:
+      - tools
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sira.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - sira-network
+    restart: always
+
 networks:
   sira-network:
     driver: bridge

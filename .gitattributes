@@ -1,0 +1,5 @@
+# Garante que scripts shell sempre usem LF (necessário para containers Linux)
+*.sh text eol=lf
+
+# Demais arquivos de texto usam o padrão da plataforma
+* text=auto

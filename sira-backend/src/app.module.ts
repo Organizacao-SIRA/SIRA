@@ -1,6 +1,9 @@
 import { Module, Get, Controller } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 import { MaterialsModule } from './materials/materials.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { RecommendationsModule } from './recommendations/recommendations.module';
 
 @Controller()
 class AppController {
@@ -9,17 +12,19 @@ class AppController {
     return {
       status: 'up',
       timestamp: new Date().toISOString(),
-      service: 'SIRA+ API'
+      service: 'SIRA+ API',
     };
   }
 }
 
 @Module({
   imports: [
-    HttpModule,
-    MaterialsModule
+    PrismaModule,
+    AuthModule,
+    MaterialsModule,
+    FavoritesModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
-  providers: [],
 })
 export class AppModule {}
