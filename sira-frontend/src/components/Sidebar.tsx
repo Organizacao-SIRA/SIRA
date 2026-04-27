@@ -1,4 +1,4 @@
-import { Library, Sparkles, Bookmark, UserCircle } from 'lucide-react';
+import { Library, Sparkles, Bookmark, UserCircle, Settings } from 'lucide-react';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -19,6 +19,7 @@ export const Sidebar = ({
     { id: 'home', label: 'Recomendações', icon: Sparkles },
     { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
     { id: 'profile', label: 'Meu Perfil', icon: UserCircle },
+    { id: 'onboarding', label: 'Preferências', icon: Settings },
   ];
 
   return (

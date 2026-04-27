@@ -11,6 +11,9 @@ import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { useAuth } from './contexts/AuthContext';
+import { Onboarding } from './pages/Onboarding';
+import { Interests } from './pages/Interests';
+
 
 export default function App() {
   const { isAuthenticated, user } = useAuth();
@@ -18,8 +21,8 @@ export default function App() {
   const [previousScreen, setPreviousScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const [results, setResults] = useState<any[]>([]); 
+
+  const [results, setResults] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -96,7 +99,7 @@ export default function App() {
 
   const toggleFavorite = async (item: any) => {
     const isFav = favorites.some(f => f.id === item.id);
-    
+
     try {
       if (isFav) {
         await removeFavoriteApi(item.id);
@@ -149,6 +152,9 @@ export default function App() {
           {currentScreen === 'profile' && <Profile profileData={profileData} setProfileData={setProfileData} />}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
+          {currentScreen === 'onboarding' && (<Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} /> )}
+          {currentScreen === 'interests' && (<Interests setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />)}
+
         </main>
       </div>
     </div>
