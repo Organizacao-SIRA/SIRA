@@ -21,7 +21,7 @@ export class AuthService {
       data: { email: dto.email, password, name: dto.name },
     });
 
-    return { token: this.sign(user), user: this.safeUser(user) };
+    return { access_token: this.sign(user), user: this.safeUser(user) };
   }
 
   async login(dto: LoginDto) {
@@ -31,14 +31,27 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciais inválidas');
 
-    return { token: this.sign(user), user: this.safeUser(user) };
+    return { access_token: this.sign(user), user: this.safeUser(user) };
   }
 
   private sign(user: { id: string; email: string }) {
     return this.jwtService.sign({ sub: user.id, email: user.email });
   }
 
-  private safeUser(user: { id: string; email: string; name: string | null }) {
-    return { id: user.id, email: user.email, name: user.name };
+  private safeUser(user: any) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      course: user.course,
+      educationLevel: user.educationLevel,
+      mainArea: user.mainArea,
+      subAreas: user.subAreas,
+      languages: user.languages,
+      materialLevels: user.materialLevels,
+      wantsBooks: user.wantsBooks,
+      wantsArticles: user.wantsArticles,
+      interests: user.interests,
+    };
   }
 }

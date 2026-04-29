@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface CatalogCardProps {
   book: any;
@@ -64,16 +64,28 @@ export const CatalogCard = ({ book, viewDetails }: CatalogCardProps) => {
         </p>
         
         {/* Rodapé do Card */}
-        <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">
-          <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-            {book.source || 'SIRA+'}
-          </span>
-          <button 
-            onClick={() => viewDetails(book)}
-            className="text-[#1351B4] hover:text-[#003157] text-sm font-bold flex items-center gap-1 transition-colors"
-          >
-            Ver Detalhes <ChevronRight className="w-4 h-4" />
-          </button>
+        <div className="mt-auto pt-4 border-t border-gray-50 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+              {book.source || 'SIRA+'}
+            </span>
+            <button
+              onClick={() => viewDetails(book)}
+              className="text-[#1351B4] hover:text-[#003157] text-sm font-bold flex items-center gap-1 transition-colors"
+            >
+              Ver Detalhes <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          {book.url && (
+            <a
+              href={book.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-[#1351B4] border border-[#1351B4] hover:bg-blue-50 py-1.5 rounded-lg transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> Acessar Material
+            </a>
+          )}
         </div>
       </div>
     </div>

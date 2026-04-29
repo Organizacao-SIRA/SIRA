@@ -1,34 +1,36 @@
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1`;
 
-const getToken = () => localStorage.getItem('sira_token');
-
-const authHeaders = (): Record<string, string> => ({
-  'Content-Type': 'application/json',
-  ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
-});
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('@sira:token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 // --- Auth ---
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (data: any) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(data),
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Credenciais inválidas');
-  return data as { token: string; user: { id: string; email: string; name: string | null } };
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Erro ao realizar login');
+  }
+  return response.json();
 };
 
-export const registerUser = async (name: string, email: string, password: string) => {
+export const registerUser = async (data: any) => {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify(data),
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Erro ao criar conta');
-  return data as { token: string; user: { id: string; email: string; name: string | null } };
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Erro ao realizar cadastro');
+  }
+  return response.json();
 };
 
 // --- Materials ---
@@ -36,10 +38,9 @@ export const registerUser = async (name: string, email: string, password: string
 export const searchAcademicContent = async (query: string) => {
   if (!query || query.length < 2) return [];
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}`,
-      { headers: authHeaders() },
-    );
+    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();
   } catch (error) {
@@ -57,7 +58,9 @@ export const fetchCatalogBooks = async (category: string) => {
   };
   const queryTerm = terms[category] || category;
   try {
-    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(queryTerm)}`);
+    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(queryTerm)}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();
   } catch (error) {
@@ -68,16 +71,21 @@ export const fetchCatalogBooks = async (category: string) => {
 
 // --- Favorites ---
 
-export const getFavorites = async () => {
-  const response = await fetch(`${API_BASE_URL}/favorites`, { headers: authHeaders() });
-  if (!response.ok) throw new Error('Erro ao carregar favoritos');
+export const fetchFavorites = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao buscar favoritos');
   return response.json();
 };
 
 export const addFavorite = async (material: any) => {
   const response = await fetch(`${API_BASE_URL}/favorites`, {
     method: 'POST',
-    headers: authHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({
       id: material.id,
       type: material.type,
@@ -91,22 +99,40 @@ export const addFavorite = async (material: any) => {
       relevance: material.relevance || 0,
     }),
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Erro ao adicionar favorito');
-  return data;
+  if (!response.ok) throw new Error('Erro ao adicionar aos favoritos');
+  return response.json();
 };
 
-export const removeFavorite = async (materialId: string) => {
+export const removeFavoriteApi = async (materialId: string) => {
   const response = await fetch(`${API_BASE_URL}/favorites/${encodeURIComponent(materialId)}`, {
     method: 'DELETE',
-    headers: authHeaders(),
+    headers: getAuthHeaders(),
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Erro ao remover favorito');
-  return data;
+  if (!response.ok) throw new Error('Erro ao remover dos favoritos');
+  return response.json();
 };
 
-// --- Recommendations ---
+// --- User Profile ---
+
+export const getProfile = async () => {
+  const response = await fetch(`${API_BASE_URL}/users/profile`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao carregar perfil');
+  return response.json();
+};
+
+export const updateProfile = async (data: Record<string, any>) => {
+  const response = await fetch(`${API_BASE_URL}/users/profile`, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Erro ao salvar perfil');
+  return response.json();
+};
+
+// --- AI Recommendations ---
 
 type RecommendationsResponse = {
   recommendations: Array<any & { aiExplanation: string | null }>;
@@ -115,7 +141,9 @@ type RecommendationsResponse = {
 };
 
 export const getAiRecommendations = async (): Promise<RecommendationsResponse> => {
-  const response = await fetch(`${API_BASE_URL}/recommendations`, { headers: authHeaders() });
+  const response = await fetch(`${API_BASE_URL}/recommendations`, {
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Erro ao buscar recomendações');
   return data;
@@ -124,7 +152,7 @@ export const getAiRecommendations = async (): Promise<RecommendationsResponse> =
 export const refreshAiRecommendations = async (): Promise<RecommendationsResponse> => {
   const response = await fetch(`${API_BASE_URL}/recommendations/refresh`, {
     method: 'POST',
-    headers: authHeaders(),
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Erro ao atualizar recomendações');

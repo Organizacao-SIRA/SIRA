@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { MaterialsModule } from './materials/materials.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
+import { UsersModule } from './users/users.module';
 
 @Controller()
 class AppController {
@@ -24,6 +25,7 @@ class AppController {
     MaterialsModule,
     FavoritesModule,
     RecommendationsModule,
+    UsersModule,
   ],
   controllers: [AppController],
 })

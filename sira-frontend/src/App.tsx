@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
-import {
-  searchAcademicContent,
-  loginUser,
-  registerUser,
-  getFavorites,
-  addFavorite,
-  removeFavorite,
-} from './services/api';
-import type { AuthUser } from './types';
+import { searchAcademicContent, fetchFavorites, addFavorite, removeFavoriteApi, getProfile } from './services/api';
 import { Home } from './pages/Home';
 import { Recommendations } from './pages/Recommendations';
-import { AiRecommendations } from './pages/AiRecommendations';
 import { Favorites } from './pages/Favorites';
 import { Profile } from './pages/Profile';
 import { Catalog } from './pages/Catalog';
@@ -19,8 +10,12 @@ import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { Onboarding } from './pages/Onboarding';
+import { Interests } from './pages/Interests';
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
+  const { isAuthenticated, user, logout } = useAuth();
   const [currentScreen, setCurrentScreen] = useState('home');
   const [previousScreen, setPreviousScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -29,13 +24,12 @@ export default function App() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
 
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
     course: '',
-    educationLevel: '',
+    educationLevel: 'Graduação',
     mainArea: '',
     subAreas: '',
     languages: ['Português'],
@@ -44,64 +38,56 @@ export default function App() {
     wantsArticles: true,
   });
 
-  // Restaura sessão ao iniciar
   useEffect(() => {
-    const token = localStorage.getItem('sira_token');
-    const savedUser = localStorage.getItem('sira_user');
-    if (token && savedUser) {
-      const parsedUser: AuthUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      setProfileData(prev => ({ ...prev, name: parsedUser.name || '', email: parsedUser.email }));
+    if (isAuthenticated) {
       loadFavorites();
+      loadProfile();
+    } else {
+      setFavorites([]);
+      setProfileData({
+        name: '', email: '', course: '', educationLevel: 'Graduação',
+        mainArea: '', subAreas: '', languages: ['Português'],
+        materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
+      });
     }
-  }, []);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated && currentScreen !== 'register') {
+      setCurrentScreen('login');
+    } else if (isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
+      setCurrentScreen('home');
+    }
+  }, [isAuthenticated, currentScreen]);
+
+  const loadProfile = async () => {
+    try {
+      const data = await getProfile();
+      setProfileData(prev => ({
+        ...prev,
+        name: data.name || prev.name,
+        email: data.email || prev.email,
+        course: data.course || '',
+        educationLevel: data.educationLevel || 'Graduação',
+        mainArea: data.mainArea || '',
+        subAreas: data.subAreas || '',
+        languages: data.languages?.length ? data.languages : ['Português'],
+        materialLevels: data.materialLevels?.length ? data.materialLevels : ['Intermediário'],
+        wantsBooks: data.wantsBooks ?? true,
+        wantsArticles: data.wantsArticles ?? true,
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  };
 
   const loadFavorites = async () => {
     try {
-      const data = await getFavorites();
+      const data = await fetchFavorites();
       setFavorites(data);
-    } catch {
-      // token pode ter expirado — não bloqueia a app
+    } catch (error) {
+      console.error('Erro ao carregar favoritos:', error);
     }
-  };
-
-  const handleLogin = async (email: string, password: string) => {
-    const data = await loginUser(email, password);
-    localStorage.setItem('sira_token', data.token);
-    localStorage.setItem('sira_user', JSON.stringify(data.user));
-    setUser(data.user);
-    setProfileData(prev => ({ ...prev, name: data.user.name || '', email: data.user.email }));
-    await loadFavorites();
-    setCurrentScreen('home');
-  };
-
-  const handleRegister = async (name: string, email: string, password: string) => {
-    const data = await registerUser(name, email, password);
-    localStorage.setItem('sira_token', data.token);
-    localStorage.setItem('sira_user', JSON.stringify(data.user));
-    setUser(data.user);
-    setProfileData(prev => ({ ...prev, name: data.user.name || '', email: data.user.email }));
-    setCurrentScreen('home');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('sira_token');
-    localStorage.removeItem('sira_user');
-    setUser(null);
-    setFavorites([]);
-    setProfileData({
-      name: '',
-      email: '',
-      course: '',
-      educationLevel: '',
-      mainArea: '',
-      subAreas: '',
-      languages: ['Português'],
-      materialLevels: ['Intermediário'],
-      wantsBooks: true,
-      wantsArticles: true,
-    });
-    setCurrentScreen('home');
   };
 
   const handleSearch = async (e: any) => {
@@ -127,31 +113,22 @@ export default function App() {
 
   const toggleFavorite = async (item: any) => {
     const isFav = favorites.some(f => f.id === item.id);
-
-    if (!user) {
-      // Sem autenticação: comportamento local
-      setFavorites(prev =>
-        isFav ? prev.filter(f => f.id !== item.id) : [...prev, item],
-      );
-      return;
-    }
-
     try {
       if (isFav) {
-        await removeFavorite(item.id);
+        await removeFavoriteApi(item.id);
         setFavorites(prev => prev.filter(f => f.id !== item.id));
       } else {
         await addFavorite(item);
         setFavorites(prev => [...prev, item]);
       }
     } catch (error) {
-      console.error('Erro ao atualizar favorito:', error);
+      console.error('Erro ao alternar favorito:', error);
     }
   };
 
   const isFavorite = (id: any) => favorites.some(f => f.id === id);
 
-  const showSidebar = currentScreen !== 'login' && currentScreen !== 'register';
+  const showSidebar = !['login', 'register', 'onboarding', 'interests'].includes(currentScreen);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
@@ -161,7 +138,7 @@ export default function App() {
         setCurrentScreen={setCurrentScreen}
         currentScreen={currentScreen}
         user={user}
-        onLogout={handleLogout}
+        onLogout={logout}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
@@ -184,15 +161,12 @@ export default function App() {
           )}
 
           {currentScreen === 'home' && (
-            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
+            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'results' && (
             <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
-          {currentScreen === 'ai-recommendations' && (
-            <AiRecommendations user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
-          )}
-          {currentScreen === 'details' && (
+{currentScreen === 'details' && (
             <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
           {currentScreen === 'catalog' && <Catalog viewDetails={viewDetails} />}
@@ -202,11 +176,13 @@ export default function App() {
           {currentScreen === 'profile' && (
             <Profile profileData={profileData} setProfileData={setProfileData} />
           )}
-          {currentScreen === 'login' && (
-            <Login setCurrentScreen={setCurrentScreen} onLogin={handleLogin} />
+          {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
+          {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
+          {currentScreen === 'onboarding' && (
+            <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
           )}
-          {currentScreen === 'register' && (
-            <Register setCurrentScreen={setCurrentScreen} onRegister={handleRegister} />
+          {currentScreen === 'interests' && (
+            <Interests setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
           )}
         </main>
       </div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { 
-  FileText, BookOpen, Star, Sparkles, 
-  ChevronRight, Filter as FilterIcon, Search
+import {
+  FileText, BookOpen, Star, Sparkles,
+  ChevronRight, Filter as FilterIcon, Search, ExternalLink
 } from 'lucide-react';
 
 export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavorite, isFavorite }: any) => {
@@ -122,14 +122,24 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
                 {item.abstract}
               </p>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-50">
-                <button 
+              <div className="flex gap-3 pt-4 border-t border-gray-50 flex-wrap">
+                <button
                   onClick={() => viewDetails(item)}
                   className="bg-[#1351B4] hover:bg-[#003157] text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
                 >
                   Ver Detalhes <ChevronRight className="w-4 h-4" />
                 </button>
-                <button 
+                {item.url && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-[#1351B4] text-[#1351B4] hover:bg-blue-50 px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                  >
+                    Acessar <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                <button
                   onClick={() => toggleFavorite(item)}
                   className={`p-2.5 rounded-xl border transition-all ${
                     isFavorite(item.id) ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' : 'bg-white border-gray-200 text-gray-400 hover:text-[#1351B4]'

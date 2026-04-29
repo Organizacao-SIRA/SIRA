@@ -93,6 +93,7 @@ export class MaterialsService {
         relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
         abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
         image: item.volumeInfo?.imageLinks?.thumbnail || null,
+        url: `https://books.google.com/books?id=${item.id}`,
       }));
     } catch (error) {
       this.logger.error(`Erro ao buscar no Google Books: ${error.message}`);
@@ -106,7 +107,7 @@ export class MaterialsService {
   private async fetchSemanticScholar(query: string): Promise<MaterialDto[]> {
     const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
     const headers = apiKey ? { 'x-api-key': apiKey } : {};
-    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,abstract,venue`;
+    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,abstract,venue,url,openAccessPdf`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url, { headers })));
@@ -120,6 +121,7 @@ export class MaterialsService {
         source: item.venue || 'Semantic Scholar',
         relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
         abstract: item.abstract || 'Resumo acadêmico indisponível.',
+        url: item.openAccessPdf?.url || item.url || `https://www.semanticscholar.org/paper/${item.paperId}`,
       }));
     } catch (error) {
       this.logger.error(`Erro ao buscar no Semantic Scholar: ${error.message}`);

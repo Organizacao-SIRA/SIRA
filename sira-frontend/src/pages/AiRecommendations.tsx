@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Star, ChevronRight, Brain, BookOpen, LogIn, AlertCircle, RefreshCw, Clock } from 'lucide-react';
+import { Sparkles, Star, ChevronRight, Brain, BookOpen, LogIn, AlertCircle, RefreshCw, Clock, ExternalLink } from 'lucide-react';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 
@@ -202,13 +202,23 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
 
               <p className="text-gray-600 text-sm line-clamp-2 mb-5 leading-relaxed italic">{item.abstract}</p>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-50">
+              <div className="flex gap-3 pt-4 border-t border-gray-50 flex-wrap">
                 <button
                   onClick={() => viewDetails(item)}
                   className="bg-[#1351B4] hover:bg-[#003157] text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
                 >
                   Ver Detalhes <ChevronRight className="w-4 h-4" />
                 </button>
+                {item.url && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-[#1351B4] text-[#1351B4] hover:bg-blue-50 px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                  >
+                    Acessar <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
                 <button
                   onClick={() => toggleFavorite(item)}
                   className={`p-2.5 rounded-xl border transition-all ${

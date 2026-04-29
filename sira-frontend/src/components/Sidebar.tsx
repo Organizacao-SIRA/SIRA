@@ -1,4 +1,4 @@
-import { Library, Sparkles, Bookmark, UserCircle } from 'lucide-react';
+import { Library, Sparkles, Bookmark, UserCircle, Settings } from 'lucide-react';
 import type { AuthUser } from '../types';
 
 interface SidebarProps {
@@ -19,13 +19,14 @@ export const Sidebar = ({
 
   const menuItems = [
     { id: 'catalog', label: 'Catálogo de Livros', icon: Library },
-    { id: 'ai-recommendations', label: 'Recomendações', icon: Sparkles },
+    { id: 'home', label: 'Recomendações', icon: Sparkles },
     { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
     ...(user ? [{ id: 'profile', label: 'Meu Perfil', icon: UserCircle }] : []),
+    { id: 'onboarding', label: 'Preferências', icon: Settings },
   ];
 
   return (
-    <aside 
+    <aside
       className={`${
         isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'
       } absolute md:relative z-40 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 flex flex-col shadow-lg md:shadow-none min-h-[calc(100vh-68px)]`}
@@ -33,7 +34,7 @@ export const Sidebar = ({
       {/* Cabeçalho do Menu para Mobile */}
       <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center md:hidden">
         <span className="font-bold text-[#003157]">Menu Principal</span>
-        <button onClick={() => setIsSidebarOpen(false)} className="text-gray-500 hover:text-red-500 text-2xl">
+        <button onClick={() => setIsSidebarOpen(false)} className="cursor-pointer text-gray-500 hover:text-red-500 text-2xl">
           &times;
         </button>
       </div>
@@ -42,9 +43,8 @@ export const Sidebar = ({
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            // Define se o item está ativo (Home também engloba resultados e detalhes)
             const isActive = currentScreen === item.id ||
-              (item.id === 'ai-recommendations' && currentScreen === 'results');
+              (item.id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
             
             return (
               <li key={item.id}>
@@ -53,7 +53,7 @@ export const Sidebar = ({
                     setCurrentScreen(item.id);
                     if (window.innerWidth < 768) setIsSidebarOpen(false); 
                   }}
-                  className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors cursor-pointer ${
                     isActive 
                       ? 'bg-[#F2F5FD] text-[#1351B4] border-l-4 border-[#1351B4]' 
                       : 'text-gray-700 hover:bg-gray-100 border-l-4 border-transparent'

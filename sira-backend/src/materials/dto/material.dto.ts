@@ -32,4 +32,7 @@ export class MaterialDto {
 
   @ApiProperty({ example: 'http://...', description: 'Link da imagem de capa', required: false })
   image?: string;
+
+  @ApiProperty({ example: 'https://books.google.com/...', description: 'Link de acesso ao material', required: false })
+  url?: string;
 }
