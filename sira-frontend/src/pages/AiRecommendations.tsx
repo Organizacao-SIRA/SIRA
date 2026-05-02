@@ -28,7 +28,7 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
     setError('');
     try {
       const data = await getAiRecommendations();
-      setRecommendations(data.recommendations);
+      setRecommendations(data.recommendations.slice(0, 2));
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
     } catch (err: any) {
@@ -43,7 +43,7 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
     setError('');
     try {
       const data = await refreshAiRecommendations();
-      setRecommendations(data.recommendations);
+      setRecommendations(data.recommendations.slice(0, 2));
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
     } catch (err: any) {

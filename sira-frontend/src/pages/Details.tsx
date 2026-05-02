@@ -138,7 +138,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
               <h3 className="font-bold text-[#8A6D00] text-lg">Análise do SIRA+</h3>
             </div>
             <p className="text-sm text-[#8A6D00] leading-relaxed font-medium italic">
-              "{item.aiJustification || "Recomendado com base na aderência técnica ao seu perfil."}"
+              "{item.aiExplanation || "Recomendado com base na aderência técnica ao seu perfil."}"
             </p>
             <div className="mt-6 pt-4 border-t border-[#FFCD07]/30">
               <div className="flex items-center justify-between text-xs font-bold text-[#8A6D00] uppercase mb-2">
