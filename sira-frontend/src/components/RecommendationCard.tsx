@@ -1,4 +1,4 @@
-import { FileText, BookOpen, Sparkles, Star } from 'lucide-react';
+import { FileText, BookOpen, Sparkles, Star, Brain } from 'lucide-react';
 
 interface RecommendationCardProps {
   item: any;
@@ -31,7 +31,14 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
 
     <h3 className="text-xl font-bold text-[#003157] mb-2 leading-tight">{item.title}</h3>
     <p className="text-sm text-gray-500 mb-4">{item.authors} • {item.year}</p>
-    <p className="text-gray-700 text-sm line-clamp-2 mb-6">{item.abstract}</p>
+    <p className="text-gray-700 text-sm line-clamp-2 mb-4">{item.abstract}</p>
+
+    {item.aiExplanation && (
+      <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
+        <Brain className="w-4 h-4 text-[#1351B4] mt-0.5 flex-shrink-0" />
+        <p className="text-sm text-[#1351B4] font-medium italic">{item.aiExplanation}</p>
+      </div>
+    )}
 
     <div className="flex items-center gap-3">
       <button 

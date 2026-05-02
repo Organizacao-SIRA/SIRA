@@ -75,6 +75,11 @@ export class MaterialDto {
   @IsOptional()
   aiJustification?: string;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  aiExplanation?: string | null;
+
   @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   keywords?: string[];
