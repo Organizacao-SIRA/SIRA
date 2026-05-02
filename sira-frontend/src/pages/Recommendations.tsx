@@ -6,7 +6,7 @@ import { RecommendationCard } from '../components/RecommendationCard';
 
 export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavorite, isFavorite }: any) => {
   
-  const displayResults = results || [];
+  const displayResults = (results || []).slice(0, 2);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
