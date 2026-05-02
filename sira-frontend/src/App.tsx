@@ -22,6 +22,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [results, setResults] = useState<any[]>([]);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [searchPage, setSearchPage] = useState(0);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -96,9 +98,26 @@ export default function App() {
     if (!searchQuery.trim()) return;
     setIsLoading(true);
     setCurrentScreen('results');
+    setSearchPage(0);
     try {
-      const data = await searchAcademicContent(searchQuery);
-      setResults(data);
+      const { items, total } = await searchAcademicContent(searchQuery, 0);
+      setResults(items);
+      setSearchTotal(total);
+    } catch {
+      setResults([]);
+      setSearchTotal(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearchPage = async (page: number) => {
+    setIsLoading(true);
+    setSearchPage(page);
+    try {
+      const { items, total } = await searchAcademicContent(searchQuery, page);
+      setResults(items);
+      setSearchTotal(total);
     } catch {
       setResults([]);
     } finally {
@@ -166,7 +185,7 @@ export default function App() {
             <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'results' && (
-            <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+            <Recommendations searchQuery={searchQuery} results={results} total={searchTotal} page={searchPage} onPageChange={handleSearchPage} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} isLoading={isLoading} />
           )}
           {currentScreen === 'details' && (
             <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />

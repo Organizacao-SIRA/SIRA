@@ -70,7 +70,8 @@ export class RecommendationsService {
 
     const candidatesArrays: MaterialDto[][] = [];
     for (let i = 0; i < uniqueQueries.length; i++) {
-      candidatesArrays.push(await this.materialsService.search(uniqueQueries[i]));
+      const { items } = await this.materialsService.search(uniqueQueries[i]);
+      candidatesArrays.push(items);
       if (i < uniqueQueries.length - 1) await new Promise(r => setTimeout(r, 300));
     }
 

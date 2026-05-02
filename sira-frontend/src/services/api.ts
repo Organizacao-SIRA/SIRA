@@ -38,17 +38,17 @@ export const registerUser = async (data: any) => {
 /**
  * Busca Principal (Recommendations / Home) via Backend SIRA
  */
-export const searchAcademicContent = async (query: string) => {
-  if (!query || query.length < 2) return [];
+export const searchAcademicContent = async (query: string, page = 0): Promise<{ items: any[]; total: number }> => {
+  if (!query || query.length < 2) return { items: [], total: 0 };
   try {
-    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}`, {
+    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}&page=${page}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();
   } catch (error) {
     console.error('Erro ao buscar conteúdos acadêmicos:', error);
-    return [];
+    return { items: [], total: 0 };
   }
 };
 
@@ -65,7 +65,8 @@ export const fetchCatalogBooks = async (category: string) => {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Erro na resposta do servidor');
-    return await response.json();
+    const data = await response.json();
+    return data.items ?? data;
   } catch (error) {
     console.error('Erro ao buscar catálogo:', error);
     return [];

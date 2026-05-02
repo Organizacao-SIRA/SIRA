@@ -47,8 +47,11 @@ export class MaterialsService {
     });
   }
 
-  async search(query: string, userId?: string): Promise<MaterialDto[]> {
-    if (!query || query.trim().length < 2) return [];
+  async search(query: string, userId?: string, page = 0): Promise<{ items: MaterialDto[]; total: number }> {
+    const PAGE_SIZE = 4;
+    const MAX_RESULTS = 20;
+
+    if (!query || query.trim().length < 2) return { items: [], total: 0 };
 
     const cacheKey = query.toLowerCase().trim();
 
@@ -60,37 +63,40 @@ export class MaterialsService {
     const cached = this.cache.get(cacheKey);
 
     if (cached && (Date.now() - cached.timestamp < this.CACHE_TTL)) {
-      this.logger.log(`Retornando resultados em cache para: "${query}"`);
+      this.logger.log(`Cache hit para: "${query}"`);
       rawResults = cached.data;
     } else {
       try {
-        this.logger.log(`Iniciando busca acadêmica para: "${query}"`);
-
+        this.logger.log(`Buscando nas APIs para: "${query}"`);
         const [googleData, semanticData] = await Promise.all([
           this.fetchGoogleBooks(query),
           this.fetchSemanticScholar(query),
         ]);
-
         rawResults = [...googleData, ...semanticData];
-
         if (rawResults.length > 0) {
           this.cache.set(cacheKey, { data: rawResults, timestamp: Date.now() });
         }
       } catch (error) {
         this.logger.error(`Erro na busca acadêmica: ${error.message}`);
-        return [];
+        return { items: [], total: 0 };
       }
     }
 
-    if (!userId || rawResults.length === 0) {
-      return rawResults.sort((a, b) => b.relevance - a.relevance);
+    const capped = rawResults.slice(0, MAX_RESULTS);
+    const total = capped.length;
+    const pageItems = capped.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+    if (!userId || pageItems.length === 0) {
+      return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
     }
 
+    this.logger.log(`Chamando Claude para ${pageItems.length} itens da página ${page} (userId: ${userId})`);
     try {
-      return await this.rankWithClaude(query, userId, rawResults);
+      const ranked = await this.rankWithClaude(query, userId, pageItems);
+      return { items: ranked, total };
     } catch (error) {
-      this.logger.error(`Erro ao ranquear com Claude: ${error.message}`);
-      return rawResults.sort((a, b) => b.relevance - a.relevance);
+      this.logger.error(`Erro ao ranquear com Claude: ${error.message}`, error.stack);
+      return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
     }
   }
 

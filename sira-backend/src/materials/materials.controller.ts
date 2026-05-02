@@ -15,7 +15,11 @@ export class MaterialsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Busca unificada em APIs acadêmicas externas' })
   @ApiResponse({ status: 200, type: [MaterialDto] })
-  async search(@Query('q') query: string, @CurrentUser() user?: JwtPayload): Promise<MaterialDto[]> {
-    return this.materialsService.search(query, user?.sub);
+  async search(
+    @Query('q') query: string,
+    @Query('page') page?: string,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<{ items: MaterialDto[]; total: number }> {
+    return this.materialsService.search(query, user?.sub, Number(page) || 0);
   }
 }

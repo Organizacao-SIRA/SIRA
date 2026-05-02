@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Filter as FilterIcon, Search, Sparkles, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { RecommendationCard } from '../components/RecommendationCard';
 
-const PAGE_SIZE = 10;
-const MAX_RESULTS = 20;
+const PAGE_SIZE = 4;
 
-export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavorite, isFavorite }: any) => {
-  const [page, setPage] = useState(0);
+interface RecommendationsProps {
+  results: any[];
+  total: number;
+  page: number;
+  onPageChange: (page: number) => void;
+  searchQuery: string;
+  viewDetails: (item: any) => void;
+  toggleFavorite: (item: any) => void;
+  isFavorite: (id: any) => boolean;
+  isLoading?: boolean;
+}
 
-  const allResults = (results || []).slice(0, MAX_RESULTS);
-  const totalPages = Math.ceil(allResults.length / PAGE_SIZE);
-  const pageResults = allResults.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+export const Recommendations = ({
+  results, total, page, onPageChange, searchQuery,
+  viewDetails, toggleFavorite, isFavorite, isLoading,
+}: RecommendationsProps) => {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
@@ -24,7 +34,7 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
         </div>
         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm text-sm font-bold text-green-700">
           <Sparkles className="w-4 h-4" />
-          <span>{allResults.length} recomendações precisas</span>
+          <span>{total} recomendações precisas</span>
         </div>
       </div>
 
@@ -85,43 +95,52 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
 
         {/* LISTA DE RESULTADOS */}
         <div className="flex-1 space-y-4">
-          {pageResults.map((item: any) => (
-            <RecommendationCard
-              key={item.id}
-              item={item}
-              viewDetails={viewDetails}
-              toggleFavorite={toggleFavorite}
-              isFavorite={isFavorite(item.id)}
-            />
-          ))}
-
-          {allResults.length === 0 && (
-            <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center">
-              <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 font-medium">Nenhum resultado encontrado para sua busca.</p>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mb-4"></div>
+              <p className="text-sm font-bold text-[#003157] uppercase tracking-widest">Analisando com IA...</p>
             </div>
-          )}
+          ) : (
+            <>
+              {results.map((item: any) => (
+                <RecommendationCard
+                  key={item.id}
+                  item={item}
+                  viewDetails={viewDetails}
+                  toggleFavorite={toggleFavorite}
+                  isFavorite={isFavorite(item.id)}
+                />
+              ))}
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 pt-4">
-              <button
-                onClick={() => setPage(p => p - 1)}
-                disabled={page === 0}
-                className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <span className="text-sm font-bold text-gray-500">
-                Página {page + 1} de {totalPages}
-              </span>
-              <button
-                onClick={() => setPage(p => p + 1)}
-                disabled={page === totalPages - 1}
-                className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+              {results.length === 0 && (
+                <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center">
+                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">Nenhum resultado encontrado para sua busca.</p>
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 pt-4">
+                  <button
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={page === 0}
+                    className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <span className="text-sm font-bold text-gray-500">
+                    Página {page + 1} de {totalPages}
+                  </span>
+                  <button
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={page === totalPages - 1}
+                    className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
