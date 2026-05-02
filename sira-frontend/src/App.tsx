@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { searchAcademicContent, fetchFavorites, addFavorite, removeFavoriteApi } from './services/api';
+import { searchAcademicContent, fetchFavorites, addFavorite, removeFavoriteApi, getProfile } from './services/api';
 import { Home } from './pages/Home';
 import { Recommendations } from './pages/Recommendations';
 import { Favorites } from './pages/Favorites';
@@ -10,13 +10,12 @@ import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
-import { useAuth } from './contexts/AuthContext';
 import { Onboarding } from './pages/Onboarding';
 import { Interests } from './pages/Interests';
-
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [currentScreen, setCurrentScreen] = useState('home');
   const [previousScreen, setPreviousScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -28,26 +27,60 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const [profileData, setProfileData] = useState({
-    name: 'Ricardo Almeida',
-    email: 'ricardo.almeida@email.com',
-    course: 'Ciências da Computação',
-    educationLevel: 'Mestrado',
-    mainArea: 'Inteligência Artificial',
-    subAreas: 'Machine Learning, PLN',
-    languages: ['Português', 'Inglês'],
+    name: '',
+    email: '',
+    course: '',
+    educationLevel: 'Graduação',
+    mainArea: '',
+    subAreas: '',
+    languages: ['Português'],
     materialLevels: ['Intermediário'],
     wantsBooks: true,
-    wantsArticles: true
+    wantsArticles: true,
   });
 
-  // Carregar favoritos ao autenticar
   useEffect(() => {
     if (isAuthenticated) {
       loadFavorites();
+      loadProfile();
     } else {
       setFavorites([]);
+      setProfileData({
+        name: '', email: '', course: '', educationLevel: 'Graduação',
+        mainArea: '', subAreas: '', languages: ['Português'],
+        materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
+      });
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated && currentScreen !== 'register') {
+      setCurrentScreen('login');
+    } else if (isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
+      setCurrentScreen('home');
+    }
+  }, [isAuthenticated, currentScreen]);
+
+  const loadProfile = async () => {
+    try {
+      const data = await getProfile();
+      setProfileData(prev => ({
+        ...prev,
+        name: data.name || prev.name,
+        email: data.email || prev.email,
+        course: data.course || '',
+        educationLevel: data.educationLevel || 'Graduação',
+        mainArea: data.mainArea || '',
+        subAreas: data.subAreas || '',
+        languages: data.languages?.length ? data.languages : ['Português'],
+        materialLevels: data.materialLevels?.length ? data.materialLevels : ['Intermediário'],
+        wantsBooks: data.wantsBooks ?? true,
+        wantsArticles: data.wantsArticles ?? true,
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  };
 
   const loadFavorites = async () => {
     try {
@@ -58,24 +91,6 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    if (!isAuthenticated && currentScreen !== 'register') {
-      setCurrentScreen('login');
-    } else if (isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
-      setCurrentScreen('home');
-    }
-  }, [isAuthenticated, currentScreen]);
-
-  useEffect(() => {
-    if (user) {
-      setProfileData(prev => ({
-        ...prev,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-      }));
-    }
-  }, [user]);
-
   const handleSearch = async (e: any) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -84,7 +99,7 @@ export default function App() {
     try {
       const data = await searchAcademicContent(searchQuery);
       setResults(data);
-    } catch (error) {
+    } catch {
       setResults([]);
     } finally {
       setIsLoading(false);
@@ -115,7 +130,7 @@ export default function App() {
 
   const isFavorite = (id: any) => favorites.some(f => f.id === id);
 
-  const showSidebar = currentScreen !== 'login' && currentScreen !== 'register';
+  const showSidebar = !['login', 'register', 'onboarding', 'interests'].includes(currentScreen);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
@@ -124,15 +139,18 @@ export default function App() {
         setIsSidebarOpen={setIsSidebarOpen}
         setCurrentScreen={setCurrentScreen}
         currentScreen={currentScreen}
+        user={user}
+        onLogout={logout}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
         {showSidebar && (
           <Sidebar
             isSidebarOpen={isSidebarOpen}
-            setIsSidebarOpen={setIsSidebarOpen} // Resolve o erro vermelho da Sidebar
+            setIsSidebarOpen={setIsSidebarOpen}
             currentScreen={currentScreen}
             setCurrentScreen={setCurrentScreen}
+            user={user}
           />
         )}
 
@@ -144,17 +162,32 @@ export default function App() {
             </div>
           )}
 
-          {currentScreen === 'home' && <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />}
-          {currentScreen === 'results' && <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
-          {currentScreen === 'details' && <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
-          {currentScreen === 'catalog' && <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />}
-          {currentScreen === 'favorites' && <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'profile' && <Profile profileData={profileData} setProfileData={setProfileData} />}
+          {currentScreen === 'home' && (
+            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
+          )}
+          {currentScreen === 'results' && (
+            <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+          )}
+          {currentScreen === 'details' && (
+            <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+          )}
+          {currentScreen === 'catalog' && (
+            <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+          )}
+          {currentScreen === 'favorites' && (
+            <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
+          )}
+          {currentScreen === 'profile' && (
+            <Profile profileData={profileData} setProfileData={setProfileData} />
+          )}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'onboarding' && (<Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} /> )}
-          {currentScreen === 'interests' && (<Interests setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />)}
-
+          {currentScreen === 'onboarding' && (
+            <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
+          )}
+          {currentScreen === 'interests' && (
+            <Interests setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
+          )}
         </main>
       </div>
     </div>

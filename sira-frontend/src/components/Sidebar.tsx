@@ -1,29 +1,32 @@
 import { Library, Sparkles, Bookmark, UserCircle, Settings } from 'lucide-react';
+import type { AuthUser } from '../types';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean) => void;
   currentScreen: string;
   setCurrentScreen: (screen: string) => void;
+  user: AuthUser | null;
 }
 
-export const Sidebar = ({ 
-  isSidebarOpen, 
-  setIsSidebarOpen, 
-  currentScreen, 
-  setCurrentScreen 
+export const Sidebar = ({
+  isSidebarOpen,
+  setIsSidebarOpen,
+  currentScreen,
+  setCurrentScreen,
+  user,
 }: SidebarProps) => {
-  
+
   const menuItems = [
     { id: 'catalog', label: 'Catálogo de Livros', icon: Library },
     { id: 'home', label: 'Recomendações', icon: Sparkles },
     { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
-    { id: 'profile', label: 'Meu Perfil', icon: UserCircle },
+    ...(user ? [{ id: 'profile', label: 'Meu Perfil', icon: UserCircle }] : []),
     { id: 'onboarding', label: 'Preferências', icon: Settings },
   ];
 
   return (
-    <aside 
+    <aside
       className={`${
         isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'
       } absolute md:relative z-40 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 flex flex-col shadow-lg md:shadow-none min-h-[calc(100vh-68px)]`}
@@ -40,8 +43,7 @@ export const Sidebar = ({
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            // Define se o item está ativo (Home também engloba resultados e detalhes)
-            const isActive = currentScreen === item.id || 
+            const isActive = currentScreen === item.id ||
               (item.id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
             
             return (

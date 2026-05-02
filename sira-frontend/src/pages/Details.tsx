@@ -1,7 +1,7 @@
 import React from 'react';
-import { 
-  FileText, BookOpen, Star, ChevronRight, Sparkles, 
-  Globe, Calendar, UserCircle, ArrowLeft, Tag, Link as LinkIcon, Library
+import {
+  FileText, BookOpen, Star, ChevronRight, Sparkles,
+  Globe, Calendar, UserCircle, ArrowLeft, Tag, Link as LinkIcon, Library, ExternalLink
 } from 'lucide-react';
 
 interface DetailsProps {
@@ -155,11 +155,22 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-            <button 
+            {item.url && (
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-xl bg-[#1351B4] hover:bg-[#003157] text-white font-bold transition-all flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-5 h-5" />
+                Acessar Material
+              </a>
+            )}
+            <button
               onClick={() => toggleFavorite(item)}
               className={`w-full py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                isFavorite(item.id) 
-                  ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' 
+                isFavorite(item.id)
+                  ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]'
                   : 'bg-white border-gray-200 text-gray-700 hover:border-[#1351B4]'
               }`}
             >

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Pencil, GraduationCap, Settings, School, CheckCircle2,
   Cpu, Landmark, Scale, LineChart, Activity, TrendingUp, Users, Globe, User as UserIcon
 } from 'lucide-react';
+import { updateProfile } from '../services/api';
 
 const AVAILABLE_THEMES = [
   { id: 'dir', label: 'Direito', icon: Scale },
@@ -54,8 +55,13 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
     }
   };
 
-  const handleSave = () => {
-    setProfileData(editProfileData);
+  const handleSave = async () => {
+    try {
+      const saved = await updateProfile(editProfileData);
+      setProfileData({ ...editProfileData, ...saved });
+    } catch {
+      setProfileData(editProfileData);
+    }
     setIsEditingProfile(false);
   };
 
@@ -67,7 +73,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           <p className="text-gray-500 text-sm mt-1">Gerencie suas informações e preferências.</p>
         </div>
         {!isEditingProfile && (
-          <button 
+          <button
             onClick={() => setIsEditingProfile(true)}
             className="bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm flex items-center gap-2"
           >
@@ -75,7 +81,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           </button>
         )}
       </div>
-      
+
       <div className="space-y-6">
         {/* Cabeçalho de Identificação */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5">
@@ -93,7 +99,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
 
         {/* GRID DE DUAS COLUNAS: Dados Pessoais e Perfil Acadêmico lado a lado */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Seção Dados Pessoais */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-full">
             <div className="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex items-center gap-2 text-[#003157]">
@@ -103,15 +109,15 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">Nome</span>
-                {isEditingProfile ? 
-                  <input type="text" value={editProfileData.name} onChange={(e) => handleChange('name', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#1351B4]" /> : 
+                {isEditingProfile ?
+                  <input type="text" value={editProfileData.name} onChange={(e) => handleChange('name', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#1351B4]" /> :
                   <span className="text-gray-900 font-bold">{profileData.name}</span>
                 }
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm">
                 <span className="text-gray-500">E-mail</span>
-                {isEditingProfile ? 
-                  <input type="email" value={editProfileData.email} onChange={(e) => handleChange('email', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#1351B4]" /> : 
+                {isEditingProfile ?
+                  <input type="email" value={editProfileData.email} onChange={(e) => handleChange('email', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#1351B4]" /> :
                   <span className="text-gray-900">{profileData.email}</span>
                 }
               </div>
@@ -127,24 +133,24 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">Curso</span>
-                {isEditingProfile ? 
-                  <input type="text" value={editProfileData.course} onChange={(e) => handleChange('course', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> : 
+                {isEditingProfile ?
+                  <input type="text" value={editProfileData.course} onChange={(e) => handleChange('course', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> :
                   <span className="text-gray-900 font-bold">{profileData.course}</span>
                 }
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">Nível</span>
-                {isEditingProfile ? 
+                {isEditingProfile ?
                   <select value={editProfileData.educationLevel} onChange={(e) => handleChange('educationLevel', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 bg-white outline-none">
                     <option>Graduação</option><option>Mestrado</option><option>Doutorado</option><option>Especialização</option>
-                  </select> : 
+                  </select> :
                   <span className="text-gray-900 font-bold">{profileData.educationLevel}</span>
                 }
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm">
                 <span className="text-gray-500">Área</span>
-                {isEditingProfile ? 
-                  <input type="text" value={editProfileData.mainArea} onChange={(e) => handleChange('mainArea', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> : 
+                {isEditingProfile ?
+                  <input type="text" value={editProfileData.mainArea} onChange={(e) => handleChange('mainArea', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> :
                   <span className="text-gray-900 font-bold">{profileData.mainArea}</span>
                 }
               </div>
@@ -152,7 +158,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           </div>
         </div>
 
-        {/* Áreas de Interesse (Cards abaixo das colunas) */}
+        {/* Áreas de Interesse */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 text-[#003157]">
             <School className="w-5 h-5" />
@@ -162,18 +168,18 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {AVAILABLE_THEMES.map((theme) => {
                 const Icon = theme.icon;
-                const isSelected = isEditingProfile 
+                const isSelected = isEditingProfile
                   ? editProfileData.interests?.includes(theme.id)
                   : profileData.interests?.includes(theme.id);
-                
+
                 return (
                   <button
                     key={theme.id}
                     onClick={() => toggleInterest(theme.id)}
                     disabled={!isEditingProfile}
                     className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all ${
-                      isSelected 
-                        ? 'border-[#1351B4] bg-blue-50' 
+                      isSelected
+                        ? 'border-[#1351B4] bg-blue-50'
                         : 'border-gray-50 bg-gray-50/50'
                     } ${isEditingProfile ? 'cursor-pointer hover:border-blue-200 shadow-sm' : 'cursor-default'}`}
                   >
@@ -202,12 +208,12 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Línguas</span>
               {['Português', 'Inglês', 'Espanhol'].map(lang => (
                 <label key={lang} className="flex items-center gap-3 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={isEditingProfile ? (editProfileData.languages?.includes(lang)) : (profileData.languages?.includes(lang))}
                     onChange={(e) => isEditingProfile && handleCheckboxArrayChange('languages', lang, e.target.checked)}
                     disabled={!isEditingProfile}
-                    className="rounded text-[#1351B4] w-4 h-4" 
+                    className="rounded text-[#1351B4] w-4 h-4"
                   />
                   <span className="text-gray-700">{lang}</span>
                 </label>
@@ -217,12 +223,12 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Nível</span>
               {['Introdutório', 'Intermediário', 'Avançado'].map(level => (
                 <label key={level} className="flex items-center gap-3 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={isEditingProfile ? (editProfileData.materialLevels?.includes(level)) : (profileData.materialLevels?.includes(level))}
                     onChange={(e) => isEditingProfile && handleCheckboxArrayChange('materialLevels', level, e.target.checked)}
                     disabled={!isEditingProfile}
-                    className="rounded text-[#1351B4] w-4 h-4" 
+                    className="rounded text-[#1351B4] w-4 h-4"
                   />
                   <span className="text-gray-700">{level}</span>
                 </label>

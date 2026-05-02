@@ -6,7 +6,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 COPY package*.json ./
 COPY prisma ./prisma/
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN npm install
 
 # Estágio 2: Desenvolvimento (Com Hot Reload)
@@ -31,7 +31,7 @@ ARG DATABASE_URL=postgresql://sira_user:sira_password@postgres:5432/sira_db?sche
 ENV DATABASE_URL=${DATABASE_URL}
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci --omit=dev && npx prisma generate
+RUN npm install --omit=dev && npx prisma generate
 
 # Estágio 5: Runner de Produção (Imagem final otimizada e leve)
 FROM node:22-alpine AS runner

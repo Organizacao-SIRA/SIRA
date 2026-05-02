@@ -1,17 +1,18 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
 import { scrypt as _scrypt, randomBytes, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
   ) {}
 
   private async hashPassword(password: string): Promise<string> {
@@ -27,55 +28,46 @@ export class AuthService {
     return timingSafeEqual(hashBuffer, derivedKey);
   }
 
-  async register(registerDto: RegisterDto) {
-    const { email, password, name } = registerDto;
-    const existingUser = await this.usersService.findByEmail(email);
-    
-    if (existingUser) {
-      throw new ConflictException('E-mail já está em uso');
-    }
+  async register(dto: RegisterDto) {
+    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (exists) throw new ConflictException('E-mail já cadastrado');
 
-    const hashedPassword = await this.hashPassword(password);
-    
-    const user = await this.usersService.create({
-      email,
-      password: hashedPassword,
-      name,
+    const hashedPassword = await this.hashPassword(dto.password);
+    const user = await this.prisma.user.create({
+      data: { email: dto.email, password: hashedPassword, name: dto.name },
     });
 
-    const payload = { sub: user.id, email: user.email };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      }
-    };
+    return { access_token: this.sign(user), user: this.safeUser(user) };
   }
 
-  async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
-    const user = await this.usersService.findByEmail(email);
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (!user) throw new UnauthorizedException('Credenciais inválidas');
 
-    if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
+    const valid = await this.comparePasswords(dto.password, user.password);
+    if (!valid) throw new UnauthorizedException('Credenciais inválidas');
 
-    const isPasswordValid = await this.comparePasswords(password, user.password);
+    return { access_token: this.sign(user), user: this.safeUser(user) };
+  }
 
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
+  private sign(user: { id: string; email: string }) {
+    return this.jwtService.sign({ sub: user.id, email: user.email });
+  }
 
-    const payload = { sub: user.id, email: user.email };
+  private safeUser(user: any) {
     return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      }
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      course: user.course,
+      educationLevel: user.educationLevel,
+      mainArea: user.mainArea,
+      subAreas: user.subAreas,
+      languages: user.languages,
+      materialLevels: user.materialLevels,
+      wantsBooks: user.wantsBooks,
+      wantsArticles: user.wantsArticles,
+      interests: user.interests,
     };
   }
 }

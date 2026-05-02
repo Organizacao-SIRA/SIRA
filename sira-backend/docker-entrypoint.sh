@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Se houver schema.prisma, tenta sincronizar o banco
 if [ -f "./prisma/schema.prisma" ]; then
@@ -9,7 +10,7 @@ if [ -f "./prisma/schema.prisma" ]; then
     # Em desenvolvimento, usamos db push para evitar prompts interativos que travam o container
     npx prisma db push --skip-generate
   fi
+  echo "Database schema applied successfully."
 fi
 
-# Executa o comando principal (CMD do Dockerfile)
 exec "$@"

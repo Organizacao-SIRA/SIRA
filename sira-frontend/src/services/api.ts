@@ -5,6 +5,8 @@ const getAuthHeaders = (): Record<string, string> => {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
+// --- Auth ---
+
 export const loginUser = async (data: any) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
@@ -31,35 +33,7 @@ export const registerUser = async (data: any) => {
   return response.json();
 };
 
-export const fetchFavorites = async () => {
-  const response = await fetch(`${API_BASE_URL}/favorites`, {
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error('Erro ao buscar favoritos');
-  return response.json();
-};
-
-export const addFavorite = async (material: any) => {
-  const response = await fetch(`${API_BASE_URL}/favorites`, {
-    method: 'POST',
-    headers: {
-      ...getAuthHeaders(),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(material),
-  });
-  if (!response.ok) throw new Error('Erro ao adicionar aos favoritos');
-  return response.json();
-};
-
-export const removeFavoriteApi = async (materialId: string) => {
-  const response = await fetch(`${API_BASE_URL}/favorites/${materialId}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error('Erro ao remover dos favoritos');
-  return response.json();
-};
+// --- Materials ---
 
 /**
  * Busca Principal (Recommendations / Home) via Backend SIRA
@@ -78,18 +52,14 @@ export const searchAcademicContent = async (query: string) => {
   }
 };
 
-/**
- * Busca para o Catálogo via Backend SIRA
- */
 export const fetchCatalogBooks = async (category: string) => {
-  const terms: any = { 
-    'Todas': 'science', 
-    'Ciências da Computação': 'computer science', 
-    'Administração Pública': 'public administration', 
-    'Direito': 'law' 
+  const terms: Record<string, string> = {
+    'Todas': 'science',
+    'Ciências da Computação': 'computer science',
+    'Administração Pública': 'public administration',
+    'Direito': 'law',
   };
   const queryTerm = terms[category] || category;
-
   try {
     const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(queryTerm)}`, {
       headers: getAuthHeaders(),
@@ -100,4 +70,94 @@ export const fetchCatalogBooks = async (category: string) => {
     console.error('Erro ao buscar catálogo:', error);
     return [];
   }
+};
+
+// --- Favorites ---
+
+export const fetchFavorites = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao buscar favoritos');
+  return response.json();
+};
+
+export const addFavorite = async (material: any) => {
+  const response = await fetch(`${API_BASE_URL}/favorites`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: material.id,
+      type: material.type,
+      title: material.title,
+      authors: material.authors,
+      year: String(material.year),
+      source: material.source,
+      abstract: material.abstract || null,
+      url: material.url || null,
+      image: material.image || null,
+      relevance: material.relevance || 0,
+    }),
+  });
+  if (!response.ok) throw new Error('Erro ao adicionar aos favoritos');
+  return response.json();
+};
+
+export const removeFavoriteApi = async (materialId: string) => {
+  const response = await fetch(`${API_BASE_URL}/favorites/${encodeURIComponent(materialId)}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao remover dos favoritos');
+  return response.json();
+};
+
+// --- User Profile ---
+
+export const getProfile = async () => {
+  const response = await fetch(`${API_BASE_URL}/users/profile`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Erro ao carregar perfil');
+  return response.json();
+};
+
+export const updateProfile = async (data: Record<string, any>) => {
+  const response = await fetch(`${API_BASE_URL}/users/profile`, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Erro ao salvar perfil');
+  return response.json();
+};
+
+// --- AI Recommendations ---
+
+type RecommendationsResponse = {
+  recommendations: Array<any & { aiExplanation: string | null }>;
+  basedOn: { favorites: number; searches: number };
+  generatedAt: string;
+};
+
+export const getAiRecommendations = async (): Promise<RecommendationsResponse> => {
+  const response = await fetch(`${API_BASE_URL}/recommendations`, {
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Erro ao buscar recomendações');
+  return data;
+};
+
+export const refreshAiRecommendations = async (): Promise<RecommendationsResponse> => {
+  const response = await fetch(`${API_BASE_URL}/recommendations/refresh`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Erro ao atualizar recomendações');
+  return data;
 };

@@ -50,26 +50,32 @@ export class MaterialDto {
   @IsOptional()
   image?: string;
 
+  @ApiProperty({ example: 'https://books.google.com/...', description: 'Link de acesso ao material', required: false })
   @IsString()
   @IsOptional()
   url?: string;
 
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   thematicArea?: string;
 
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   doi?: string;
 
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   isbn?: string;
 
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   aiJustification?: string;
 
+  @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   keywords?: string[];
 }

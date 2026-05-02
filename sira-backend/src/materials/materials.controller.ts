@@ -1,7 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { MaterialsService } from './materials.service';
 import { MaterialDto } from './dto/material.dto';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
+import { CurrentUser, JwtPayload } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Materials')
 @Controller('materials')
@@ -9,9 +11,11 @@ export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}
 
   @Get('search')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Busca unificada em APIs acadêmicas externas' })
   @ApiResponse({ status: 200, type: [MaterialDto] })
-  async search(@Query('q') query: string): Promise<MaterialDto[]> {
-    return this.materialsService.search(query);
+  async search(@Query('q') query: string, @CurrentUser() user?: JwtPayload): Promise<MaterialDto[]> {
+    return this.materialsService.search(query, user?.sub);
   }
 }
