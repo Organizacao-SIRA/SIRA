@@ -72,11 +72,31 @@ Se quiser acompanhar os logs separadamente, abra 2 terminais:
 
 ---
 
-**Comandos Úteis:**
-- Recriar containers apos mudar `.env`: `docker compose up -d --build`
-- Resetar banco de dados: `docker compose down -v`
-- Ver status dos containers: `docker compose ps`
-- Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`
-wn -v`
-- Ver status dos containers: `docker compose ps`
-- Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`
+## 🛠️ Comandos de Desenvolvimento e Manutenção
+
+### Banco de Dados (Prisma via Docker)
+Como o projeto é orquestrado via Docker, todos os comandos do banco devem ser executados através do container do backend para garantir paridade de ambiente.
+
+- **Testar alterações rápidas no Schema (Sem gerar histórico):**
+  Ideal para iterar localmente enquanto desenvolve o banco.
+  ```bash
+  docker exec -it sira-backend npx prisma db push
+  ```
+
+- **Criar Histórico de Migração (Modo DevOps / Produção):**
+  Quando a alteração estiver consolidada e pronta para ser versionada/compartilhada.
+  ```bash
+  docker exec -it sira-backend npx prisma migrate dev --name "descricao_da_mudanca"
+  ```
+
+- **Resetar Banco de Dados Limpo (Apagar tudo e recriar):**
+  Resolve problemas de sincronização forçando a recriação das tabelas a partir do schema atual.
+  ```bash
+  docker exec -it sira-backend npx prisma db push --force-reset
+  ```
+
+### Orquestração (Docker)
+- **Ver logs em tempo real:** `docker compose logs -f`
+- **Ver status dos containers:** `docker compose ps`
+- **Recriar imagens após mudar `.env` ou `Dockerfile`:** `docker compose up -d --build`
+- **Derrubar tudo e apagar volumes:** `docker compose down -v`
