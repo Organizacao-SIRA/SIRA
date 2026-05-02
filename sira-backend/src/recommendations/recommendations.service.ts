@@ -106,7 +106,7 @@ export class RecommendationsService {
   }
 
   private async rankWithClaude(
-    favorites: Array<{ material: { title: string; authors: string; year: number; type: string; abstract: string | null } }>,
+    favorites: Array<{ material: { title: string; authors: string; year: string; type: string; abstract: string | null } }>,
     searches: Array<{ query: string }>,
     candidates: MaterialDto[],
   ): Promise<RecommendationItem[]> {

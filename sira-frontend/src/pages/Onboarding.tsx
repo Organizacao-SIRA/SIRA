@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { GraduationCap, Settings, Sparkles, ChevronRight } from 'lucide-react';
-<<<<<<< HEAD
 import { updateProfile } from '../services/api';
-=======
->>>>>>> develop
 
 interface OnboardingProps {
   setCurrentScreen: (screen: string) => void;
@@ -35,7 +32,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     }
   };
 
-<<<<<<< HEAD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated = { ...profileData, ...formData };
@@ -45,11 +41,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     } catch {
       // salva em estado mesmo se a API falhar
     }
-=======
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setProfileData({ ...profileData, ...formData });
->>>>>>> develop
     setCurrentScreen('interests');
   };
 
@@ -67,10 +58,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-<<<<<<< HEAD
-=======
-          {/* Seção: Perfil Acadêmico */}
->>>>>>> develop
           <section>
             <h3 className="text-sm font-bold text-[#003157] mb-3 flex items-center gap-2 border-b pb-1">
               <GraduationCap className="w-4 h-4" /> Perfil Acadêmico
@@ -125,10 +112,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
             </div>
           </section>
 
-<<<<<<< HEAD
-=======
-          {/* Seção: Preferências de Leitura */}
->>>>>>> develop
           <section>
             <h3 className="text-sm font-bold text-[#003157] mb-2 flex items-center gap-2 border-b pb-1">
               <Settings className="w-4 h-4" /> Preferências
@@ -141,11 +124,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                     <input
                       type="checkbox"
                       checked={formData.languages.includes(lang)}
-<<<<<<< HEAD
                       onChange={() => handleCheckboxChange('languages', lang, true)}
-=======
-                      onChange={(e) => handleCheckboxChange('languages', lang, true)}
->>>>>>> develop
                       className="rounded text-[#1351B4] w-3.5 h-3.5"
                     />
                     <span className="text-[11px] text-gray-600 group-hover:text-gray-900">{lang}</span>
@@ -159,11 +138,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                     <input
                       type="checkbox"
                       checked={formData.materialLevels.includes(level)}
-<<<<<<< HEAD
                       onChange={() => handleCheckboxChange('materialLevels', level, true)}
-=======
-                      onChange={(e) => handleCheckboxChange('materialLevels', level, true)}
->>>>>>> develop
                       className="rounded text-[#1351B4] w-3.5 h-3.5"
                     />
                     <span className="text-[11px] text-gray-600 group-hover:text-gray-900">{level}</span>
@@ -205,8 +180,4 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       </div>
     </div>
   );
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> develop

@@ -8,7 +8,7 @@ if [ -f "./prisma/schema.prisma" ]; then
     npx prisma migrate deploy
   else
     # Em desenvolvimento, usamos db push para evitar prompts interativos que travam o container
-    npx prisma db push --skip-generate
+    npx prisma db push
   fi
   echo "Database schema applied successfully."
 fi
