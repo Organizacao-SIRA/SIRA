@@ -62,6 +62,7 @@ Esse comando faz o build das imagens, sobe os containers e ativa o hot reload pa
 - **Interface:** [http://localhost:5173](http://localhost:5173)
 - **Documentação Swagger:** [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
 - **Healthcheck:** [http://localhost:3002/api/v1/health](http://localhost:3002/api/v1/health)
+- **Interface pgAdmin:** [http://localhost:5050](http://localhost:5050) *(Login: admin@sira.com / Senha: admin)*
 - **PostgreSQL no host:** `localhost:5433`
 
 ### 5. Acompanhar os Logs
@@ -74,5 +75,8 @@ Se quiser acompanhar os logs separadamente, abra 2 terminais:
 **Comandos Úteis:**
 - Recriar containers apos mudar `.env`: `docker compose up -d --build`
 - Resetar banco de dados: `docker compose down -v`
+- Ver status dos containers: `docker compose ps`
+- Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`
+wn -v`
 - Ver status dos containers: `docker compose ps`
 - Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`
