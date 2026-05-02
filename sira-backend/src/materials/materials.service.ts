@@ -18,6 +18,33 @@ export class MaterialsService {
     private readonly prisma: PrismaService,
   ) {}
 
+  async ensureMaterialExists(data: MaterialDto) {
+    const existing = await this.prisma.material.findUnique({
+      where: { id: data.id },
+    });
+
+    if (existing) return existing;
+
+    return this.prisma.material.create({
+      data: {
+        id: data.id,
+        type: data.type,
+        title: data.title,
+        authors: data.authors,
+        year: data.year.toString(),
+        source: data.source,
+        relevance: data.relevance,
+        abstract: data.abstract,
+        image: data.image,
+        url: data.url,
+        thematicArea: data.thematicArea,
+        doi: data.doi,
+        isbn: data.isbn,
+        aiJustification: data.aiJustification,
+      },
+    });
+  }
+
   async search(query: string, userId?: string): Promise<MaterialDto[]> {
     if (!query || query.trim().length < 2) return [];
 
@@ -88,7 +115,7 @@ export class MaterialsService {
         type: MaterialType.BOOK,
         title: item.volumeInfo?.title || 'Título Indisponível',
         authors: item.volumeInfo?.authors?.join(', ') || 'Autor desconhecido',
-        year: item.volumeInfo?.publishedDate?.split('-')[0] || 'N/A',
+        year: (item.volumeInfo?.publishedDate?.split('-')[0] || 'N/A').toString(),
         source: 'Google Books',
         relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
         abstract: item.volumeInfo?.description || 'Sem resumo disponível.',

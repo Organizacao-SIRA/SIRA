@@ -20,6 +20,7 @@ export default function App() {
   const [previousScreen, setPreviousScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
   const [results, setResults] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -113,6 +114,7 @@ export default function App() {
 
   const toggleFavorite = async (item: any) => {
     const isFav = favorites.some(f => f.id === item.id);
+
     try {
       if (isFav) {
         await removeFavoriteApi(item.id);
@@ -166,10 +168,12 @@ export default function App() {
           {currentScreen === 'results' && (
             <Recommendations searchQuery={searchQuery} results={results} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
-{currentScreen === 'details' && (
+          {currentScreen === 'details' && (
             <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
-          {currentScreen === 'catalog' && <Catalog viewDetails={viewDetails} />}
+          {currentScreen === 'catalog' && (
+            <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+          )}
           {currentScreen === 'favorites' && (
             <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
           )}

@@ -1,57 +1,78 @@
 # SIRA - Sistema Inteligente de Recomendações Acadêmicas
 
-O SIRA é um sistema de recomendações acadêmicas desenvolvido em uma arquitetura de monorepo com foco em performance e escalabilidade.
+O SIRA+ é um ecossistema acadêmico moderno projetado para agregar, recomendar e organizar materiais científicos (artigos e livros) em uma arquitetura robusta e escalável de Monorepo.
 
-## 🛠️ Tecnologias e Aplicação
+## 🛠️ Tecnologias e Arquitetura
 
-*   **Backend (sira-backend):** API construída com **NestJS 11** e **TypeScript**. Segue uma arquitetura modular com injeção de dependência nativa.
-*   **Frontend (sira-frontend):** Aplicação Single Page (SPA) desenvolvida com **React 19**, **Vite 8** e **Tailwind CSS 4**. Focada em renderização rápida e Hot Reload (HMR).
-*   **Banco de Dados:** **PostgreSQL 17** rodando em container isolado.
-*   **ORM:** **Prisma 7** para modelagem de dados e gerenciamento de migrations (conectado ao Postgres).
-*   **Infraestrutura:** **Docker & Docker Compose**. Tudo roda em containers para garantir que o ambiente seja idêntico em qualquer máquina.
+*   **Backend (NestJS 11):** API modular com injeção de dependência nativa.
+    *   **Segurança:** Autenticação via JWT (JSON Web Tokens) e Hashing de senhas utilizando o algoritmo moderno **scrypt** (módulo nativo `node:crypto`).
+    *   **Persistência:** PostgreSQL 17 gerenciado via **Prisma ORM**.
+    *   **Integrações:** Agregação em tempo real das APIs Google Books e Semantic Scholar.
+*   **Frontend (React 19):** Interface performática construída com Vite 8.
+    *   **Estado Global:** Context API para gerenciamento de sessão e persistência de token em LocalStorage.
+    *   **Estilização:** Tailwind CSS 4 para uma interface limpa e responsiva.
+*   **Infraestrutura (Docker):** Orquestração completa via Docker Compose para paridade total de ambientes.
 
-## 🏗️ Estrutura de Infraestrutura
+## ✨ Funcionalidades Implementadas
 
-1.  **Dockerização Multi-stage:** O backend e o frontend possuem builds divididos em estágios. Isso significa que as ferramentas de desenvolvimento (compiladores, linters) ficam de fora da imagem final, deixando-a leve e segura.
-2.  **Segurança Non-Root:** O backend roda com um usuário de sistema limitado (`nestjs`), não como root, seguindo boas práticas de segurança de containers.
-3.  **Rede Interna:** Os serviços se comunicam via uma rede privada interna do Docker (`sira-network`), permitindo que a API acesse o banco apenas pelo nome do serviço (`postgres`).
-4.  **Resiliência:** O backend possui um sistema de *healthcheck* que aguarda o banco de dados estar totalmente pronto antes de iniciar o serviço.
+- [x] **Sistema de Usuários:** Registro e Login com proteção de rotas.
+- [x] **Busca Acadêmica:** Pesquisa integrada em múltiplas bases científicas com cache inteligente em memória.
+- [x] **Favoritos Persistentes:** Salve artigos e livros diretamente no seu perfil. Os dados são sincronizados no PostgreSQL e permanecem disponíveis em qualquer dispositivo.
+- [x] **Catálogo Integrado:** Navegação por categorias (Ciências da Computação, Direito, etc.) com paginação simulada via APIs externas.
+- [x] **Documentação Automática:** Swagger UI configurado para testes rápidos dos endpoints.
+
+## 🏗️ Padrões de Platform Engineering
+
+1.  **Zero-Dependency Security:** Uso de módulos nativos do Node.js para criptografia, eliminando vulnerabilidades de pacotes de terceiros e problemas de compilação C++ em containers.
+2.  **Hot Reload Full-Stack:** Docker Compose Watch para sincronização automática de código e rebuild apenas quando necessário.
+3.  **Dockerização Otimizada:** Imagens multi-stage para manter o ambiente de produção leve e seguro, rodando sob usuário não-root.
+4.  **Resiliência de Inicialização:** Sistema de healthcheck garantindo que a API só inicie após o banco de dados estar pronto para conexões.
 
 ## 🚀 Como Iniciar o Projeto
 
-Certifique-se de ter o **Docker** instalado em sua máquina.
+### 1. Requisitos
+- Docker e Docker Compose instalados.
 
-### 1. Configurar Variáveis de Ambiente
-Antes de subir os containers, é necessário criar os arquivos `.env` a partir dos exemplos fornecidos:
-
+### 2. Configuração de Ambiente
+Antes de subir os containers, crie os arquivos `.env` a partir dos exemplos:
 ```bash
-# Na raiz do projeto:
 cp sira-backend/.env.example sira-backend/.env
 cp sira-frontend/.env.example sira-frontend/.env
 ```
 
-*Nota: No arquivo `sira-backend/.env`, você pode precisar configurar chaves de API externas (como `GOOGLE_BOOKS_API_KEY`) para habilitar todas as funcionalidades de busca.*
-
-### 2. Clonar e Iniciar
-Agora, execute o comando abaixo para construir as imagens e subir os containers:
-
-```bash
-docker-compose up --build
+Edite o arquivo `sira-backend/.env` e configure sua chave secreta:
+```env
+DATABASE_URL="postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public"
+JWT_SECRET="sua_chave_secreta_aqui"
+# Opcional para aumentar limites de busca
+GOOGLE_BOOKS_API_KEY=""
+SEMANTIC_SCHOLAR_API_KEY=""
 ```
 
-### 2. Acessar os Serviços
-Após a finalização do processo, os serviços estarão disponíveis nos seguintes endereços:
+Observacao: no ambiente Docker, o backend acessa o banco por `postgres:5432`. A porta publicada para acesso a partir da sua maquina host e `localhost:5433`.
 
-*   **Frontend:** [http://localhost:5173](http://localhost:5173)
-*   **Backend (Saúde da API):** [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
-*   **Documentação Swagger:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+### 3. Subir o Ambiente
+```bash
+docker compose up --watch
+```
 
-### 3. Desenvolvimento em Tempo Real
-O projeto está configurado com **volumes montados**. Isso significa que qualquer alteração que você fizer no código das pastas `src/` (tanto no backend quanto no frontend) será refletida instantaneamente dentro do container sem que você precise reiniciá-lo.
+Esse comando faz o build das imagens, sobe os containers e ativa o hot reload para desenvolvimento.
+
+### 4. Acessar os Serviços
+- **Interface:** [http://localhost:5173](http://localhost:5173)
+- **Documentação Swagger:** [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
+- **Healthcheck:** [http://localhost:3002/api/v1/health](http://localhost:3002/api/v1/health)
+- **PostgreSQL no host:** `localhost:5433`
+
+### 5. Acompanhar os Logs
+Se quiser acompanhar os logs separadamente, abra 2 terminais:
+- Frontend: `docker compose logs -f frontend`
+- Backend: `docker compose logs -f backend`
 
 ---
 
-**Nota:** Se precisar resetar o banco de dados completamente:
-```bash
-docker-compose down -v
-```
+**Comandos Úteis:**
+- Recriar containers apos mudar `.env`: `docker compose up -d --build`
+- Resetar banco de dados: `docker compose down -v`
+- Ver status dos containers: `docker compose ps`
+- Sincronizar Prisma após mudar schema: `docker exec sira-backend npx prisma generate`

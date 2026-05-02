@@ -1,9 +1,10 @@
 # Estágio 1: Base (Dependências e Preparação)
 FROM node:22-alpine AS base
 WORKDIR /app
+ARG DATABASE_URL=postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public
+ENV DATABASE_URL=${DATABASE_URL}
 COPY package*.json ./
 COPY prisma ./prisma/
-# Copia o script de entrada aqui para estar disponível em todos os estágios
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN npm install
@@ -12,7 +13,7 @@ RUN npm install
 FROM base AS development
 ENV NODE_ENV=development
 COPY . .
-RUN if [ -f "./prisma/schema.prisma" ]; then npx prisma generate; fi
+RUN npx prisma generate
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "run", "dev"]
@@ -26,6 +27,8 @@ RUN npm run build
 # Estágio 4: Dependências de Produção (Instala apenas o necessário para execução)
 FROM node:22-alpine AS production-deps
 WORKDIR /app
+ARG DATABASE_URL=postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public
+ENV DATABASE_URL=${DATABASE_URL}
 COPY package*.json ./
 COPY prisma ./prisma/
 RUN npm install --omit=dev && npx prisma generate

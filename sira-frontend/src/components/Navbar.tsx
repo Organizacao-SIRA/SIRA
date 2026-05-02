@@ -25,7 +25,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
             {!isAuthPage && (
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="mr-4 p-2 hover:bg-[#003157] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                className="mr-4 cursor-pointer p-2 hover:bg-[#003157] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white"
                 title="Menu Principal"
               >
                 <Menu className="w-6 h-6" />
@@ -41,7 +41,6 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
               </span>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             {user ? (
               <>
@@ -64,7 +63,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
             ) : (
               <button
                 onClick={() => setCurrentScreen('login')}
-                className={`flex items-center px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm border ${
+                className={`flex items-center cursor-pointer px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm border ${
                   currentScreen === 'login'
                     ? 'bg-white text-[#1351B4] border-white'
                     : 'bg-[#003157] hover:bg-[#002244] text-white border-blue-800'

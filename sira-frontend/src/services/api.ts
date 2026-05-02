@@ -35,6 +35,9 @@ export const registerUser = async (data: any) => {
 
 // --- Materials ---
 
+/**
+ * Busca Principal (Recommendations / Home) via Backend SIRA
+ */
 export const searchAcademicContent = async (query: string) => {
   if (!query || query.length < 2) return [];
   try {

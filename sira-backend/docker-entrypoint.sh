@@ -1,12 +1,14 @@
 #!/bin/sh
 set -e
 
+# Se houver schema.prisma, tenta sincronizar o banco
 if [ -f "./prisma/schema.prisma" ]; then
-  echo "Applying database schema..."
+  echo "Prisma schema found. Syncing database..."
   if [ "$NODE_ENV" = "production" ]; then
     npx prisma migrate deploy
   else
-    npx prisma db push
+    # Em desenvolvimento, usamos db push para evitar prompts interativos que travam o container
+    npx prisma db push --skip-generate
   fi
   echo "Database schema applied successfully."
 fi

@@ -1,8 +1,8 @@
 import React from 'react';
-import {
-  FileText, BookOpen, Star, Sparkles,
-  ChevronRight, Filter as FilterIcon, Search, ExternalLink
+import { 
+  Filter as FilterIcon, Search, Sparkles
 } from 'lucide-react';
+import { RecommendationCard } from '../components/RecommendationCard';
 
 export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavorite, isFavorite }: any) => {
   
@@ -17,7 +17,6 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
             Resultados para: <span className="text-[#1351B4]">"{searchQuery || 'Sua Pesquisa'}"</span>
           </h2>
         </div>
-        {/* TAG DE QUANTIDADE DE RESULTADOS (Restaurada) */}
         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm text-sm font-bold text-green-700">
           <Sparkles className="w-4 h-4" />
           <span>{displayResults.length} recomendações precisas</span>
@@ -74,20 +73,7 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
                 </div>
               </div>
 
-              {/* Nível */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Nível do Material</h4>
-                <div className="space-y-2">
-                  {['Introdutório', 'Intermediário', 'Avançado'].map(item => (
-                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer">
-                      <input type="checkbox" defaultChecked={item === 'Intermediário'} className="w-4 h-4 rounded border-gray-300 text-[#1351B4]" />
-                      {item}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* BOTÃO APLICAR FILTROS (Adicionado) */}
+              {/* BOTÃO APLICAR FILTROS */}
               <button className="w-full mt-4 bg-[#1351B4] hover:bg-[#003157] text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group">
                 <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Aplicar Filtros
@@ -99,57 +85,20 @@ export const Recommendations = ({ results, searchQuery, viewDetails, toggleFavor
         {/* LISTA DE RESULTADOS */}
         <div className="flex-1 space-y-4">
           {displayResults.map((item: any) => (
-            <div key={item.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex gap-2">
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider ${
-                    item.type === 'article' ? 'bg-blue-50 text-[#1351B4] border border-blue-100' : 'bg-yellow-50 text-yellow-800 border border-yellow-100'
-                  }`}>
-                    {item.type === 'article' ? 'Artigo' : 'Livro'}
-                  </span>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase bg-gray-100 text-gray-400 border border-gray-200">
-                    {item.source}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-green-700 font-bold text-xs bg-green-50 px-2 py-1 rounded-md border border-green-100">
-                  <Sparkles className="w-3 h-3" /> {item.relevance}% Relevância
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold text-[#003157] mb-2">{item.title}</h3>
-              <p className="text-sm text-gray-500 mb-4">{item.authors} ({item.year})</p>
-              <p className="text-gray-600 text-sm line-clamp-2 mb-6 leading-relaxed italic">
-                {item.abstract}
-              </p>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-50 flex-wrap">
-                <button
-                  onClick={() => viewDetails(item)}
-                  className="bg-[#1351B4] hover:bg-[#003157] text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
-                >
-                  Ver Detalhes <ChevronRight className="w-4 h-4" />
-                </button>
-                {item.url && (
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border border-[#1351B4] text-[#1351B4] hover:bg-blue-50 px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
-                  >
-                    Acessar <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
-                <button
-                  onClick={() => toggleFavorite(item)}
-                  className={`p-2.5 rounded-xl border transition-all ${
-                    isFavorite(item.id) ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' : 'bg-white border-gray-200 text-gray-400 hover:text-[#1351B4]'
-                  }`}
-                >
-                  <Star className="w-5 h-5" fill={isFavorite(item.id) ? 'currentColor' : 'none'} />
-                </button>
-              </div>
-            </div>
+            <RecommendationCard 
+              key={item.id} 
+              item={item} 
+              viewDetails={viewDetails} 
+              toggleFavorite={toggleFavorite} 
+              isFavorite={isFavorite(item.id)} 
+            />
           ))}
+          {displayResults.length === 0 && (
+            <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center">
+              <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 font-medium">Nenhum resultado encontrado para sua busca.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

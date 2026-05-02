@@ -3,7 +3,11 @@ import { Search, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
 import { fetchCatalogBooks } from '../services/api';
 import { CatalogCard } from '../components/CatalogCard'; // Certifique-se de que o caminho está correto
 
-export const Catalog = ({ viewDetails }: { viewDetails: (item: any) => void }) => {
+export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: { 
+  viewDetails: (item: any) => void;
+  toggleFavorite: (item: any) => void;
+  isFavorite: (id: string) => boolean;
+}) => {
   const [catalogSearch, setCatalogSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [items, setItems] = useState<any[]>([]);
@@ -104,6 +108,8 @@ export const Catalog = ({ viewDetails }: { viewDetails: (item: any) => void }) =
                 key={item.id} 
                 book={item} 
                 viewDetails={viewDetails} 
+                toggleFavorite={toggleFavorite}
+                isFavorite={isFavorite(item.id)}
               />
             ))
           ) : (

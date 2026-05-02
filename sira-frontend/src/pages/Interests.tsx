@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import {
   Cpu, Landmark, Scale, LineChart, GraduationCap,
   Activity, TrendingUp, Users, Globe, ChevronRight, CheckCircle2
 } from 'lucide-react';
 import { updateProfile } from '../services/api';
+=======
+import { 
+  Cpu, Landmark, Scale, LineChart, GraduationCap, 
+  Activity, TrendingUp, Users, Globe, ChevronRight, CheckCircle2 
+} from 'lucide-react';
+>>>>>>> develop
 
 const AVAILABLE_THEMES = [
   { id: 'ia', label: 'Inteligência Artificial', icon: Cpu },
@@ -27,11 +34,16 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
   const [selected, setSelected] = useState<string[]>(profileData?.interests || []);
 
   const toggleTheme = (id: string) => {
+<<<<<<< HEAD
     setSelected(prev =>
+=======
+    setSelected(prev => 
+>>>>>>> develop
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
 
+<<<<<<< HEAD
   const handleFinish = async () => {
     setProfileData({ ...profileData, interests: selected });
     try {
@@ -40,16 +52,29 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
       // salva em estado mesmo se a API falhar
     }
     setCurrentScreen('home');
+=======
+  const handleFinish = () => {
+    setProfileData({ ...profileData, interests: selected });
+    setCurrentScreen('home'); 
+>>>>>>> develop
   };
 
   return (
     <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 overflow-hidden">
+<<<<<<< HEAD
+=======
+      {/* Reduzi max-w para 2xl e padding interno para p-6 */}
+>>>>>>> develop
       <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 animate-fadeIn">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-[#003157]">Quais temas te interessam?</h2>
           <p className="text-gray-500 mt-1 text-xs">Selecione as áreas para personalizar suas recomendações.</p>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Reduzi a altura (h-24) e o espaçamento dos ícones */}
+>>>>>>> develop
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
           {AVAILABLE_THEMES.map((theme) => {
             const Icon = theme.icon;
@@ -89,4 +114,8 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> develop

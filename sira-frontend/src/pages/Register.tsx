@@ -57,16 +57,16 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
                   Cadastro realizado com sucesso! Redirecionando...
                 </div>
               )}
-
+              
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Nome Completo</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
+                  <input 
+                    type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome"
+                    placeholder="Seu nome" 
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1351B4] transition-all"
                     required
                   />
@@ -77,11 +77,11 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">E-mail</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
+                  <input 
+                    type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
+                    placeholder="seu@email.com" 
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1351B4] transition-all"
                     required
                   />
@@ -92,19 +92,19 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Senha</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="password"
+                  <input 
+                    type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Crie uma senha"
+                    placeholder="Crie uma senha" 
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1351B4] transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
+              <button 
+                type="submit" 
                 disabled={isLoading || success}
                 className="w-full bg-[#1351B4] hover:bg-[#003157] disabled:bg-gray-400 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 mt-2"
               >

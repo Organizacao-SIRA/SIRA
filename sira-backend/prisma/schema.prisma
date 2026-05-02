@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -47,17 +48,22 @@ model SearchHistory {
 }
 
 model Material {
-  id          String     @id
-  type        String     // 'article', 'book', etc.
-  title       String
-  authors     String
-  year        Int
-  source      String
-  relevance   Int        @default(0)
-  abstract    String?
-  url         String?
-  favorites   Favorite[]
-  createdAt   DateTime   @default(now())
+  id              String     @id
+  type            String     // 'article', 'book', etc.
+  title           String
+  authors         String
+  year            String
+  source          String
+  relevance       Int        @default(0)
+  abstract        String?
+  image           String?
+  url             String?
+  thematicArea    String?
+  doi             String?
+  isbn            String?
+  aiJustification String?
+  favorites       Favorite[]
+  createdAt       DateTime   @default(now())
 }
 
 model Favorite {
