@@ -18,11 +18,8 @@ dist-ssr
 .env.local
 .env.*.local
 
-# Requirements Documents (as requested)
-BACKEND_REQUIREMENTS.md
-FRONTEND_REQUIREMENTS.md
-
 # Local docs & context
+docs/
 contexto/
 CHANGELOG.md
 RESUMO_ALTERACOES.md
@@ -31,6 +28,7 @@ RESUMO_ALTERACOES.md
 .vscode/*
 !.vscode/extensions.json
 .idea
+.agents
 .codex
 .DS_Store
 *.suo
