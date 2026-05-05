@@ -18,7 +18,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, user, viewDeta
   <div className="flex-1 flex flex-col bg-gray-50 min-h-[calc(100vh-68px)] animate-fadeIn">
     <div className="max-w-4xl w-full mx-auto px-4 pt-10 pb-6 text-center space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#003157] tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark tracking-tight">
           O que você está investigando hoje?
         </h1>
         <p className="text-base text-gray-600 max-w-xl mx-auto leading-relaxed">
@@ -27,7 +27,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, user, viewDeta
       </div>
 
       <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-        <div className="relative flex items-center shadow-lg rounded-full bg-white border border-gray-200 focus-within:border-[#1351B4] transition-all">
+        <div className="relative flex items-center shadow-lg rounded-full bg-white border border-gray-200 focus-within:border-primary transition-all">
           <Search className="absolute left-5 text-gray-400 w-5 h-5" />
           <input
             type="text"
@@ -39,7 +39,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, user, viewDeta
           />
           <button
             type="submit"
-            className="absolute right-1.5 bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm"
+            className="absolute right-1.5 bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm"
           >
             Pesquisar
           </button>

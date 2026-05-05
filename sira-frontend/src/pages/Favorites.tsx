@@ -23,9 +23,9 @@ export const Favorites = ({ favorites, toggleFavorite, viewDetails, setCurrentSc
     <div className="w-full mx-auto px-4 py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-2 bg-blue-50 rounded-lg">
-          <Bookmark className="w-6 h-6 text-[#1351B4]" />
+          <Bookmark className="w-6 h-6 text-primary" />
         </div>
-        <h1 className="text-3xl font-bold text-[#003157]">Minha Biblioteca</h1>
+        <h1 className="text-3xl font-bold text-primary-dark">Minha Biblioteca</h1>
       </div>
 
       {/* Tabs */}
@@ -35,7 +35,7 @@ export const Favorites = ({ favorites, toggleFavorite, viewDetails, setCurrentSc
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-4 px-1 border-b-2 font-bold text-sm transition-all whitespace-nowrap ${
-              activeTab === tab ? 'border-[#1351B4] text-[#1351B4]' : 'border-transparent text-gray-400 hover:text-gray-600'
+              activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
           >
             {tab === 'all' ? 'Todos os Materiais' : tab === 'book' ? 'Livros' : 'Artigos Científicos'}
@@ -47,11 +47,11 @@ export const Favorites = ({ favorites, toggleFavorite, viewDetails, setCurrentSc
       {filteredFavorites.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-100">
           <Bookmark className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-[#003157]">Nenhum item salvo</h3>
+          <h3 className="text-xl font-bold text-primary-dark">Nenhum item salvo</h3>
           <p className="text-gray-500 mb-8 max-w-xs mx-auto">Salve livros e artigos para acessá-los rapidamente aqui.</p>
           <button 
             onClick={() => setCurrentScreen('home')}
-            className="bg-[#1351B4] text-white px-8 py-3 rounded-full font-bold flex items-center mx-auto hover:bg-[#003157] transition-all shadow-md"
+            className="bg-primary text-white px-8 py-3 rounded-full font-bold flex items-center mx-auto hover:bg-primary-dark transition-all shadow-md"
           >
             <Search className="w-4 h-4 mr-2" /> Explorar Conteúdos
           </button>

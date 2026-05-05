@@ -176,8 +176,8 @@ export default function App() {
         <main className="flex-1 overflow-y-auto w-full relative">
           {isLoading && (
             <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4]"></div>
-              <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Buscando...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Buscando...</p>
             </div>
           )}
 

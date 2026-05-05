@@ -46,7 +46,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
     <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 overflow-hidden">
       <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 animate-fadeIn">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-[#003157]">Quais temas te interessam?</h2>
+          <h2 className="text-2xl font-bold text-primary-dark">Quais temas te interessam?</h2>
           <p className="text-gray-500 mt-1 text-xs">Selecione as áreas para personalizar suas recomendações.</p>
         </div>
 
@@ -59,14 +59,14 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
                 key={theme.id}
                 onClick={() => toggleTheme(theme.id)}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer h-24 relative ${
-                  isSelected ? 'border-[#1351B4] bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
+                  isSelected ? 'border-primary bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
                 }`}
               >
                 {isSelected && (
-                  <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[#1351B4]" />
+                  <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />
                 )}
-                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[#1351B4]' : 'text-gray-300'}`} />
-                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-[#003157]' : 'text-gray-600'}`}>
+                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-gray-300'}`} />
+                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-primary-dark' : 'text-gray-600'}`}>
                   {theme.label}
                 </span>
               </button>
@@ -80,7 +80,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           </span>
           <button
             onClick={handleFinish}
-            className="bg-[#1351B4] hover:bg-[#003157] text-white px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all"
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all"
           >
             Concluir e Acessar
             <ChevronRight className="w-4 h-4" />

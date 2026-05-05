@@ -27,15 +27,15 @@ export const ProfileForm = ({ isEditing, profileData, editData, setEditData }: P
     <div className="space-y-6 pb-10">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 bg-gray-50/50">
-          <User className="w-5 h-5 text-[#1351B4]" />
-          <h3 className="text-lg font-bold text-[#003157]">Dados Pessoais</h3>
+          <User className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-bold text-primary-dark">Dados Pessoais</h3>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           {[{ label: 'Nome', field: 'name' }, { label: 'E-mail', field: 'email' }, { label: 'Instituição', field: 'institution' }, { label: 'Curso', field: 'course' }].map((item) => (
             <div key={item.field}>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{item.label}</label>
               {isEditing ? (
-                <input type="text" value={data[item.field] || ''} onChange={(e) => handleChange(item.field, e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-[#1351B4]" />
+                <input type="text" value={data[item.field] || ''} onChange={(e) => handleChange(item.field, e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-primary" />
               ) : (
                 <p className="text-gray-900 font-semibold">{data[item.field]}</p>
               )}
@@ -46,8 +46,8 @@ export const ProfileForm = ({ isEditing, profileData, editData, setEditData }: P
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 bg-gray-50/50">
-          <GraduationCap className="w-5 h-5 text-[#1351B4]" />
-          <h3 className="text-lg font-bold text-[#003157]">Perfil Acadêmico</h3>
+          <GraduationCap className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-bold text-primary-dark">Perfil Acadêmico</h3>
         </div>
         <div className="p-6 space-y-4 text-sm">
           <div>
@@ -63,15 +63,15 @@ export const ProfileForm = ({ isEditing, profileData, editData, setEditData }: P
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 bg-gray-50/50">
-          <Settings className="w-5 h-5 text-[#1351B4]" />
-          <h3 className="text-lg font-bold text-[#003157]">Preferências</h3>
+          <Settings className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-bold text-primary-dark">Preferências</h3>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
           <div className="space-y-3">
             <span className="text-gray-500 font-bold block mb-2">Idiomas:</span>
             {['Português', 'Inglês', 'Espanhol'].map(lang => (
               <label key={lang} className="flex items-center gap-2">
-                <input type="checkbox" checked={data.languages?.includes(lang) || false} disabled={!isEditing} onChange={(e) => handleCheckboxArray('languages', lang, e.target.checked)} className="rounded text-[#1351B4]" />
+                <input type="checkbox" checked={data.languages?.includes(lang) || false} disabled={!isEditing} onChange={(e) => handleCheckboxArray('languages', lang, e.target.checked)} className="rounded text-primary" />
                 <span className="text-gray-700">{lang}</span>
               </label>
             ))}

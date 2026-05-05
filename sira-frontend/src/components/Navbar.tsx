@@ -15,8 +15,8 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
   const isAuthPage = currentScreen === 'login' || currentScreen === 'register';
 
   return (
-    <header className="bg-[#1351B4] text-white shadow-md sticky top-0 z-50 w-full transition-all">
-      <div className="h-1 w-full bg-gradient-to-r from-[#00A859] to-[#FFCD07]"></div>
+    <header className="bg-primary text-white shadow-md sticky top-0 z-50 w-full transition-all">
+      <div className="h-1 w-full bg-gradient-to-r from-success to-accent"></div>
 
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -25,7 +25,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
             {!isAuthPage && (
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="mr-4 cursor-pointer p-2 hover:bg-[#003157] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                className="mr-4 cursor-pointer p-2 hover:bg-primary-dark rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white"
                 title="Menu Principal"
               >
                 <Menu className="w-6 h-6" />
@@ -34,7 +34,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
 
             <div className="flex items-center cursor-pointer group" onClick={() => setCurrentScreen('home')}>
               <span className="font-bold text-2xl tracking-tight">
-                SIRA<span className="text-[#FFCD07]">+</span>
+                SIRA<span className="text-accent">+</span>
               </span>
               <span className="ml-3 border-l border-blue-400 pl-3 text-sm hidden md:block font-light text-blue-100 leading-tight group-hover:text-white transition-colors">
                 Sistema Inteligente de<br />Recomendação Acadêmica
@@ -46,7 +46,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
               <>
                 <button
                   onClick={() => setCurrentScreen('profile')}
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-[#003157] hover:bg-[#002244] text-white border border-blue-800 transition-all"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary-dark hover:bg-primary-darker text-white border border-blue-800 transition-all"
                 >
                   <User className="w-4 h-4 text-gray-300" />
                   <span className="max-w-[120px] truncate">{user.name || user.email}</span>
@@ -65,11 +65,11 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
                 onClick={() => setCurrentScreen('login')}
                 className={`flex items-center cursor-pointer px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm border ${
                   currentScreen === 'login'
-                    ? 'bg-white text-[#1351B4] border-white'
-                    : 'bg-[#003157] hover:bg-[#002244] text-white border-blue-800'
+                    ? 'bg-white text-primary border-white'
+                    : 'bg-primary-dark hover:bg-primary-darker text-white border-blue-800'
                 }`}
               >
-                <User className={`w-4 h-4 mr-2 ${currentScreen === 'login' ? 'text-[#1351B4]' : 'text-gray-300'}`} />
+                <User className={`w-4 h-4 mr-2 ${currentScreen === 'login' ? 'text-primary' : 'text-gray-300'}`} />
                 {currentScreen === 'login' ? 'Acessando...' : 'Entrar'}
               </button>
             )}
