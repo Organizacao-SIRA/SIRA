@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
+import { User, Lock, Mail, UserPlus } from 'lucide-react';
 import { registerUser } from '../services/api';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 
 interface RegisterProps {
   setCurrentScreen: (screen: string) => void;
@@ -58,59 +60,44 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
                 </div>
               )}
               
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Nome Completo</label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    type="text" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome" 
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    required
-                  />
-                </div>
-              </div>
+              <Input
+                label="Nome Completo"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Seu nome"
+                icon={<User className="w-4 h-4" />}
+                required
+              />
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">E-mail</label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com" 
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    required
-                  />
-                </div>
-              </div>
+              <Input
+                label="E-mail"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                icon={<Mail className="w-4 h-4" />}
+                required
+              />
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Senha</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Crie uma senha" 
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    required
-                  />
-                </div>
-              </div>
+              <Input
+                label="Senha"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Crie uma senha"
+                icon={<Lock className="w-4 h-4" />}
+                required
+              />
 
-              <button 
-                type="submit" 
-                disabled={isLoading || success}
-                className="w-full bg-primary hover:bg-primary-dark disabled:bg-gray-400 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 mt-2"
+              <Button
+                type="submit"
+                isLoading={isLoading}
+                disabled={success}
+                className="w-full mt-2"
               >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Finalizar cadastro'}
-                {!isLoading && <UserPlus className="w-4 h-4" />}
-              </button>
+                Finalizar cadastro {!isLoading && <UserPlus className="w-4 h-4 ml-2" />}
+              </Button>
             </form>
           </div>
 

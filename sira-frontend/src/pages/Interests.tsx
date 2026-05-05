@@ -4,6 +4,7 @@ import {
   Activity, TrendingUp, Users, Globe, ChevronRight, CheckCircle2
 } from 'lucide-react';
 import { updateProfile } from '../services/api';
+import { Button } from '../components/ui/Button';
 
 const AVAILABLE_THEMES = [
   { id: 'ia', label: 'Inteligência Artificial', icon: Cpu },
@@ -78,13 +79,13 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             {selected.length} Selecionados
           </span>
-          <button
+          <Button
             onClick={handleFinish}
-            className="bg-primary hover:bg-primary-dark text-white px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all"
+            className="flex items-center gap-2"
           >
             Concluir e Acessar
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

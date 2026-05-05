@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { GraduationCap, Settings, Sparkles, ChevronRight } from 'lucide-react';
 import { updateProfile } from '../services/api';
+import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
+import { Checkbox } from '../components/ui/Checkbox';
+import { Button } from '../components/ui/Button';
 
 interface OnboardingProps {
   setCurrentScreen: (screen: string) => void;
@@ -57,125 +61,106 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <section>
-            <h3 className="text-sm font-bold text-primary-dark mb-3 flex items-center gap-2 border-b pb-1">
+            <h3 className="text-sm font-bold text-primary-dark mb-4 flex items-center gap-2 border-b pb-2">
               <GraduationCap className="w-4 h-4" /> Perfil Acadêmico
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-              <div className="space-y-0.5">
-                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Curso</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Ciência da Computação"
-                  value={formData.course}
-                  onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary transition-all"
-                  required
-                />
-              </div>
-              <div className="space-y-0.5">
-                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nível de Escolaridade</label>
-                <select
-                  value={formData.educationLevel}
-                  onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary appearance-none cursor-pointer"
-                >
-                  <option>Graduação</option>
-                  <option>Especialização</option>
-                  <option>Mestrado</option>
-                  <option>Doutorado</option>
-                </select>
-              </div>
-              <div className="space-y-0.5">
-                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Área Principal</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Inteligência Artificial"
-                  value={formData.mainArea}
-                  onChange={(e) => setFormData({ ...formData, mainArea: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary"
-                  required
-                />
-              </div>
-              <div className="space-y-0.5">
-                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Subáreas</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Machine Learning, NLP"
-                  value={formData.subAreas}
-                  onChange={(e) => setFormData({ ...formData, subAreas: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary"
-                  required
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Curso"
+                type="text"
+                placeholder="Ex: Ciência da Computação"
+                value={formData.course}
+                onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                required
+              />
+              <Select
+                label="Nível de Escolaridade"
+                value={formData.educationLevel}
+                onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
+                options={[
+                  { value: 'Graduação', label: 'Graduação' },
+                  { value: 'Especialização', label: 'Especialização' },
+                  { value: 'Mestrado', label: 'Mestrado' },
+                  { value: 'Doutorado', label: 'Doutorado' }
+                ]}
+              />
+              <Input
+                label="Área Principal"
+                type="text"
+                placeholder="Ex: Inteligência Artificial"
+                value={formData.mainArea}
+                onChange={(e) => setFormData({ ...formData, mainArea: e.target.value })}
+                required
+              />
+              <Input
+                label="Subáreas"
+                type="text"
+                placeholder="Ex: Machine Learning, NLP"
+                value={formData.subAreas}
+                onChange={(e) => setFormData({ ...formData, subAreas: e.target.value })}
+                required
+              />
             </div>
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-primary-dark mb-2 flex items-center gap-2 border-b pb-1">
+            <h3 className="text-sm font-bold text-primary-dark mb-4 flex items-center gap-2 border-b pb-2">
               <Settings className="w-4 h-4" /> Preferências
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Línguas</span>
-                {['Português', 'Inglês', 'Espanhol'].map((lang) => (
-                  <label key={lang} className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-5 rounded-xl border border-gray-100">
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-gray-400 uppercase block">Línguas</span>
+                <div className="space-y-2">
+                  {['Português', 'Inglês', 'Espanhol'].map((lang) => (
+                    <Checkbox
+                      key={lang}
+                      label={lang}
                       checked={formData.languages.includes(lang)}
                       onChange={() => handleCheckboxChange('languages', lang, true)}
-                      className="rounded text-primary w-3.5 h-3.5"
                     />
-                    <span className="text-[11px] text-gray-600 group-hover:text-gray-900">{lang}</span>
-                  </label>
-                ))}
+                  ))}
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Nível</span>
-                {['Introdutório', 'Intermediário', 'Avançado'].map((level) => (
-                  <label key={level} className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-gray-400 uppercase block">Nível</span>
+                <div className="space-y-2">
+                  {['Introdutório', 'Intermediário', 'Avançado'].map((level) => (
+                    <Checkbox
+                      key={level}
+                      label={level}
                       checked={formData.materialLevels.includes(level)}
                       onChange={() => handleCheckboxChange('materialLevels', level, true)}
-                      className="rounded text-primary w-3.5 h-3.5"
                     />
-                    <span className="text-[11px] text-gray-600 group-hover:text-gray-900">{level}</span>
-                  </label>
-                ))}
+                  ))}
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Formato</span>
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-gray-400 uppercase block">Formato</span>
+                <div className="space-y-2">
+                  <Checkbox
+                    label="Livros"
                     checked={formData.wantsBooks}
                     onChange={(e) => handleCheckboxChange('wantsBooks', e.target.checked)}
-                    className="rounded text-primary w-3.5 h-3.5"
                   />
-                  <span className="text-[11px] text-gray-600">Livros</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
+                  <Checkbox
+                    label="Artigos"
                     checked={formData.wantsArticles}
                     onChange={(e) => handleCheckboxChange('wantsArticles', e.target.checked)}
-                    className="rounded text-primary w-3.5 h-3.5"
                   />
-                  <span className="text-[11px] text-gray-600">Artigos</span>
-                </label>
+                </div>
               </div>
             </div>
           </section>
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-primary hover:bg-primary-dark text-white py-2.5 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer group mt-2"
+            className="w-full mt-4 flex items-center justify-center gap-2 group"
           >
             Avançar para Temas
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </Button>
         </form>
       </div>
     </div>
