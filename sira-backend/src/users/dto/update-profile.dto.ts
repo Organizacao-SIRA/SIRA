@@ -40,4 +40,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsArray()
   interests?: string[];
+
+  @IsOptional()
+  @IsString()
+  academicGoal?: string;
 }

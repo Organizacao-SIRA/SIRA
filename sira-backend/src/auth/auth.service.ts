@@ -68,6 +68,9 @@ export class AuthService {
       wantsBooks: user.wantsBooks,
       wantsArticles: user.wantsArticles,
       interests: user.interests,
+      academicGoal: user.academicGoal,
+      onboardingCompletedAt: user.onboardingCompletedAt,
+      hasCompletedOnboarding: Boolean(user.onboardingCompletedAt),
     };
   }
 }
