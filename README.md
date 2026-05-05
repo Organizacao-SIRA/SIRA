@@ -77,26 +77,50 @@ Se quiser acompanhar os logs separadamente, abra 2 terminais:
 ### Banco de Dados (Prisma via Docker)
 Como o projeto é orquestrado via Docker, todos os comandos do banco devem ser executados através do container do backend para garantir paridade de ambiente.
 
-- **Testar alterações rápidas no Schema (Sem gerar histórico):**
-  Ideal para iterar localmente enquanto desenvolve o banco.
+- **Sincronizar Schema com Banco (Sem histórico):**
   ```bash
-  docker exec -it sira-backend npx prisma db push
+  docker exec sira-backend npx prisma db push
   ```
 
-- **Criar Histórico de Migração (Modo DevOps / Produção):**
-  Quando a alteração estiver consolidada e pronta para ser versionada/compartilhada.
+- **Gerar Tipos do Prisma Client (Sync TypeScript):**
+  Necessário sempre que o Schema mudar para evitar erros de compilação.
   ```bash
-  docker exec -it sira-backend npx prisma migrate dev --name "descricao_da_mudanca"
+  docker exec sira-backend npx prisma generate
   ```
 
-- **Resetar Banco de Dados Limpo (Apagar tudo e recriar):**
-  Resolve problemas de sincronização forçando a recriação das tabelas a partir do schema atual.
+- **Criar Histórico de Migração (Modo DevOps):**
   ```bash
-  docker exec -it sira-backend npx prisma db push --force-reset
+  docker exec sira-backend npx prisma migrate dev --name "descricao_da_mudanca"
   ```
+
+### Solução de Problemas (Troubleshooting)
+
+**1. Erro de compilação TS2353 (Propriedade inexistente no Prisma):**
+Se você alterou o schema e o compilador do NestJS continua reclamando que o campo não existe, o Docker pode estar usando uma versão cacheada do `node_modules`. Execute:
+```bash
+# 1. Atualiza o banco e gera novos tipos localmente
+docker exec sira-backend npx prisma db push
+docker exec sira-backend npx prisma generate
+
+# 2. Força o rebuild do backend sem usar cache do Docker
+docker compose build --no-cache backend
+docker compose up -d backend
+```
+
+**2. Containers não sincronizam (Hot Reload parado):**
+Se o `docker compose up --watch` parar de refletir mudanças:
+```bash
+# Limpa estados residuais e reinicia
+docker compose down
+docker compose up --watch
+```
+
+**3. Reset total do ambiente:**
+```bash
+docker compose down -v && docker compose up --build --watch
+```
 
 ### Orquestração (Docker)
 - **Ver logs em tempo real:** `docker compose logs -f`
 - **Ver status dos containers:** `docker compose ps`
-- **Recriar imagens após mudar `.env` ou `Dockerfile`:** `docker compose up -d --build`
-- **Derrubar tudo e apagar volumes:** `docker compose down -v`
+- **Verificar se banco está Healthy:** `docker inspect -f '{{.State.Health.Status}}' sira-postgres`

@@ -171,12 +171,16 @@ export class RecommendationsService {
 
   private buildPreferenceQueries(user: RecommendationUser) {
     const keywordsFromInterests = getPreferenceTopicKeywords(user.interests || []);
+    const mainAreaLabels = getPreferenceTopicLabels([user.mainArea].filter(Boolean) as string[]);
+    const mainAreaKeywords = getPreferenceTopicKeywords([user.mainArea].filter(Boolean) as string[]);
+    const preferredLevels = (user.materialLevels || []).join(' ');
 
     return [
-      user.mainArea,
-      user.subAreas,
+      ...mainAreaLabels.map(label => `${label} ${preferredLevels}`.trim()),
+      ...mainAreaKeywords.slice(0, 1),
+      `${user.subAreas || ''} ${preferredLevels}`.trim(),
       ...keywordsFromInterests.slice(0, 2),
-      `${user.academicGoal || ''} ${user.course || ''}`.trim(),
+      `${user.academicGoal || ''} ${user.course || ''} ${preferredLevels}`.trim(),
     ].filter((query): query is string => Boolean(query && query.trim().length >= 2));
   }
 
@@ -226,7 +230,7 @@ export class RecommendationsService {
         messages: [
           {
             role: 'user',
-            content: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nPREFERÊNCIAS DECLARADAS:\n${preferencesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100 baseado em quão bem o material se alinha com o perfil do usuário\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0}]}`,
+            content: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nPREFERÊNCIAS DECLARADAS:\n${preferencesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
           },
         ],
       });
@@ -235,16 +239,25 @@ export class RecommendationsService {
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
       const parsed = JSON.parse(text);
 
-      const metaMap = new Map<string, { explanation: string; relevance: number }>(
-        parsed.recommendations.map((r: { id: string; explanation: string; relevance: number }) => [
+      const metaMap = new Map<string, { explanation: string; relevance: number; level: string }>(
+        parsed.recommendations.map((r: { id: string; explanation: string; relevance: number; level: string }) => [
           r.id,
-          { explanation: r.explanation, relevance: Math.min(100, Math.max(0, Math.round(r.relevance))) },
+          {
+            explanation: r.explanation,
+            relevance: Math.min(100, Math.max(0, Math.round(r.relevance))),
+            level: r.level,
+          },
         ]),
       );
 
       return candidates
         .filter(c => metaMap.has(c.id))
-        .map(c => ({ ...c, aiExplanation: metaMap.get(c.id)!.explanation, relevance: metaMap.get(c.id)!.relevance }))
+        .map(c => ({
+          ...c,
+          aiExplanation: metaMap.get(c.id)!.explanation,
+          relevance: metaMap.get(c.id)!.relevance,
+          level: metaMap.get(c.id)!.level,
+        }))
         .sort((a, b) => b.relevance - a.relevance);
     } catch (error) {
       this.logger.error(`Erro ao chamar Claude: ${error.message}`);

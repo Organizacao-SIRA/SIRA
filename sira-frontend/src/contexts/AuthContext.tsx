@@ -4,6 +4,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 interface AuthContextData {
@@ -11,24 +12,20 @@ interface AuthContextData {
   token: string | null;
   login: (userData: User, token: string) => void;
   logout: () => void;
+  updateUser: (userData: Partial<User>) => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('@sira:token');
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('@sira:user');
-
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('@sira:token');
+  });
 
   const login = (userData: User, jwtToken: string) => {
     localStorage.setItem('@sira:token', jwtToken);
@@ -44,8 +41,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...userData };
+      localStorage.setItem('@sira:user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   );

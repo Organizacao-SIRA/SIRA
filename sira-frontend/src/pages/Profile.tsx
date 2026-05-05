@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { updateProfile, getPreferenceOptions } from '../services/api';
 import type { PreferenceTopic, PreferenceOptions } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 const TOPIC_ICONS: Record<string, React.ElementType> = {
   ia: Cpu,
@@ -25,6 +26,7 @@ interface ProfileProps {
 }
 
 export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
+  const { updateUser } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editProfileData, setEditProfileData] = useState(profileData || {});
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
@@ -70,6 +72,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
     try {
       const saved = await updateProfile(editProfileData);
       setProfileData({ ...editProfileData, ...saved });
+      updateUser({ name: saved.name });
     } catch {
       setProfileData(editProfileData);
     }
@@ -201,10 +204,22 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">Área</span>
-                {isEditingProfile ?
-                  <input type="text" value={editProfileData.mainArea} onChange={(e) => handleChange('mainArea', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> :
-                  <span className="text-gray-900 font-bold">{profileData.mainArea}</span>
-                }
+                {isEditingProfile ? (
+                  <select
+                    value={editProfileData.mainArea}
+                    onChange={(e) => handleChange('mainArea', e.target.value)}
+                    className="w-full border border-gray-200 rounded px-2 py-1 bg-white outline-none"
+                  >
+                    <option value="">Selecione a área principal</option>
+                    {topicsList.map((topic) => (
+                      <option key={topic.id} value={topic.id}>{topic.label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-gray-900 font-bold">
+                    {topicsList.find(t => t.id === profileData.mainArea)?.label || profileData.mainArea}
+                  </span>
+                )}
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm">
                 <span className="text-gray-500">Objetivo</span>

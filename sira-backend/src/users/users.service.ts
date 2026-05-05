@@ -3,15 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import {
-  ACADEMIC_GOAL_SET,
   ACADEMIC_GOALS,
-  EDUCATION_LEVEL_SET,
   EDUCATION_LEVELS,
-  LANGUAGE_SET,
   LANGUAGES,
-  MATERIAL_LEVEL_SET,
   MATERIAL_LEVELS,
-  PREFERENCE_TOPIC_IDS,
   PREFERENCE_TOPICS,
 } from './preferences-options';
 
@@ -36,7 +31,9 @@ export class UsersService {
   }
 
   async completeOnboarding(userId: string, dto: CompleteOnboardingDto) {
-    this.validateCompleteOnboarding(dto);
+    if (!dto.wantsBooks && !dto.wantsArticles) {
+      throw new BadRequestException('Selecione pelo menos um formato de material');
+    }
 
     const exists = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!exists) throw new NotFoundException('Usuário não encontrado');
@@ -67,7 +64,11 @@ export class UsersService {
     const current = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!current) throw new NotFoundException('Usuário não encontrado');
 
-    this.validateProfileUpdate(dto, current);
+    const wantsBooks = dto.wantsBooks ?? current.wantsBooks;
+    const wantsArticles = dto.wantsArticles ?? current.wantsArticles;
+    if (!wantsBooks && !wantsArticles) {
+      throw new BadRequestException('Selecione pelo menos um formato de material');
+    }
 
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -79,62 +80,6 @@ export class UsersService {
     }
 
     return this.safeUser(user);
-  }
-
-  private validateCompleteOnboarding(dto: CompleteOnboardingDto) {
-    if (!EDUCATION_LEVEL_SET.has(dto.educationLevel)) {
-      throw new BadRequestException('Nível de escolaridade inválido');
-    }
-
-    this.validateStringList(dto.languages, LANGUAGE_SET, 'Idioma inválido');
-    this.validateStringList(dto.materialLevels, MATERIAL_LEVEL_SET, 'Nível de material inválido');
-
-    if (!dto.wantsBooks && !dto.wantsArticles) {
-      throw new BadRequestException('Selecione pelo menos um formato de material');
-    }
-
-    if (dto.interests.length < 3) {
-      throw new BadRequestException('Selecione pelo menos 3 tópicos de interesse');
-    }
-
-    this.validateStringList(dto.interests, PREFERENCE_TOPIC_IDS, 'Tópico de interesse inválido');
-
-    if (dto.academicGoal && !ACADEMIC_GOAL_SET.has(dto.academicGoal)) {
-      throw new BadRequestException('Objetivo acadêmico inválido');
-    }
-  }
-
-  private validateProfileUpdate(dto: UpdateProfileDto, current: any) {
-    if (dto.educationLevel && !EDUCATION_LEVEL_SET.has(dto.educationLevel)) {
-      throw new BadRequestException('Nível de escolaridade inválido');
-    }
-
-    if (dto.languages) {
-      this.validateStringList(dto.languages, LANGUAGE_SET, 'Idioma inválido');
-    }
-
-    if (dto.materialLevels) {
-      this.validateStringList(dto.materialLevels, MATERIAL_LEVEL_SET, 'Nível de material inválido');
-    }
-
-    if (dto.interests) {
-      this.validateStringList(dto.interests, PREFERENCE_TOPIC_IDS, 'Tópico de interesse inválido');
-    }
-
-    if (dto.academicGoal && !ACADEMIC_GOAL_SET.has(dto.academicGoal)) {
-      throw new BadRequestException('Objetivo acadêmico inválido');
-    }
-
-    const wantsBooks = dto.wantsBooks ?? current.wantsBooks;
-    const wantsArticles = dto.wantsArticles ?? current.wantsArticles;
-    if (!wantsBooks && !wantsArticles) {
-      throw new BadRequestException('Selecione pelo menos um formato de material');
-    }
-  }
-
-  private validateStringList(values: string[], allowed: Set<string>, message: string) {
-    const invalid = values.find(value => !allowed.has(value));
-    if (invalid) throw new BadRequestException(message);
   }
 
   private hasRecommendationRelevantChanges(dto: UpdateProfileDto) {

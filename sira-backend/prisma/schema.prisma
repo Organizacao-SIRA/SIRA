@@ -62,6 +62,7 @@ model Material {
   thematicArea    String?
   doi             String?
   isbn            String?
+  level           String? // 'Introdutório', 'Intermediário', 'Avançado'
   aiJustification String?
   favorites       Favorite[]
   createdAt       DateTime   @default(now())

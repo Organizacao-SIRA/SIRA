@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { completeOnboarding, getPreferenceOptions } from '../services/api';
 import type { PreferenceTopic } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 const TOPIC_ICONS: Record<string, React.ElementType> = {
   ia: Cpu,
@@ -26,7 +27,14 @@ interface InterestsProps {
 }
 
 export const Interests = ({ setCurrentScreen, profileData, setProfileData }: InterestsProps) => {
-  const [selected, setSelected] = useState<string[]>(profileData?.interests || []);
+  const { updateUser } = useAuth();
+  const [selected, setSelected] = useState<string[]>(() => {
+    const initial = profileData?.interests || [];
+    if (profileData?.mainArea && !initial.includes(profileData.mainArea)) {
+      return [...initial, profileData.mainArea];
+    }
+    return initial;
+  });
   const [topics, setTopics] = useState<PreferenceTopic[]>([]);
   const [isLoadingTopics, setIsLoadingTopics] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -38,22 +46,12 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
   const loadTopics = async () => {
     setIsLoadingTopics(true);
+    setError('');
     try {
       const options = await getPreferenceOptions();
       setTopics(options.topics);
-    } catch {
-      // Fallback — usar tópicos básicos se API falhar
-      setTopics([
-        { id: 'ia', label: 'Inteligência Artificial' },
-        { id: 'gp', label: 'Gestão Pública' },
-        { id: 'dir', label: 'Direito' },
-        { id: 'cd', label: 'Ciência de Dados' },
-        { id: 'edu', label: 'Educação' },
-        { id: 'sau', label: 'Saúde' },
-        { id: 'eco', label: 'Economia' },
-        { id: 'soc', label: 'Sociologia' },
-        { id: 'amb', label: 'Meio Ambiente' },
-      ]);
+    } catch (err: any) {
+      setError(err.message || 'Não foi possível carregar os temas. Por favor, recarregue a página.');
     } finally {
       setIsLoadingTopics(false);
     }
@@ -86,6 +84,10 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
     try {
       const updatedUser = await completeOnboarding(payload);
+      
+      // Sincroniza o estado global de autenticação
+      updateUser({ hasCompletedOnboarding: true });
+
       setProfileData({
         ...profileData,
         ...updatedUser,
@@ -109,6 +111,24 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
           <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && topics.length === 0) {
+    return (
+      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-[#003157] mb-2">Erro ao carregar temas</h3>
+          <p className="text-gray-500 text-sm mb-4">{error}</p>
+          <button
+            onClick={loadTopics}
+            className="bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer"
+          >
+            Tentar novamente
+          </button>
         </div>
       </div>
     );

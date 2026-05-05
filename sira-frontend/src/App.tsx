@@ -27,11 +27,11 @@ export default function App() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
 
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     course: '',
     educationLevel: 'Graduação',
     mainArea: '',
@@ -42,16 +42,27 @@ export default function App() {
     wantsArticles: true,
     interests: [] as string[],
     academicGoal: '',
-    hasCompletedOnboarding: false,
+    hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
     onboardingCompletedAt: null as string | null,
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
+      // Sincroniza dados básicos do auth imediatamente
+      setProfileData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        hasCompletedOnboarding: user.hasCompletedOnboarding ?? prev.hasCompletedOnboarding,
+      }));
+
+      // Busca dados completos do perfil
       setIsProfileLoading(true);
       Promise.all([loadFavorites(), loadProfile()])
-        .finally(() => setIsProfileLoading(false));
-    } else {
+        .finally(() => {
+          setIsProfileLoading(false);
+        });
+    } else if (!isAuthenticated) {
       setFavorites([]);
       setProfileData({
         name: '', email: '', course: '', educationLevel: 'Graduação',
@@ -59,20 +70,28 @@ export default function App() {
         materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
         interests: [], academicGoal: '', hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
+      setIsProfileLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.id, user?.hasCompletedOnboarding]);
 
   useEffect(() => {
-    if (!isAuthenticated && currentScreen !== 'register') {
-      setCurrentScreen('login');
-    } else if (isAuthenticated && !isProfileLoading && (currentScreen === 'login' || currentScreen === 'register')) {
+    if (!isAuthenticated) {
+      if (currentScreen !== 'register') setCurrentScreen('login');
+      return;
+    }
+
+    // Se está autenticado mas carregando o perfil, esperamos
+    if (isProfileLoading) return;
+
+    // Lógica de redirecionamento baseada em fatos (profileData finalizado)
+    if (currentScreen === 'login' || currentScreen === 'register' || currentScreen === 'onboarding') {
       if (profileData.hasCompletedOnboarding) {
         setCurrentScreen('home');
-      } else {
+      } else if (currentScreen !== 'onboarding' && currentScreen !== 'interests') {
         setCurrentScreen('onboarding');
       }
     }
-  }, [isAuthenticated, currentScreen, isProfileLoading, profileData.hasCompletedOnboarding]);
+  }, [isAuthenticated, isProfileLoading, profileData.hasCompletedOnboarding, currentScreen]);
 
   const loadProfile = async () => {
     try {

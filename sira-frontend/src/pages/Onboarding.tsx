@@ -29,6 +29,22 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
+    if (profileData && profileData.course) {
+      setFormData({
+        course: profileData.course || '',
+        educationLevel: profileData.educationLevel || 'Graduação',
+        mainArea: profileData.mainArea || '',
+        subAreas: profileData.subAreas || '',
+        languages: profileData.languages?.length ? profileData.languages : ['Português'],
+        materialLevels: profileData.materialLevels?.length ? profileData.materialLevels : ['Intermediário'],
+        wantsBooks: profileData.wantsBooks ?? true,
+        wantsArticles: profileData.wantsArticles ?? true,
+        academicGoal: profileData.academicGoal || '',
+      });
+    }
+  }, [profileData]);
+
+  useEffect(() => {
     loadPreferenceOptions();
   }, []);
 
@@ -175,14 +191,17 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
               </div>
               <div className="space-y-0.5">
                 <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Área Principal</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Inteligência Artificial"
+                <select
                   value={formData.mainArea}
                   onChange={(e) => setFormData({ ...formData, mainArea: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#1351B4]"
+                  className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#1351B4] appearance-none cursor-pointer"
                   required
-                />
+                >
+                  <option value="">Selecione a área principal</option>
+                  {options.topics.map((topic) => (
+                    <option key={topic.id} value={topic.id}>{topic.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-0.5">
                 <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Subáreas</label>

@@ -67,7 +67,13 @@ export const ACADEMIC_GOALS = [
   'Trabalho profissional',
 ] as const;
 
-export const PREFERENCE_TOPIC_IDS = new Set(PREFERENCE_TOPICS.map(topic => topic.id));
+export const PREFERENCE_TOPIC_IDS = PREFERENCE_TOPICS.map(topic => topic.id);
+export const EDUCATION_LEVEL_LIST = [...EDUCATION_LEVELS];
+export const LANGUAGE_LIST = [...LANGUAGES];
+export const MATERIAL_LEVEL_LIST = [...MATERIAL_LEVELS];
+export const ACADEMIC_GOAL_LIST = [...ACADEMIC_GOALS];
+
+export const PREFERENCE_TOPIC_IDS_SET = new Set(PREFERENCE_TOPIC_IDS);
 export const EDUCATION_LEVEL_SET = new Set<string>(EDUCATION_LEVELS);
 export const LANGUAGE_SET = new Set<string>(LANGUAGES);
 export const MATERIAL_LEVEL_SET = new Set<string>(MATERIAL_LEVELS);
