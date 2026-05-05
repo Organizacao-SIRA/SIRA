@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { GraduationCap, Settings, Sparkles, ChevronRight } from 'lucide-react';
-import { updateProfile } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, Settings, Sparkles, ChevronRight, Loader2, AlertCircle, Target } from 'lucide-react';
+import { getPreferenceOptions } from '../services/api';
+import type { PreferenceOptions } from '../types';
 
 interface OnboardingProps {
   setCurrentScreen: (screen: string) => void;
@@ -9,6 +10,10 @@ interface OnboardingProps {
 }
 
 export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: OnboardingProps) => {
+  const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+  const [optionsError, setOptionsError] = useState('');
+
   const [formData, setFormData] = useState({
     course: profileData?.course || '',
     educationLevel: profileData?.educationLevel || 'Graduação',
@@ -18,7 +23,27 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     materialLevels: profileData?.materialLevels || ['Intermediário'],
     wantsBooks: profileData?.wantsBooks ?? true,
     wantsArticles: profileData?.wantsArticles ?? true,
+    academicGoal: profileData?.academicGoal || '',
   });
+
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadPreferenceOptions();
+  }, []);
+
+  const loadPreferenceOptions = async () => {
+    setIsLoadingOptions(true);
+    setOptionsError('');
+    try {
+      const options = await getPreferenceOptions();
+      setPreferenceOptions(options);
+    } catch (err: any) {
+      setOptionsError(err.message || 'Erro ao carregar opções');
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  };
 
   const handleCheckboxChange = (field: string, value: string | boolean, isArray = false) => {
     if (isArray) {
@@ -32,17 +57,71 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validate = (): string[] => {
+    const errors: string[] = [];
+    if (!formData.course.trim() || formData.course.trim().length < 2) {
+      errors.push('Informe o curso (mínimo 2 caracteres).');
+    }
+    if (!formData.mainArea.trim() || formData.mainArea.trim().length < 2) {
+      errors.push('Informe a área principal (mínimo 2 caracteres).');
+    }
+    if (formData.languages.length === 0) {
+      errors.push('Selecione pelo menos 1 idioma.');
+    }
+    if (formData.materialLevels.length === 0) {
+      errors.push('Selecione pelo menos 1 nível de material.');
+    }
+    if (!formData.wantsBooks && !formData.wantsArticles) {
+      errors.push('Selecione pelo menos um formato (livros ou artigos).');
+    }
+    return errors;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const errors = validate();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    setValidationErrors([]);
+
+    // Salvar dados parciais no profileData e avançar para interests
     const updated = { ...profileData, ...formData };
     setProfileData(updated);
-    try {
-      await updateProfile(formData);
-    } catch {
-      // salva em estado mesmo se a API falhar
-    }
     setCurrentScreen('interests');
   };
+
+  if (isLoadingOptions) {
+    return (
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
+          <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando opções...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (optionsError) {
+    return (
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-[#003157] mb-2">Erro ao carregar opções</h3>
+          <p className="text-gray-500 text-sm mb-4">{optionsError}</p>
+          <button
+            onClick={loadPreferenceOptions}
+            className="bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const options = preferenceOptions!;
 
   return (
     <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
@@ -56,6 +135,14 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
             Para personalizarmos as suas recomendações, precisamos conhecer seu perfil acadêmico.
           </p>
         </div>
+
+        {validationErrors.length > 0 && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl">
+            {validationErrors.map((err, i) => (
+              <p key={i} className="text-red-600 text-xs font-medium">{err}</p>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <section>
@@ -81,10 +168,9 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                   onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
                   className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#1351B4] appearance-none cursor-pointer"
                 >
-                  <option>Graduação</option>
-                  <option>Especialização</option>
-                  <option>Mestrado</option>
-                  <option>Doutorado</option>
+                  {options.educationLevels.map((level) => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-0.5">
@@ -106,7 +192,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                   value={formData.subAreas}
                   onChange={(e) => setFormData({ ...formData, subAreas: e.target.value })}
                   className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#1351B4]"
-                  required
                 />
               </div>
             </div>
@@ -119,7 +204,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
               <div className="space-y-1.5">
                 <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Línguas</span>
-                {['Português', 'Inglês', 'Espanhol'].map((lang) => (
+                {options.languages.map((lang) => (
                   <label key={lang} className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -133,7 +218,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
               </div>
               <div className="space-y-1.5">
                 <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Nível</span>
-                {['Introdutório', 'Intermediário', 'Avançado'].map((level) => (
+                {options.materialLevels.map((level) => (
                   <label key={level} className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -167,6 +252,23 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                 </label>
               </div>
             </div>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-bold text-[#003157] mb-2 flex items-center gap-2 border-b pb-1">
+              <Target className="w-4 h-4" /> Objetivo Acadêmico
+              <span className="text-[10px] text-gray-400 font-normal ml-1">(opcional)</span>
+            </h3>
+            <select
+              value={formData.academicGoal}
+              onChange={(e) => setFormData({ ...formData, academicGoal: e.target.value })}
+              className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#1351B4] appearance-none cursor-pointer"
+            >
+              <option value="">Selecione (opcional)</option>
+              {options.academicGoals.map((goal) => (
+                <option key={goal} value={goal}>{goal}</option>
+              ))}
+            </select>
           </section>
 
           <button

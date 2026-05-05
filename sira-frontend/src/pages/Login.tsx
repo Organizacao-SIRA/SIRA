@@ -22,7 +22,7 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
     try {
       const response = await loginUser({ email, password });
       login(response.user, response.access_token);
-      setCurrentScreen('home');
+      // App.tsx decidirá a tela com base em hasCompletedOnboarding
     } catch (err: any) {
       setError(err.message || 'Erro ao tentar fazer login.');
     } finally {

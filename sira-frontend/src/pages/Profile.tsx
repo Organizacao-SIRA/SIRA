@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Pencil, GraduationCap, Settings, School, CheckCircle2,
-  Cpu, Landmark, Scale, LineChart, Activity, TrendingUp, Users, Globe, User as UserIcon
+  Pencil, GraduationCap, Settings, School, CheckCircle2, Target,
+  Cpu, Landmark, Scale, LineChart, Activity, TrendingUp, Users, Globe, User as UserIcon,
+  ShieldCheck, AlertTriangle
 } from 'lucide-react';
-import { updateProfile } from '../services/api';
+import { updateProfile, getPreferenceOptions } from '../services/api';
+import type { PreferenceTopic, PreferenceOptions } from '../types';
 
-const AVAILABLE_THEMES = [
-  { id: 'dir', label: 'Direito', icon: Scale },
-  { id: 'ia', label: 'Tecnologia', icon: Cpu },
-  { id: 'sau', label: 'Saúde', icon: Activity },
-  { id: 'eco', label: 'Economia', icon: TrendingUp },
-  { id: 'amb', label: 'Bioética', icon: Globe },
-  { id: 'gp', label: 'Gestão Pública', icon: Landmark },
-  { id: 'cd', label: 'Ciência de Dados', icon: LineChart },
-  { id: 'edu', label: 'Educação', icon: GraduationCap },
-  { id: 'soc', label: 'Sociologia', icon: Users },
-];
+const TOPIC_ICONS: Record<string, React.ElementType> = {
+  ia: Cpu,
+  gp: Landmark,
+  dir: Scale,
+  cd: LineChart,
+  edu: GraduationCap,
+  sau: Activity,
+  eco: TrendingUp,
+  soc: Users,
+  amb: Globe,
+};
 
 interface ProfileProps {
   profileData: any;
@@ -25,10 +27,19 @@ interface ProfileProps {
 export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editProfileData, setEditProfileData] = useState(profileData || {});
+  const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
 
   useEffect(() => {
     if (profileData) setEditProfileData(profileData);
   }, [profileData]);
+
+  useEffect(() => {
+    if (isEditingProfile && !preferenceOptions) {
+      getPreferenceOptions()
+        .then(setPreferenceOptions)
+        .catch(() => {});
+    }
+  }, [isEditingProfile]);
 
   if (!profileData) return <div className="p-20 text-center font-bold text-[#003157]">Carregando perfil...</div>;
 
@@ -65,6 +76,27 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
     setIsEditingProfile(false);
   };
 
+  // Tópicos: usar opções do backend se disponíveis, senão fallback local
+  const topicsList: PreferenceTopic[] = preferenceOptions?.topics || [
+    { id: 'dir', label: 'Direito' },
+    { id: 'ia', label: 'Tecnologia' },
+    { id: 'sau', label: 'Saúde' },
+    { id: 'eco', label: 'Economia' },
+    { id: 'amb', label: 'Meio Ambiente' },
+    { id: 'gp', label: 'Gestão Pública' },
+    { id: 'cd', label: 'Ciência de Dados' },
+    { id: 'edu', label: 'Educação' },
+    { id: 'soc', label: 'Sociologia' },
+  ];
+
+  const languagesList = preferenceOptions?.languages || ['Português', 'Inglês', 'Espanhol'];
+  const materialLevelsList = preferenceOptions?.materialLevels || ['Introdutório', 'Intermediário', 'Avançado'];
+  const educationLevelsList = preferenceOptions?.educationLevels || ['Graduação', 'Especialização', 'Mestrado', 'Doutorado'];
+  const academicGoalsList = preferenceOptions?.academicGoals || [];
+
+  // Resolver label do objetivo acadêmico
+  const academicGoalLabel = profileData.academicGoal || 'Não informado';
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
       <div className="mb-6 flex justify-between items-end">
@@ -91,9 +123,27 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
               <path d="M10 100 Q50 50 90 100" fill="currentColor" opacity="0.8" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-2xl font-bold text-[#003157]">{profileData.name}</h2>
             <p className="text-gray-500 text-sm">{profileData.email}</p>
+          </div>
+          {/* Badge de status do onboarding */}
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border ${
+            profileData.hasCompletedOnboarding
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-amber-50 text-amber-700 border-amber-200'
+          }`}>
+            {profileData.hasCompletedOnboarding ? (
+              <>
+                <ShieldCheck className="w-4 h-4" />
+                Preferências concluídas
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-4 h-4" />
+                Preferências pendentes
+              </>
+            )}
           </div>
         </div>
 
@@ -142,16 +192,33 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
                 <span className="text-gray-500">Nível</span>
                 {isEditingProfile ?
                   <select value={editProfileData.educationLevel} onChange={(e) => handleChange('educationLevel', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 bg-white outline-none">
-                    <option>Graduação</option><option>Mestrado</option><option>Doutorado</option><option>Especialização</option>
+                    {educationLevelsList.map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
                   </select> :
                   <span className="text-gray-900 font-bold">{profileData.educationLevel}</span>
                 }
               </div>
-              <div className="grid grid-cols-[120px_1fr] items-center text-sm">
+              <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">Área</span>
                 {isEditingProfile ?
                   <input type="text" value={editProfileData.mainArea} onChange={(e) => handleChange('mainArea', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 outline-none" /> :
                   <span className="text-gray-900 font-bold">{profileData.mainArea}</span>
+                }
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center text-sm">
+                <span className="text-gray-500">Objetivo</span>
+                {isEditingProfile ?
+                  <select value={editProfileData.academicGoal || ''} onChange={(e) => handleChange('academicGoal', e.target.value)} className="w-full border border-gray-200 rounded px-2 py-1 bg-white outline-none">
+                    <option value="">Não informado</option>
+                    {academicGoalsList.map(goal => (
+                      <option key={goal} value={goal}>{goal}</option>
+                    ))}
+                  </select> :
+                  <span className="text-gray-900 font-bold flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-gray-400" />
+                    {academicGoalLabel}
+                  </span>
                 }
               </div>
             </div>
@@ -166,29 +233,30 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           </div>
           <div className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {AVAILABLE_THEMES.map((theme) => {
-                const Icon = theme.icon;
+              {topicsList.map((topic) => {
+                const Icon = TOPIC_ICONS[topic.id] || Globe;
                 const isSelected = isEditingProfile
-                  ? editProfileData.interests?.includes(theme.id)
-                  : profileData.interests?.includes(theme.id);
+                  ? editProfileData.interests?.includes(topic.id)
+                  : profileData.interests?.includes(topic.id);
 
                 return (
                   <button
-                    key={theme.id}
-                    onClick={() => toggleInterest(theme.id)}
+                    key={topic.id}
+                    onClick={() => toggleInterest(topic.id)}
                     disabled={!isEditingProfile}
                     className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all ${
                       isSelected
                         ? 'border-[#1351B4] bg-blue-50'
                         : 'border-gray-50 bg-gray-50/50'
                     } ${isEditingProfile ? 'cursor-pointer hover:border-blue-200 shadow-sm' : 'cursor-default'}`}
+                    title={topic.description}
                   >
                     {isSelected && isEditingProfile && (
                       <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[#1351B4]" />
                     )}
                     <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[#1351B4]' : 'text-gray-300'}`} />
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-[#003157]' : 'text-gray-500'}`}>
-                      {theme.label}
+                      {topic.label}
                     </span>
                   </button>
                 );
@@ -206,7 +274,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-sm">
             <div className="space-y-3">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Línguas</span>
-              {['Português', 'Inglês', 'Espanhol'].map(lang => (
+              {languagesList.map(lang => (
                 <label key={lang} className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -221,7 +289,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
             </div>
             <div className="space-y-3">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Nível</span>
-              {['Introdutório', 'Intermediário', 'Avançado'].map(level => (
+              {materialLevelsList.map(level => (
                 <label key={level} className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
