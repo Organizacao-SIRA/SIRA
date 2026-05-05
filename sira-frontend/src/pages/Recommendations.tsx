@@ -3,6 +3,7 @@ import {
   Filter as FilterIcon, Search, Sparkles, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { RecommendationCard } from '../components/RecommendationCard';
+import { Button } from '../components/ui/Button';
 
 const PAGE_SIZE = 4;
 
@@ -85,10 +86,13 @@ export const Recommendations = ({
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-[#1351B4] hover:bg-[#003157] text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group">
+              <Button 
+                variant="primary"
+                className="w-full mt-4 flex items-center justify-center gap-2 group"
+              >
                 <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Aplicar Filtros
-              </button>
+              </Button>
             </div>
           </div>
         </aside>
@@ -121,23 +125,25 @@ export const Recommendations = ({
 
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 pt-4">
-                  <button
+                  <Button
                     onClick={() => onPageChange(page - 1)}
                     disabled={page === 0}
-                    className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    variant="secondary"
+                    className="p-2 min-w-0 w-10 h-10 border-gray-200 text-gray-500"
                   >
                     <ChevronLeft className="w-5 h-5" />
-                  </button>
+                  </Button>
                   <span className="text-sm font-bold text-gray-500">
                     Página {page + 1} de {totalPages}
                   </span>
-                  <button
+                  <Button
                     onClick={() => onPageChange(page + 1)}
                     disabled={page === totalPages - 1}
-                    className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-[#1351B4] hover:text-[#1351B4] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    variant="secondary"
+                    className="p-2 min-w-0 w-10 h-10 border-gray-200 text-gray-500"
                   >
                     <ChevronRight className="w-5 h-5" />
-                  </button>
+                  </Button>
                 </div>
               )}
             </>

@@ -1,4 +1,5 @@
 import { FileText, BookOpen, Sparkles, Star, Brain } from 'lucide-react';
+import { Button } from './ui/Button';
 
 interface RecommendationCardProps {
   item: any;
@@ -41,23 +42,25 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
     )}
 
     <div className="flex items-center gap-3">
-      <button 
+      <Button 
         onClick={() => viewDetails(item)}
-        className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+        variant="primary"
+        size="sm"
       >
         Ver Detalhes
-      </button>
-      <button 
+      </Button>
+      <Button 
         aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         onClick={() => toggleFavorite(item)}
-        className={`flex items-center justify-center w-10 h-10 rounded border transition-colors cursor-pointer ${
+        variant={isFavorite ? 'primary' : 'secondary'}
+        className={`w-10 h-10 p-0 min-w-0 flex items-center justify-center ${
           isFavorite 
-            ? 'bg-blue-50 border-primary text-primary' 
+            ? 'bg-blue-50 border-primary text-primary hover:bg-blue-100' 
             : 'bg-white border-gray-200 text-gray-400 hover:border-primary hover:text-primary'
         }`}
       >
         <Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} />
-      </button>
+      </Button>
     </div>
   </div>
 );

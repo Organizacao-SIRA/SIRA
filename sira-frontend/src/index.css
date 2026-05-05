@@ -10,3 +10,18 @@
   --color-accent-dark: #8A6D00;
   --color-success: #00A859;
 }
+
+@layer base {
+  button, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"]:disabled {
+    cursor: not-allowed;
+  }
+}

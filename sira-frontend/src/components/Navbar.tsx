@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, User, LogOut } from 'lucide-react';
 import type { AuthUser } from '../types';
+import { Button } from './ui/Button';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
@@ -45,34 +46,35 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
           <div className="flex items-center space-x-3">
             {user ? (
               <>
-                <button
+                <Button
                   onClick={() => setCurrentScreen('profile')}
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary-dark hover:bg-primary-darker text-white border border-blue-800 transition-all"
+                  variant="primary"
+                  size="sm"
+                  className="hidden sm:flex bg-primary-dark hover:bg-primary-darker border-blue-800"
                 >
-                  <User className="w-4 h-4 text-gray-300" />
+                  <User className="w-4 h-4 text-gray-300 mr-2" />
                   <span className="max-w-[120px] truncate">{user.name || user.email}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={onLogout}
+                  variant="danger"
+                  size="sm"
                   title="Sair"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition-all shadow-sm cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Sair</span>
-                </button>
+                </Button>
               </>
             ) : (
-              <button
+              <Button
                 onClick={() => setCurrentScreen('login')}
-                className={`flex items-center cursor-pointer px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm border ${
-                  currentScreen === 'login'
-                    ? 'bg-white text-primary border-white'
-                    : 'bg-primary-dark hover:bg-primary-darker text-white border-blue-800'
-                }`}
+                variant={currentScreen === 'login' ? 'secondary' : 'primary'}
+                size="sm"
+                className={currentScreen === 'login' ? '' : 'bg-primary-dark hover:bg-primary-darker border-blue-800'}
               >
                 <User className={`w-4 h-4 mr-2 ${currentScreen === 'login' ? 'text-primary' : 'text-gray-300'}`} />
                 {currentScreen === 'login' ? 'Acessando...' : 'Entrar'}
-              </button>
+              </Button>
             )}
           </div>
 
