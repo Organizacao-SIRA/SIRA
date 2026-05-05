@@ -48,6 +48,7 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
         Ver Detalhes
       </button>
       <button 
+        aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         onClick={() => toggleFavorite(item)}
         className={`flex items-center justify-center w-10 h-10 rounded border transition-colors cursor-pointer ${
           isFavorite 

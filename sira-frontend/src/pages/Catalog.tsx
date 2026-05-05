@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
 import { fetchCatalogBooks } from '../services/api';
 import { CatalogCard } from '../components/CatalogCard'; // Certifique-se de que o caminho está correto
+import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 
 export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: { 
   viewDetails: (item: any) => void;
@@ -85,9 +86,10 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
 
       {/* Área de Conteúdo */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-32">
-          <Loader2 className="animate-spin text-primary w-12 h-12" />
-          <p className="text-sm font-bold text-gray-400 mt-4 uppercase tracking-widest">Consultando bases integradas...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CatalogCardSkeleton key={index} />
+          ))}
         </div>
       ) : isBlocked && items.length === 0 ? (
         /* Aviso de Bloqueio de API */

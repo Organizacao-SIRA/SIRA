@@ -24,6 +24,8 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     wantsArticles: profileData?.wantsArticles ?? true,
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleCheckboxChange = (field: string, value: string | boolean, isArray = false) => {
     if (isArray) {
       const currentArray = formData[field as keyof typeof formData] as string[];
@@ -156,10 +158,11 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
 
           <Button
             type="submit"
+            isLoading={isLoading}
             className="w-full mt-4 flex items-center justify-center gap-2 group"
           >
             Avançar para Temas
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {!isLoading && <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
           </Button>
         </form>
       </div>

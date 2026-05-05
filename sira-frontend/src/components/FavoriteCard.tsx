@@ -13,7 +13,7 @@ export const FavoriteCard = ({ item, toggleFavorite, viewDetails }: any) => (
           <BookOpen className="w-3 h-3" /> Livro
         </span>
       )}
-      <button onClick={() => toggleFavorite(item)} className="text-primary hover:text-red-500 transition-colors cursor-pointer">
+      <button aria-label="Remover dos favoritos" onClick={() => toggleFavorite(item)} className="text-primary hover:text-red-500 transition-colors cursor-pointer">
         <Star className="w-5 h-5" fill="currentColor" />
       </button>
     </div>

@@ -1,4 +1,4 @@
-import React, { SelectHTMLAttributes, useId } from 'react';
+import React, { type SelectHTMLAttributes, useId } from 'react';
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;

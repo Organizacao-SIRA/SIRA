@@ -34,7 +34,7 @@ export const Sidebar = ({
       {/* Cabeçalho do Menu para Mobile */}
       <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center md:hidden">
         <span className="font-bold text-primary-dark">Menu Principal</span>
-        <button onClick={() => setIsSidebarOpen(false)} className="cursor-pointer text-gray-500 hover:text-red-500 text-2xl">
+        <button aria-label="Fechar menu" onClick={() => setIsSidebarOpen(false)} className="cursor-pointer text-gray-500 hover:text-red-500 text-2xl">
           &times;
         </button>
       </div>

@@ -16,6 +16,7 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
       
       {/* Botão de Favoritar (Posicionado no Canto Superior Esquerdo) */}
       <button 
+        aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         onClick={(e) => {
           e.stopPropagation();
           toggleFavorite(book);
