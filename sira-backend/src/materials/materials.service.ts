@@ -42,6 +42,7 @@ export class MaterialsService {
         thematicArea: data.thematicArea,
         doi: data.doi,
         isbn: data.isbn,
+        level: data.level,
         aiJustification: data.aiJustification,
       },
     });
@@ -151,9 +152,12 @@ ${searchesText}
 RESULTADOS:
 ${candidatesText}
 
-Para cada resultado, escreva UMA frase curta em português explicando por que é relevante para a pesquisa "${query}" considerando o perfil do usuário, e atribua um score de relevância de 0 a 100.
+Para cada resultado:
+1. Escreva UMA frase curta em português explicando por que é relevante para a pesquisa "${query}" considerando o perfil do usuário.
+2. Atribua um score de relevância de 0 a 100.
+3. Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado".
 
-JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0}]}`,
+JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
         },
       ],
     });
@@ -162,10 +166,14 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0}]}`,
     const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed = JSON.parse(text);
 
-    const metaMap = new Map<string, { explanation: string; relevance: number }>(
-      parsed.results.map((r: { id: string; explanation: string; relevance: number }) => [
+    const metaMap = new Map<string, { explanation: string; relevance: number; level: string }>(
+      parsed.results.map((r: { id: string; explanation: string; relevance: number; level: string }) => [
         r.id,
-        { explanation: r.explanation, relevance: Math.min(100, Math.max(0, Math.round(r.relevance))) },
+        {
+          explanation: r.explanation,
+          relevance: Math.min(100, Math.max(0, Math.round(r.relevance))),
+          level: r.level,
+        },
       ]),
     );
 
@@ -174,6 +182,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0}]}`,
         ...c,
         aiExplanation: metaMap.get(c.id)?.explanation ?? null,
         relevance: metaMap.get(c.id)?.relevance ?? c.relevance,
+        level: metaMap.get(c.id)?.level,
       }))
       .sort((a, b) => b.relevance - a.relevance);
   }

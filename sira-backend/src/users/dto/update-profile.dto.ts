@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsArray, IsIn } from 'class-validator';
+import {
+  ACADEMIC_GOAL_LIST,
+  EDUCATION_LEVEL_LIST,
+  LANGUAGE_LIST,
+  MATERIAL_LEVEL_LIST,
+  PREFERENCE_TOPIC_IDS,
+} from '../preferences-options';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -10,11 +17,11 @@ export class UpdateProfileDto {
   course?: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(EDUCATION_LEVEL_LIST)
   educationLevel?: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(PREFERENCE_TOPIC_IDS)
   mainArea?: string;
 
   @IsOptional()
@@ -23,10 +30,12 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsArray()
+  @IsIn(LANGUAGE_LIST, { each: true })
   languages?: string[];
 
   @IsOptional()
   @IsArray()
+  @IsIn(MATERIAL_LEVEL_LIST, { each: true })
   materialLevels?: string[];
 
   @IsOptional()
@@ -39,5 +48,11 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsArray()
+  @IsIn(PREFERENCE_TOPIC_IDS, { each: true })
   interests?: string[];
+
+  @IsOptional()
+  @IsString()
+  @IsIn(ACADEMIC_GOAL_LIST)
+  academicGoal?: string;
 }

@@ -10,24 +10,26 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(uuid())
-  email               String               @unique
-  password            String
-  name                String?
-  course              String?
-  educationLevel      String?
-  mainArea            String?
-  subAreas            String?
-  languages           String[]
-  materialLevels      String[]
-  wantsBooks          Boolean              @default(true)
-  wantsArticles       Boolean              @default(true)
-  interests           String[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  favorites           Favorite[]
-  searchHistory       SearchHistory[]
-  recommendationCache RecommendationCache?
+  id                    String               @id @default(uuid())
+  email                 String               @unique
+  password              String
+  name                  String?
+  course                String?
+  educationLevel        String?
+  mainArea              String?
+  subAreas              String?
+  languages             String[]
+  materialLevels        String[]
+  wantsBooks            Boolean              @default(true)
+  wantsArticles         Boolean              @default(true)
+  interests             String[]
+  academicGoal          String?
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  favorites             Favorite[]
+  searchHistory         SearchHistory[]
+  recommendationCache   RecommendationCache?
 }
 
 model RecommendationCache {
@@ -48,7 +50,7 @@ model SearchHistory {
 
 model Material {
   id              String     @id
-  type            String     // 'article', 'book', etc.
+  type            String // 'article', 'book', etc.
   title           String
   authors         String
   year            String
@@ -60,6 +62,7 @@ model Material {
   thematicArea    String?
   doi             String?
   isbn            String?
+  level           String? // 'Introdutório', 'Intermediário', 'Avançado'
   aiJustification String?
   favorites       Favorite[]
   createdAt       DateTime   @default(now())

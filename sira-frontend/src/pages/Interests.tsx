@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Cpu, Landmark, Scale, LineChart, GraduationCap,
-  Activity, TrendingUp, Users, Globe, ChevronRight, CheckCircle2
+  Activity, TrendingUp, Users, Globe, ChevronRight, CheckCircle2,
+  ChevronLeft, Loader2, AlertCircle
 } from 'lucide-react';
-import { updateProfile } from '../services/api';
+import { completeOnboarding, getPreferenceOptions } from '../services/api';
+import type { PreferenceTopic } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
-const AVAILABLE_THEMES = [
-  { id: 'ia', label: 'Inteligência Artificial', icon: Cpu },
-  { id: 'gp', label: 'Gestão Pública', icon: Landmark },
-  { id: 'dir', label: 'Direito e Legislação', icon: Scale },
-  { id: 'cd', label: 'Ciência de Dados', icon: LineChart },
-  { id: 'edu', label: 'Educação e Pedagogia', icon: GraduationCap },
-  { id: 'sau', label: 'Saúde Pública', icon: Activity },
-  { id: 'eco', label: 'Economia e Finanças', icon: TrendingUp },
-  { id: 'soc', label: 'Sociologia', icon: Users },
-  { id: 'amb', label: 'Meio Ambiente', icon: Globe },
-];
+const TOPIC_ICONS: Record<string, React.ElementType> = {
+  ia: Cpu,
+  gp: Landmark,
+  dir: Scale,
+  cd: LineChart,
+  edu: GraduationCap,
+  sau: Activity,
+  eco: TrendingUp,
+  soc: Users,
+  amb: Globe,
+};
 
 interface InterestsProps {
   setCurrentScreen: (screen: string) => void;
@@ -24,7 +27,35 @@ interface InterestsProps {
 }
 
 export const Interests = ({ setCurrentScreen, profileData, setProfileData }: InterestsProps) => {
-  const [selected, setSelected] = useState<string[]>(profileData?.interests || []);
+  const { updateUser } = useAuth();
+  const [selected, setSelected] = useState<string[]>(() => {
+    const initial = profileData?.interests || [];
+    if (profileData?.mainArea && !initial.includes(profileData.mainArea)) {
+      return [...initial, profileData.mainArea];
+    }
+    return initial;
+  });
+  const [topics, setTopics] = useState<PreferenceTopic[]>([]);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadTopics();
+  }, []);
+
+  const loadTopics = async () => {
+    setIsLoadingTopics(true);
+    setError('');
+    try {
+      const options = await getPreferenceOptions();
+      setTopics(options.topics);
+    } catch (err: any) {
+      setError(err.message || 'Não foi possível carregar os temas. Por favor, recarregue a página.');
+    } finally {
+      setIsLoadingTopics(false);
+    }
+  };
 
   const toggleTheme = (id: string) => {
     setSelected(prev =>
@@ -33,41 +64,112 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
   };
 
   const handleFinish = async () => {
-    setProfileData({ ...profileData, interests: selected });
+    if (selected.length < 3) return;
+
+    setIsSaving(true);
+    setError('');
+
+    const payload = {
+      course: profileData.course,
+      educationLevel: profileData.educationLevel,
+      mainArea: profileData.mainArea,
+      subAreas: profileData.subAreas || undefined,
+      languages: profileData.languages,
+      materialLevels: profileData.materialLevels,
+      wantsBooks: profileData.wantsBooks,
+      wantsArticles: profileData.wantsArticles,
+      interests: selected,
+      academicGoal: profileData.academicGoal || undefined,
+    };
+
     try {
-      await updateProfile({ interests: selected });
-    } catch {
-      // salva em estado mesmo se a API falhar
+      const updatedUser = await completeOnboarding(payload);
+      
+      // Sincroniza o estado global de autenticação
+      updateUser({ hasCompletedOnboarding: true });
+
+      setProfileData({
+        ...profileData,
+        ...updatedUser,
+        interests: selected,
+        hasCompletedOnboarding: true,
+        onboardingCompletedAt: updatedUser.onboardingCompletedAt,
+      });
+      setCurrentScreen('home');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar preferências. Tente novamente.');
+    } finally {
+      setIsSaving(false);
     }
-    setCurrentScreen('home');
   };
+
+  const canFinish = selected.length >= 3;
+
+  if (isLoadingTopics) {
+    return (
+      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
+          <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && topics.length === 0) {
+    return (
+      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-[#003157] mb-2">Erro ao carregar temas</h3>
+          <p className="text-gray-500 text-sm mb-4">{error}</p>
+          <button
+            onClick={loadTopics}
+            className="bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 overflow-hidden">
       <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 animate-fadeIn">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-[#003157]">Quais temas te interessam?</h2>
-          <p className="text-gray-500 mt-1 text-xs">Selecione as áreas para personalizar suas recomendações.</p>
+          <p className="text-gray-500 mt-1 text-xs">
+            Selecione pelo menos <span className="font-bold text-[#1351B4]">3 áreas</span> para personalizar suas recomendações.
+          </p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-red-600 text-xs font-medium">{error}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-          {AVAILABLE_THEMES.map((theme) => {
-            const Icon = theme.icon;
-            const isSelected = selected.includes(theme.id);
+          {topics.map((topic) => {
+            const Icon = TOPIC_ICONS[topic.id] || Globe;
+            const isSelected = selected.includes(topic.id);
             return (
               <button
-                key={theme.id}
-                onClick={() => toggleTheme(theme.id)}
+                key={topic.id}
+                onClick={() => toggleTheme(topic.id)}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer h-24 relative ${
                   isSelected ? 'border-[#1351B4] bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
                 }`}
+                title={topic.description}
               >
                 {isSelected && (
                   <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[#1351B4]" />
                 )}
                 <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[#1351B4]' : 'text-gray-300'}`} />
                 <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-[#003157]' : 'text-gray-600'}`}>
-                  {theme.label}
+                  {topic.label}
                 </span>
               </button>
             );
@@ -75,15 +177,38 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
         </div>
 
         <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            {selected.length} Selecionados
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentScreen('onboarding')}
+              className="text-gray-500 hover:text-[#003157] text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Voltar
+            </button>
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${canFinish ? 'text-green-600' : 'text-gray-400'}`}>
+              {selected.length} / 3 mín. selecionados
+            </span>
+          </div>
           <button
             onClick={handleFinish}
-            className="bg-[#1351B4] hover:bg-[#003157] text-white px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all"
+            disabled={!canFinish || isSaving}
+            className={`px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 transition-all ${
+              canFinish && !isSaving
+                ? 'bg-[#1351B4] hover:bg-[#003157] text-white cursor-pointer'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
           >
-            Concluir e Acessar
-            <ChevronRight className="w-4 h-4" />
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                Concluir e Acessar
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </div>

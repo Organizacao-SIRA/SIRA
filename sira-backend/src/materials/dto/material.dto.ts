@@ -70,6 +70,11 @@ export class MaterialDto {
   @IsOptional()
   isbn?: string;
 
+  @ApiProperty({ example: 'Intermediário', required: false })
+  @IsString()
+  @IsOptional()
+  level?: string;
+
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()

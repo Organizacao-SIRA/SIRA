@@ -1,3 +1,5 @@
+import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload } from '../types';
+
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
@@ -118,7 +120,7 @@ export const removeFavoriteApi = async (materialId: string) => {
 
 // --- User Profile ---
 
-export const getProfile = async () => {
+export const getProfile = async (): Promise<UserProfile> => {
   const response = await fetch(`${API_BASE_URL}/users/profile`, {
     headers: getAuthHeaders(),
   });
@@ -136,11 +138,46 @@ export const updateProfile = async (data: Record<string, any>) => {
   return response.json();
 };
 
+// --- Preference Options & Onboarding ---
+
+export const getPreferenceOptions = async (): Promise<PreferenceOptions> => {
+  const response = await fetch(`${API_BASE_URL}/users/preference-options`, {
+    headers: getAuthHeaders(),
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(body.message || 'Erro ao carregar opções de preferências');
+  }
+
+  return body;
+};
+
+export const completeOnboarding = async (
+  data: CompleteOnboardingPayload,
+): Promise<UserProfile> => {
+  const response = await fetch(`${API_BASE_URL}/users/onboarding`, {
+    method: 'PATCH',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(body.message || 'Erro ao salvar preferências');
+  }
+
+  return body;
+};
+
 // --- AI Recommendations ---
 
 type RecommendationsResponse = {
   recommendations: Array<any & { aiExplanation: string | null }>;
-  basedOn: { favorites: number; searches: number };
+  basedOn: { favorites: number; searches: number; preferences: boolean };
   generatedAt: string;
 };
 

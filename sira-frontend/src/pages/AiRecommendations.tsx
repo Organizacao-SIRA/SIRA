@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Star, ChevronRight, Brain, BookOpen, LogIn, AlertCircle, RefreshCw, Clock, ExternalLink } from 'lucide-react';
+import { Sparkles, Star, ChevronRight, Brain, BookOpen, LogIn, AlertCircle, RefreshCw, Clock, ExternalLink, Settings } from 'lucide-react';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 
@@ -13,7 +13,7 @@ interface AiRecommendationsProps {
 
 export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen }: AiRecommendationsProps) => {
   const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number } | null>(null);
+  const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number; preferences: boolean } | null>(null);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -60,6 +60,26 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
     });
   };
 
+  /** Gera a mensagem contextual do basedOn */
+  const getBasedOnMessage = () => {
+    if (!basedOn) return null;
+    const parts: string[] = [];
+    if (basedOn.favorites > 0) {
+      parts.push(`${basedOn.favorites} favorito${basedOn.favorites !== 1 ? 's' : ''}`);
+    }
+    if (basedOn.searches > 0) {
+      parts.push(`${basedOn.searches} busca${basedOn.searches !== 1 ? 's' : ''} recente${basedOn.searches !== 1 ? 's' : ''}`);
+    }
+    if (basedOn.preferences) {
+      parts.push('suas preferências acadêmicas');
+    }
+    if (parts.length === 0) return null;
+    return `Baseado em ${parts.join(', ')}`;
+  };
+
+  /** Verifica se o erro indica necessidade de onboarding */
+  const isOnboardingError = error.toLowerCase().includes('preferência') || error.toLowerCase().includes('onboarding') || error.toLowerCase().includes('preferencia');
+
   if (!user) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-fadeIn">
@@ -103,17 +123,29 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
             >
               Tentar novamente
             </button>
-            <button
-              onClick={() => setCurrentScreen('home')}
-              className="border border-gray-200 text-gray-600 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-all"
-            >
-              Fazer buscas primeiro
-            </button>
+            {isOnboardingError ? (
+              <button
+                onClick={() => setCurrentScreen('onboarding')}
+                className="border border-[#1351B4] text-[#1351B4] px-6 py-3 rounded-full font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Configurar preferências
+              </button>
+            ) : (
+              <button
+                onClick={() => setCurrentScreen('home')}
+                className="border border-gray-200 text-gray-600 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-all"
+              >
+                Fazer buscas primeiro
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
   }
+
+  const basedOnMessage = getBasedOnMessage();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
@@ -126,10 +158,8 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
             <h1 className="text-2xl font-bold text-[#003157]">Recomendações para você</h1>
           </div>
           <div className="flex flex-col gap-0.5 ml-1">
-            {basedOn && (
-              <p className="text-gray-400 text-sm">
-                Baseado em {basedOn.favorites} favorito{basedOn.favorites !== 1 ? 's' : ''} e {basedOn.searches} busca{basedOn.searches !== 1 ? 's' : ''} recente{basedOn.searches !== 1 ? 's' : ''}
-              </p>
+            {basedOnMessage && (
+              <p className="text-gray-400 text-sm">{basedOnMessage}</p>
             )}
             {generatedAt && (
               <p className="text-gray-300 text-xs flex items-center gap-1">

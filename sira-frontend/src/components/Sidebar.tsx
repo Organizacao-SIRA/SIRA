@@ -21,8 +21,7 @@ export const Sidebar = ({
     { id: 'catalog', label: 'Catálogo de Livros', icon: Library },
     { id: 'home', label: 'Recomendações', icon: Sparkles },
     { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
-    ...(user ? [{ id: 'profile', label: 'Meu Perfil', icon: UserCircle }] : []),
-    { id: 'onboarding', label: 'Preferências', icon: Settings },
+    ...(user ? [{ id: 'profile', label: 'Configurações', icon: Settings }] : []),
   ];
 
   return (

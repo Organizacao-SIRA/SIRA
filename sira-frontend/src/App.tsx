@@ -27,10 +27,11 @@ export default function App() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
 
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     course: '',
     educationLevel: 'Graduação',
     mainArea: '',
@@ -39,29 +40,58 @@ export default function App() {
     materialLevels: ['Intermediário'],
     wantsBooks: true,
     wantsArticles: true,
+    interests: [] as string[],
+    academicGoal: '',
+    hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
+    onboardingCompletedAt: null as string | null,
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadFavorites();
-      loadProfile();
-    } else {
+    if (isAuthenticated && user) {
+      // Sincroniza dados básicos do auth imediatamente
+      setProfileData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        hasCompletedOnboarding: user.hasCompletedOnboarding ?? prev.hasCompletedOnboarding,
+      }));
+
+      // Busca dados completos do perfil
+      setIsProfileLoading(true);
+      Promise.all([loadFavorites(), loadProfile()])
+        .finally(() => {
+          setIsProfileLoading(false);
+        });
+    } else if (!isAuthenticated) {
       setFavorites([]);
       setProfileData({
         name: '', email: '', course: '', educationLevel: 'Graduação',
         mainArea: '', subAreas: '', languages: ['Português'],
         materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
+        interests: [], academicGoal: '', hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
+      setIsProfileLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.id, user?.hasCompletedOnboarding]);
 
   useEffect(() => {
-    if (!isAuthenticated && currentScreen !== 'register') {
-      setCurrentScreen('login');
-    } else if (isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
-      setCurrentScreen('home');
+    if (!isAuthenticated) {
+      if (currentScreen !== 'register') setCurrentScreen('login');
+      return;
     }
-  }, [isAuthenticated, currentScreen]);
+
+    // Se está autenticado mas carregando o perfil, esperamos
+    if (isProfileLoading) return;
+
+    // Lógica de redirecionamento baseada em fatos (profileData finalizado)
+    if (currentScreen === 'login' || currentScreen === 'register' || currentScreen === 'onboarding') {
+      if (profileData.hasCompletedOnboarding) {
+        setCurrentScreen('home');
+      } else if (currentScreen !== 'onboarding' && currentScreen !== 'interests') {
+        setCurrentScreen('onboarding');
+      }
+    }
+  }, [isAuthenticated, isProfileLoading, profileData.hasCompletedOnboarding, currentScreen]);
 
   const loadProfile = async () => {
     try {
@@ -78,6 +108,10 @@ export default function App() {
         materialLevels: data.materialLevels?.length ? data.materialLevels : ['Intermediário'],
         wantsBooks: data.wantsBooks ?? true,
         wantsArticles: data.wantsArticles ?? true,
+        interests: data.interests || [],
+        academicGoal: data.academicGoal || '',
+        hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,
+        onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
@@ -150,6 +184,27 @@ export default function App() {
   const isFavorite = (id: any) => favorites.some(f => f.id === id);
 
   const showSidebar = !['login', 'register', 'onboarding', 'interests'].includes(currentScreen);
+
+  if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
+    return (
+      <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+        <Navbar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          setCurrentScreen={setCurrentScreen}
+          currentScreen={currentScreen}
+          user={user}
+          onLogout={logout}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
+            <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
