@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Star, ChevronRight, Brain, BookOpen, LogIn, AlertCircle, RefreshCw, Clock, ExternalLink, Settings } from 'lucide-react';
+import { Sparkles, Brain, LogIn, AlertCircle, RefreshCw, Clock, Settings, BookOpen } from 'lucide-react';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
+import { RecommendationCard } from '../components/RecommendationCard';
+import { Button } from '../components/ui/Button';
 
 interface AiRecommendationsProps {
   user: AuthUser | null;
@@ -90,12 +92,12 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
           <p className="text-gray-500 mb-8 max-w-sm mx-auto">
             Faça login para receber recomendações baseadas nos seus favoritos e histórico de buscas.
           </p>
-          <button
+          <Button
             onClick={() => setCurrentScreen('login')}
-            className="bg-primary text-white px-8 py-3 rounded-full font-bold flex items-center mx-auto hover:bg-primary-dark transition-all shadow-md gap-2"
+            className="mx-auto"
           >
-            <LogIn className="w-4 h-4" /> Fazer Login
-          </button>
+            Fazer Login
+          </Button>
         </div>
       </div>
     );
@@ -129,27 +131,27 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
           <h3 className="text-xl font-bold text-primary-dark mb-2">Não foi possível gerar recomendações</h3>
           <p className="text-gray-500 mb-8 max-w-sm mx-auto">{error}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button
+            <Button
               onClick={loadRecommendations}
-              className="bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-primary-dark transition-all shadow-md"
             >
               Tentar novamente
-            </button>
+            </Button>
             {isOnboardingError ? (
-              <button
+              <Button
                 onClick={() => setCurrentScreen('onboarding')}
-                className="border border-[#1351B4] text-[#1351B4] px-6 py-3 rounded-full font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                variant="secondary"
+                className="flex items-center justify-center gap-2"
               >
                 <Settings className="w-4 h-4" />
                 Configurar preferências
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => setCurrentScreen('home')}
-                className="border border-gray-200 text-gray-600 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-all"
+                variant="secondary"
               >
                 Fazer buscas primeiro
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -186,15 +188,17 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
             <Sparkles className="w-4 h-4" />
             <span>{recommendations.length} recomendações</span>
           </div>
-          <button
+          <Button
             onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-full text-sm font-bold transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            isLoading={isRefreshing}
+            variant="primary"
+            size="sm"
+            className="flex items-center gap-2"
             title="Gerar novas recomendações com IA"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {!isRefreshing && <RefreshCw className="w-4 h-4" />}
             {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -203,75 +207,23 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
           <BookOpen className="h-12 w-12 text-gray-200 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-primary-dark mb-2">Nenhuma recomendação ainda</h3>
           <p className="text-gray-500 mb-8 max-w-xs mx-auto">Salve favoritos e faça buscas para receber recomendações personalizadas.</p>
-          <button
+          <Button
             onClick={() => setCurrentScreen('home')}
-            className="bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary-dark transition-all shadow-md"
+            className="mx-auto px-8"
           >
             Explorar conteúdos
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
           {recommendations.map((item: any) => (
-            <div key={item.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex gap-2">
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider ${
-                    item.type === 'article' ? 'bg-blue-50 text-primary border border-blue-100' : 'bg-yellow-50 text-yellow-800 border border-yellow-100'
-                  }`}>
-                    {item.type === 'article' ? 'Artigo' : 'Livro'}
-                  </span>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase bg-gray-100 text-gray-400 border border-gray-200">
-                    {item.source}
-                  </span>
-                </div>
-                {item.relevance > 0 && (
-                  <div className="flex items-center gap-1 text-green-700 font-bold text-xs bg-green-50 px-2 py-1 rounded-md border border-green-100">
-                    <Sparkles className="w-3 h-3" /> {item.relevance}% Relevância
-                  </div>
-                )}
-              </div>
-
-              <h3 className="text-xl font-bold text-primary-dark mb-1">{item.title}</h3>
-              <p className="text-sm text-gray-500 mb-3">{item.authors} ({item.year})</p>
-
-              {item.aiExplanation && (
-                <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
-                  <Brain className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-primary font-medium italic">{item.aiExplanation}</p>
-                </div>
-              )}
-
-              <p className="text-gray-600 text-sm line-clamp-2 mb-5 leading-relaxed italic">{item.abstract}</p>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-50 flex-wrap">
-                <button
-                  onClick={() => viewDetails(item)}
-                  className="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
-                >
-                  Ver Detalhes <ChevronRight className="w-4 h-4" />
-                </button>
-                {item.url && (
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border border-primary text-primary hover:bg-blue-50 px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
-                  >
-                    Acessar <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
-                <button
-                  aria-label={isFavorite(item.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                  onClick={() => toggleFavorite(item)}
-                  className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                    isFavorite(item.id) ? 'bg-blue-50 border-primary text-primary' : 'bg-white border-gray-200 text-gray-400 hover:text-primary'
-                  }`}
-                >
-                  <Star className="w-5 h-5" fill={isFavorite(item.id) ? 'currentColor' : 'none'} />
-                </button>
-              </div>
-            </div>
+            <RecommendationCard 
+              key={item.id} 
+              item={item} 
+              viewDetails={viewDetails} 
+              toggleFavorite={toggleFavorite} 
+              isFavorite={isFavorite(item.id)} 
+            />
           ))}
         </div>
       )}

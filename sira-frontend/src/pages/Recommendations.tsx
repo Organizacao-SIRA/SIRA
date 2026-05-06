@@ -29,8 +29,8 @@ export const Recommendations = ({
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#003157]">
-            Resultados para: <span className="text-[#1351B4]">"{searchQuery || 'Sua Pesquisa'}"</span>
+          <h2 className="text-2xl font-bold text-primary-dark">
+            Resultados para: <span className="text-primary">"{searchQuery || 'Sua Pesquisa'}"</span>
           </h2>
         </div>
         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm text-sm font-bold text-green-700">
@@ -44,44 +44,46 @@ export const Recommendations = ({
         {/* BARRA LATERAL DE FILTROS */}
         <aside className="w-full lg:w-72 flex-shrink-0">
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm sticky top-24">
-            <div className="flex items-center gap-2 mb-6 text-[#003157] font-bold border-b pb-4">
-              <FilterIcon className="w-5 h-5 text-[#1351B4]" />
+            <div className="flex items-center gap-2 mb-6 text-primary-dark font-bold border-b pb-4 border-gray-50">
+              <FilterIcon className="w-5 h-5 text-primary" />
               <span>Filtros</span>
             </div>
 
             <div className="space-y-6">
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Tipo de Material</h4>
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Tipo de Material</h4>
                 <div className="space-y-2">
                   {['Artigos Científicos', 'Livros'].map(item => (
-                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-[#1351B4]">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-[#1351B4] focus:ring-[#1351B4]" />
-                      {item}
+                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
+                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">{item}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Base de Origem</h4>
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Base de Origem</h4>
                 <div className="space-y-2">
                   {['Semantic Scholar', 'arXiv', 'Google Books'].map(item => (
-                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-[#1351B4]" />
-                      {item}
+                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
+                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">{item}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Idioma</h4>
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Idioma</h4>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-[#1351B4]" /> Português
+                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
+                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary" /> 
+                    <span className="group-hover:translate-x-0.5 transition-transform">Português</span>
                   </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#1351B4]" /> Inglês
+                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary" /> 
+                    <span className="group-hover:translate-x-0.5 transition-transform">Inglês</span>
                   </label>
                 </div>
               </div>
@@ -101,8 +103,8 @@ export const Recommendations = ({
         <div className="flex-1 space-y-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mb-4"></div>
-              <p className="text-sm font-bold text-[#003157] uppercase tracking-widest">Analisando com IA...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
+              <p className="text-xs font-bold text-primary-dark uppercase tracking-widest">Analisando com IA...</p>
             </div>
           ) : (
             <>
@@ -117,30 +119,39 @@ export const Recommendations = ({
               ))}
 
               {results.length === 0 && (
-                <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center">
-                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 font-medium">Nenhum resultado encontrado para sua busca.</p>
+                <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center animate-fadeIn">
+                  <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-400 font-bold uppercase text-sm">Nenhum resultado encontrado</p>
+                  <p className="text-gray-400 text-xs mt-1">Tente ajustar sua busca para encontrar mais materiais.</p>
                 </div>
               )}
 
+              {/* PAGINAÇÃO: Correção visual final usando o átomo Button ajustado */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-4">
+                <div className="flex items-center justify-center gap-6 pt-8 pb-4">
                   <Button
                     onClick={() => onPageChange(page - 1)}
                     disabled={page === 0}
                     variant="secondary"
-                    className="p-2 min-w-0 w-10 h-10 border-gray-200 text-gray-500"
+                    className="w-10 h-10 p-0 flex items-center justify-center shadow-sm"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
-                  <span className="text-sm font-bold text-gray-500">
-                    Página {page + 1} de {totalPages}
-                  </span>
+                  
+                  <div className="flex flex-col items-center">
+                    <span className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                      Página {page + 1}
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                      de {totalPages} páginas
+                    </span>
+                  </div>
+
                   <Button
                     onClick={() => onPageChange(page + 1)}
                     disabled={page === totalPages - 1}
                     variant="secondary"
-                    className="p-2 min-w-0 w-10 h-10 border-gray-200 text-gray-500"
+                    className="w-10 h-10 p-0 flex items-center justify-center shadow-sm"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </Button>

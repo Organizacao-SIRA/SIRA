@@ -31,15 +31,19 @@ export const Button = ({
     lg: 'px-8 py-3 text-base',
   };
 
+  // Se 'p-' ou 'w-' ou 'h-' estiver presente no className, assumimos que o desenvolvedor quer controle total do tamanho/espaçamento
+  const hasCustomSizing = className.includes('p-') || (className.includes('w-') && className.includes('h-'));
+  const sizeClass = hasCustomSizing ? '' : sizes[size];
+
   return (
     <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${baseClasses} ${variants[variant]} ${sizeClass} ${className}`}
       disabled={isLoading || disabled}
       aria-busy={isLoading}
       {...props}
     >
       {isLoading && (
-        <span className="mr-2 flex items-center">
+        <span className={children ? "mr-2 flex items-center" : "flex items-center"}>
             <Spinner size="sm" className="text-current" />
         </span>
       )}
