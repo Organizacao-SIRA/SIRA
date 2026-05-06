@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Loader2, AlertTriangle, BookOpen } from 'lucide-react';
 import { fetchCatalogBooks } from '../services/api';
 import { CatalogCard } from '../components/CatalogCard'; // Certifique-se de que o caminho está correto
+import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 
 export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: { 
   viewDetails: (item: any) => void;
@@ -52,7 +53,7 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn min-h-[calc(100vh-68px)]">
       {/* Cabeçalho da Página */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#003157]">Catálogo Acadêmico</h1>
+        <h1 className="text-3xl font-bold text-primary-dark">Catálogo Acadêmico</h1>
         <p className="text-gray-500 mt-1 font-medium">
           Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos.
         </p>
@@ -67,7 +68,7 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
             placeholder="Pesquisar por título ou autor..." 
             value={catalogSearch}
             onChange={(e) => setCatalogSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#1351B4] focus:ring-1 focus:ring-[#1351B4] transition-colors text-sm"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-sm"
           />
         </div>
         
@@ -76,7 +77,7 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
           <select 
             value={selectedCategory} 
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-[#1351B4] text-sm text-[#003157] font-medium w-full md:w-56 cursor-pointer"
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-primary text-sm text-primary-dark font-medium w-full md:w-56 cursor-pointer"
           >
             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
           </select>
@@ -85,9 +86,10 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
 
       {/* Área de Conteúdo */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-32">
-          <Loader2 className="animate-spin text-[#1351B4] w-12 h-12" />
-          <p className="text-sm font-bold text-gray-400 mt-4 uppercase tracking-widest">Consultando bases integradas...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CatalogCardSkeleton key={index} />
+          ))}
         </div>
       ) : isBlocked && items.length === 0 ? (
         /* Aviso de Bloqueio de API */

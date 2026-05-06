@@ -1,4 +1,5 @@
 import { FileText, BookOpen, Sparkles, Star, Brain } from 'lucide-react';
+import { Button } from './ui/Button';
 
 interface RecommendationCardProps {
   item: any;
@@ -12,7 +13,7 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
     <div className="flex justify-between items-start mb-3">
       <div className="flex gap-2">
         {item.type === 'article' ? (
-          <span className="inline-flex items-center gap-1 bg-blue-50 text-[#1351B4] text-xs font-bold px-2.5 py-1 rounded border border-blue-200 uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1 bg-blue-50 text-primary text-xs font-bold px-2.5 py-1 rounded border border-blue-200 uppercase tracking-wider">
             <FileText className="w-3 h-3" /> Artigo
           </span>
         ) : (
@@ -29,34 +30,37 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
       </div>
     </div>
 
-    <h3 className="text-xl font-bold text-[#003157] mb-2 leading-tight">{item.title}</h3>
+    <h3 className="text-xl font-bold text-primary-dark mb-2 leading-tight">{item.title}</h3>
     <p className="text-sm text-gray-500 mb-4">{item.authors} • {item.year}</p>
     <p className="text-gray-700 text-sm line-clamp-2 mb-4">{item.abstract}</p>
 
     {item.aiExplanation && (
       <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
-        <Brain className="w-4 h-4 text-[#1351B4] mt-0.5 flex-shrink-0" />
-        <p className="text-sm text-[#1351B4] font-medium italic">{item.aiExplanation}</p>
+        <Brain className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+        <p className="text-sm text-primary font-medium italic">{item.aiExplanation}</p>
       </div>
     )}
 
     <div className="flex items-center gap-3">
-      <button 
+      <Button 
         onClick={() => viewDetails(item)}
-        className="bg-[#1351B4] hover:bg-[#003157] text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+        variant="primary"
+        size="sm"
       >
         Ver Detalhes
-      </button>
-      <button 
+      </Button>
+      <Button 
+        aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         onClick={() => toggleFavorite(item)}
-        className={`flex items-center justify-center w-10 h-10 rounded border transition-colors cursor-pointer ${
+        variant={isFavorite ? 'primary' : 'secondary'}
+        className={`w-10 h-10 p-0 min-w-0 flex items-center justify-center ${
           isFavorite 
-            ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]' 
-            : 'bg-white border-gray-200 text-gray-400 hover:border-[#1351B4] hover:text-[#1351B4]'
+            ? 'bg-blue-50 border-primary text-primary hover:bg-blue-100' 
+            : 'bg-white border-gray-200 text-gray-400 hover:border-primary hover:text-primary'
         }`}
       >
         <Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} />
-      </button>
+      </Button>
     </div>
   </div>
 );

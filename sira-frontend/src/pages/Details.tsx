@@ -22,7 +22,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
         <h2 className="text-xl font-bold text-gray-400">Nenhum detalhe disponível</h2>
         <button 
           onClick={() => setCurrentScreen('home')}
-          className="mt-4 text-[#1351B4] font-bold hover:underline flex items-center gap-2"
+          className="mt-4 text-primary font-bold hover:underline flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar para o início
         </button>
@@ -42,7 +42,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
       <nav className="flex items-center text-sm text-gray-500 mb-6 font-medium">
         <button 
           onClick={() => setCurrentScreen(previousScreen || 'home')} 
-          className="flex items-center gap-2 text-[#1351B4] hover:underline font-bold"
+          className="flex items-center gap-2 text-primary hover:underline font-bold"
         >
           <ArrowLeft className="w-4 h-4" /> {backLabels[previousScreen] || 'Voltar'}
         </button>
@@ -57,7 +57,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
           <section>
             <div className="flex gap-2 mb-4">
               {item.type === 'article' ? (
-                <span className="inline-flex items-center gap-1 bg-blue-50 text-[#1351B4] text-xs font-bold px-3 py-1 rounded border border-blue-200 uppercase">
+                <span className="inline-flex items-center gap-1 bg-blue-50 text-primary text-xs font-bold px-3 py-1 rounded border border-blue-200 uppercase">
                   <FileText className="w-3 h-3" /> Artigo Científico
                 </span>
               ) : (
@@ -67,7 +67,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
               )}
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold text-[#003157] leading-tight mb-6 italic">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary-dark leading-tight mb-6 italic">
               {item.title}
             </h1>
             
@@ -88,7 +88,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
               {item.doi && (
                 <div className="flex items-start gap-3">
                   <LinkIcon className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div><span className="font-bold text-gray-900 block mb-0.5">DOI</span> <span className="text-[#1351B4]">{item.doi}</span></div>
+                  <div><span className="font-bold text-gray-900 block mb-0.5">DOI</span> <span className="text-primary">{item.doi}</span></div>
                 </div>
               )}
               {item.isbn && (
@@ -108,7 +108,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
 
           {/* Resumo */}
           <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-bold text-[#003157] mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
+            <h2 className="text-xl font-bold text-primary-dark mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
                Resumo Acadêmico
             </h2>
             <p className="text-gray-700 leading-relaxed text-justify text-lg">
@@ -120,7 +120,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Palavras-chave</h3>
                 <div className="flex flex-wrap gap-2">
                   {item.keywords.map((kw: string, idx: number) => (
-                    <span key={idx} className="bg-blue-50 text-[#1351B4] px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">
+                    <span key={idx} className="bg-blue-50 text-primary px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">
                       {kw}
                     </span>
                   ))}
@@ -132,22 +132,22 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
 
         {/* COLUNA LATERAL (SIDEBAR) */}
         <div className="space-y-6">
-          <div className="bg-[#FFF4CC] border-l-4 border-[#FFCD07] p-6 rounded-r-2xl shadow-sm">
+          <div className="bg-accent-light border-l-4 border-accent p-6 rounded-r-2xl shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="text-[#8A6D00] w-6 h-6" />
-              <h3 className="font-bold text-[#8A6D00] text-lg">Análise do SIRA+</h3>
+              <Sparkles className="text-accent-dark w-6 h-6" />
+              <h3 className="font-bold text-accent-dark text-lg">Análise do SIRA+</h3>
             </div>
-            <p className="text-sm text-[#8A6D00] leading-relaxed font-medium italic">
+            <p className="text-sm text-accent-dark leading-relaxed font-medium italic">
               "{item.aiExplanation || "Recomendado com base na aderência técnica ao seu perfil."}"
             </p>
-            <div className="mt-6 pt-4 border-t border-[#FFCD07]/30">
-              <div className="flex items-center justify-between text-xs font-bold text-[#8A6D00] uppercase mb-2">
+            <div className="mt-6 pt-4 border-t border-accent/30">
+              <div className="flex items-center justify-between text-xs font-bold text-accent-dark uppercase mb-2">
                 <span>Relevância Semântica</span>
                 <span>{item.relevance || 90}%</span>
               </div>
               <div className="w-full bg-white/50 rounded-full h-2">
                 <div 
-                  className="bg-[#00A859] h-2 rounded-full transition-all" 
+                  className="bg-success h-2 rounded-full transition-all" 
                   style={{ width: `${item.relevance || 90}%` }}
                 ></div>
               </div>
@@ -160,7 +160,7 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl bg-[#1351B4] hover:bg-[#003157] text-white font-bold transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold transition-all flex items-center justify-center gap-2"
               >
                 <ExternalLink className="w-5 h-5" />
                 Acessar Material
@@ -170,8 +170,8 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
               onClick={() => toggleFavorite(item)}
               className={`w-full py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 isFavorite(item.id)
-                  ? 'bg-blue-50 border-[#1351B4] text-[#1351B4]'
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-[#1351B4]'
+                  ? 'bg-blue-50 border-primary text-primary'
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-primary'
               }`}
             >
               <Star className="w-5 h-5" fill={isFavorite(item.id) ? 'currentColor' : 'none'} />

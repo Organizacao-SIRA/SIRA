@@ -16,14 +16,15 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
       
       {/* Botão de Favoritar (Posicionado no Canto Superior Esquerdo) */}
       <button 
+        aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         onClick={(e) => {
           e.stopPropagation();
           toggleFavorite(book);
         }}
         className={`absolute top-2 left-2 z-20 p-2 rounded-full backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
           isFavorite 
-            ? 'bg-[#1351B4] border-[#1351B4] text-white' 
-            : 'bg-white/40 border-white/20 text-white hover:bg-white hover:text-[#1351B4]'
+            ? 'bg-primary border-primary text-white' 
+            : 'bg-white/40 border-white/20 text-white hover:bg-white hover:text-primary'
         }`}
       >
         <Star className="w-4 h-4" fill={isFavorite ? 'currentColor' : 'none'} />
@@ -32,8 +33,8 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
       {/* Capa do Material Acadêmico */}
       <div className={`h-40 flex flex-col items-center justify-center p-4 text-center relative overflow-hidden ${
         isArticle 
-          ? 'bg-gradient-to-br from-[#003157] to-[#0a4a86]' 
-          : 'bg-gradient-to-br from-[#1351B4] to-[#1e67e3]'
+          ? 'bg-gradient-to-br from-primary-dark to-[#0a4a86]' 
+          : 'bg-gradient-to-br from-primary to-[#1e67e3]'
       }`}>
         
         {/* Badge de Ano (Canto Superior Direito) */}
@@ -67,12 +68,12 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
       <div className="p-5 flex flex-col flex-1">
         <div className="flex gap-2 mb-3">
           {/* TAG ÚNICA: Categoria do Livro (Substituiu Tipo e Acadêmico) */}
-          <span className="text-[10px] font-bold text-[#8A6D00] bg-[#FFF4CC] px-2.5 py-1 rounded border border-[#E6B100]/20 truncate max-w-full uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-accent-dark bg-accent-light px-2.5 py-1 rounded border border-accent/20 truncate max-w-full uppercase tracking-wider">
             {book.thematicArea ? book.thematicArea.split(' / ')[0] : 'Geral'}
           </span>
         </div>
 
-        <h3 className="font-bold text-[#003157] text-base mb-1 line-clamp-2 min-h-[44px] leading-tight group-hover:text-[#1351B4] transition-colors">
+        <h3 className="font-bold text-primary-dark text-base mb-1 line-clamp-2 min-h-[44px] leading-tight group-hover:text-primary transition-colors">
           {book.title}
         </h3>
         
@@ -88,7 +89,7 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
             </span>
             <button
               onClick={() => viewDetails(book)}
-              className="text-[#1351B4] hover:text-[#003157] text-sm font-bold flex items-center gap-1 transition-colors"
+              className="text-primary hover:text-primary-dark text-sm font-bold flex items-center gap-1 transition-colors"
             >
               Ver Detalhes <ChevronRight className="w-4 h-4" />
             </button>
@@ -98,7 +99,7 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
               href={book.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-[#1351B4] border border-[#1351B4] hover:bg-blue-50 py-1.5 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-primary border border-primary hover:bg-blue-50 py-1.5 rounded-lg transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Acessar Material
             </a>

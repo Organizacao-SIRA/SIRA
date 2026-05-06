@@ -7,6 +7,7 @@ import {
 import { completeOnboarding, getPreferenceOptions } from '../services/api';
 import type { PreferenceTopic } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from '../components/ui/Button';
 
 const TOPIC_ICONS: Record<string, React.ElementType> = {
   ia: Cpu,
@@ -109,8 +110,8 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
     return (
       <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
-          <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
         </div>
       </div>
     );
@@ -121,14 +122,14 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
       <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
           <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-[#003157] mb-2">Erro ao carregar temas</h3>
+          <h3 className="text-lg font-bold text-primary-dark mb-2">Erro ao carregar temas</h3>
           <p className="text-gray-500 text-sm mb-4">{error}</p>
-          <button
+          <Button
             onClick={loadTopics}
-            className="bg-[#1351B4] hover:bg-[#003157] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer"
+            className="px-6"
           >
             Tentar novamente
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -138,9 +139,9 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
     <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 overflow-hidden">
       <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 animate-fadeIn">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-[#003157]">Quais temas te interessam?</h2>
+          <h2 className="text-2xl font-bold text-primary-dark">Quais temas te interessam?</h2>
           <p className="text-gray-500 mt-1 text-xs">
-            Selecione pelo menos <span className="font-bold text-[#1351B4]">3 áreas</span> para personalizar suas recomendações.
+            Selecione pelo menos <span className="font-bold text-primary">3 áreas</span> para personalizar suas recomendações.
           </p>
         </div>
 
@@ -160,15 +161,15 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
                 key={topic.id}
                 onClick={() => toggleTheme(topic.id)}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer h-24 relative ${
-                  isSelected ? 'border-[#1351B4] bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
+                  isSelected ? 'border-primary bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
                 }`}
                 title={topic.description}
               >
                 {isSelected && (
-                  <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[#1351B4]" />
+                  <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />
                 )}
-                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[#1351B4]' : 'text-gray-300'}`} />
-                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-[#003157]' : 'text-gray-600'}`}>
+                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-gray-300'}`} />
+                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-primary-dark' : 'text-gray-600'}`}>
                   {topic.label}
                 </span>
               </button>
@@ -180,7 +181,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCurrentScreen('onboarding')}
-              className="text-gray-500 hover:text-[#003157] text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-primary-dark text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               Voltar
@@ -189,14 +190,10 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
               {selected.length} / 3 mín. selecionados
             </span>
           </div>
-          <button
+          <Button
             onClick={handleFinish}
             disabled={!canFinish || isSaving}
-            className={`px-8 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 transition-all ${
-              canFinish && !isSaving
-                ? 'bg-[#1351B4] hover:bg-[#003157] text-white cursor-pointer'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            className="flex items-center gap-2"
           >
             {isSaving ? (
               <>
@@ -209,7 +206,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
                 <ChevronRight className="w-4 h-4" />
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
