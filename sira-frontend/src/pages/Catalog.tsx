@@ -9,17 +9,31 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
   toggleFavorite: (item: any) => void;
   isFavorite: (id: string) => boolean;
 }) => {
-  const [catalogSearch, setCatalogSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
+  const [catalogSearch, setCatalogSearch] = useState(() => sessionStorage.getItem('@sira:catalogSearch') || '');
+  const [selectedCategory, setSelectedCategory] = useState(() => sessionStorage.getItem('@sira:catalogCategory') || 'Todas');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
 
   const categories = ['Todas', 'Ciências da Computação', 'Administração Pública', 'Direito'];
 
+  // Sincroniza estado da barra de pesquisa e categoria ativa
+  useEffect(() => { sessionStorage.setItem('@sira:catalogSearch', catalogSearch); }, [catalogSearch]);
+  useEffect(() => { sessionStorage.setItem('@sira:catalogCategory', selectedCategory); }, [selectedCategory]);
+
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
+      const cacheKey = `@sira:catalogItems:${selectedCategory}`;
+      const cachedData = sessionStorage.getItem(cacheKey);
+
+      if (cachedData) {
+        setItems(JSON.parse(cachedData));
+        setLoading(false);
+        setIsBlocked(false);
+        return;
+      }
+
       setLoading(true);
       setIsBlocked(false);
       
@@ -27,9 +41,10 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: {
         const data = await fetchCatalogBooks(selectedCategory);
         
         if (isMounted) {
-          // Se a API retornar vazio mas uma categoria foi selecionada, pode ser o Erro 429
           if (data.length === 0 && selectedCategory !== 'Todas') {
             setIsBlocked(true);
+          } else if (data.length > 0) {
+            sessionStorage.setItem(cacheKey, JSON.stringify(data));
           }
           setItems(data);
         }
