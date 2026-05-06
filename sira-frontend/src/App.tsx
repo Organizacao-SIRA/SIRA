@@ -16,18 +16,44 @@ import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
   const { isAuthenticated, user, logout } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState('home');
-  const [previousScreen, setPreviousScreen] = useState('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Estados persistidos via sessionStorage para sobreviver a reloads (F5)
+  const [currentScreen, setCurrentScreen] = useState(() => sessionStorage.getItem('@sira:currentScreen') || 'home');
+  const [previousScreen, setPreviousScreen] = useState(() => sessionStorage.getItem('@sira:previousScreen') || 'home');
+  const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('@sira:searchQuery') || '');
+  const [results, setResults] = useState<any[]>(() => {
+    const saved = sessionStorage.getItem('@sira:results');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [searchTotal, setSearchTotal] = useState(() => {
+    const saved = sessionStorage.getItem('@sira:searchTotal');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [searchPage, setSearchPage] = useState(() => {
+    const saved = sessionStorage.getItem('@sira:searchPage');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [selectedItem, setSelectedItem] = useState<any>(() => {
+    const saved = sessionStorage.getItem('@sira:selectedItem');
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  const [results, setResults] = useState<any[]>([]);
-  const [searchTotal, setSearchTotal] = useState(0);
-  const [searchPage, setSearchPage] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
+
+  // Sincroniza as mudanças de estado com o sessionStorage
+  useEffect(() => { sessionStorage.setItem('@sira:currentScreen', currentScreen); }, [currentScreen]);
+  useEffect(() => { sessionStorage.setItem('@sira:previousScreen', previousScreen); }, [previousScreen]);
+  useEffect(() => { sessionStorage.setItem('@sira:searchQuery', searchQuery); }, [searchQuery]);
+  useEffect(() => { sessionStorage.setItem('@sira:results', JSON.stringify(results)); }, [results]);
+  useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
+  useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
+  useEffect(() => { 
+    if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
+    else sessionStorage.removeItem('@sira:selectedItem');
+  }, [selectedItem]);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -183,6 +209,21 @@ export default function App() {
 
   const isFavorite = (id: any) => favorites.some(f => f.id === id);
 
+  const handleSidebarNavigation = (screen: string) => {
+    if (screen === 'home') {
+      // Se já estiver na aba "Recomendações" (seja IA ou resultados), não faz nada
+      if (currentScreen === 'home' || currentScreen === 'results') return;
+      // Se tiver uma busca ativa salva, volta para os resultados
+      if (results && results.length > 0) {
+        setCurrentScreen('results');
+      } else {
+        setCurrentScreen('home');
+      }
+    } else {
+      setCurrentScreen(screen);
+    }
+  };
+
   const showSidebar = !['login', 'register', 'onboarding', 'interests'].includes(currentScreen);
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
@@ -198,8 +239,8 @@ export default function App() {
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1351B4] mx-auto"></div>
-            <p className="mt-4 text-[#003157] font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
           </div>
         </div>
       </div>
@@ -211,7 +252,7 @@ export default function App() {
       <Navbar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
-        setCurrentScreen={setCurrentScreen}
+        setCurrentScreen={setCurrentScreen} // Navbar mantém o reset absoluto
         currentScreen={currentScreen}
         user={user}
         onLogout={logout}
@@ -223,7 +264,7 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
             currentScreen={currentScreen}
-            setCurrentScreen={setCurrentScreen}
+            setCurrentScreen={handleSidebarNavigation} // Sidebar usa navegação inteligente
             user={user}
           />
         )}
@@ -240,7 +281,20 @@ export default function App() {
             <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'results' && (
-            <Recommendations searchQuery={searchQuery} results={results} total={searchTotal} page={searchPage} onPageChange={handleSearchPage} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} isLoading={isLoading} />
+            <Recommendations 
+              searchQuery={searchQuery} 
+              setSearchQuery={setSearchQuery}
+              handleSearch={handleSearch}
+              setCurrentScreen={setCurrentScreen}
+              results={results} 
+              total={searchTotal} 
+              page={searchPage} 
+              onPageChange={handleSearchPage} 
+              viewDetails={viewDetails} 
+              toggleFavorite={toggleFavorite} 
+              isFavorite={isFavorite} 
+              isLoading={isLoading} 
+            />
           )}
           {currentScreen === 'details' && (
             <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
