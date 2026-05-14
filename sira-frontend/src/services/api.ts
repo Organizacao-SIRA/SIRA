@@ -54,6 +54,23 @@ export const searchAcademicContent = async (query: string, page = 0): Promise<{ 
   }
 };
 
+/**
+ * Busca Conversacional (Chat IA)
+ */
+export const chatSearchMaterials = async (prompt: string): Promise<{ aiMessage: string; results: any[] }> => {
+  if (!prompt || prompt.trim().length < 2) return { aiMessage: '', results: [] };
+  try {
+    const response = await fetch(`${API_BASE_URL}/materials/chat?prompt=${encodeURIComponent(prompt)}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Erro na resposta do servidor');
+    return await response.json();
+  } catch (error) {
+    console.error('Erro no chat de busca acadêmica:', error);
+    throw error;
+  }
+};
+
 export const fetchCatalogBooks = async (category: string) => {
   const terms: Record<string, string> = {
     'Todas': 'science',

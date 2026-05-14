@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import Anthropic from '@anthropic-ai/sdk';
 import { MaterialDto, MaterialType } from './dto/material.dto';
+import { ChatSearchResponseDto } from './dto/chat-search-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { AiProvider } from '../ai/ai-provider.abstract';
 
 @Injectable()
 export class MaterialsService {
   private readonly logger = new Logger(MaterialsService.name);
-  private readonly anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   private readonly GOOGLE_BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes';
   private readonly SEMANTIC_SCHOLAR_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
 
@@ -18,6 +18,7 @@ export class MaterialsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
+    private readonly ai: AiProvider,
   ) {}
 
   async ensureMaterialExists(data: MaterialDto) {
@@ -91,17 +92,131 @@ export class MaterialsService {
       return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
     }
 
-    this.logger.log(`Chamando Claude para ${pageItems.length} itens da página ${page} (userId: ${userId})`);
+    this.logger.log(`Classificando com IA ${pageItems.length} itens da página ${page} (userId: ${userId})`);
     try {
-      const ranked = await this.rankWithClaude(query, userId, pageItems);
+      const ranked = await this.rankWithAi(query, userId, pageItems);
       return { items: ranked, total };
     } catch (error) {
-      this.logger.error(`Erro ao ranquear com Claude: ${error.message}`, error.stack);
+      this.logger.error(`Erro ao classificar com IA: ${error.message}`, error.stack);
       return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
     }
   }
 
-  private async rankWithClaude(query: string, userId: string, candidates: MaterialDto[]): Promise<MaterialDto[]> {
+  async chatSearch(prompt: string, userId?: string): Promise<ChatSearchResponseDto> {
+    this.logger.log(`Iniciando chatSearch para: "${prompt}"`);
+
+    const user = userId ? await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        course: true,
+        educationLevel: true,
+        mainArea: true,
+        interests: true,
+        academicGoal: true,
+        materialLevels: true,
+        languages: true
+      }
+    }) : null;
+
+    if (userId) {
+      this.saveSearchHistory(userId, prompt.trim()).catch(() => {});
+    }
+
+    const userProfileText = user ? `
+      PERFIL DO USUÁRIO:
+      - Curso: ${user.course}
+      - Nível: ${user.educationLevel}
+      - Área: ${user.mainArea}
+      - Interesses: ${user.interests?.join(', ')}
+      - Objetivo: ${user.academicGoal}
+      - Nível de material pref: ${user.materialLevels?.join(', ')}
+      - Idiomas: ${user.languages?.join(', ')}
+    ` : 'Perfil não disponível.';
+
+    // Fase 1: Interpretação de Intenção
+    let queries: string[] = [];
+    try {
+      const rawKeywords = await this.ai.complete({
+        system: `Você é um assistente acadêmico. Considere o perfil do usuário para extrair termos de busca.
+            ${userProfileText}
+            Extraia até 3 termos de busca otimizados (em inglês ou português) para APIs de livros e artigos.
+            Retorne apenas os termos separados por vírgula.`,
+        user: prompt,
+        maxTokens: 200,
+      });
+      queries = rawKeywords.split(',').map(q => q.trim()).filter(Boolean);
+    } catch (error) {
+      this.logger.error(`Erro ao extrair keywords via Claude: ${error.message}`);
+      queries = [prompt.trim()];
+    }
+    this.logger.log(`Queries extraídas: ${queries.join(', ')}`);
+
+    // Fase 2: Coleta de Dados
+    const searchPromises = queries.map(query =>
+      Promise.all([this.fetchGoogleBooks(query), this.fetchSemanticScholar(query)])
+    );
+    const resultsArrays = await Promise.all(searchPromises);
+
+    const seen = new Set<string>();
+    const candidates: MaterialDto[] = [];
+    for (const apiResults of resultsArrays) {
+      for (const list of apiResults) {
+        for (const item of list) {
+          if (!seen.has(item.id)) {
+            seen.add(item.id);
+            candidates.push(item);
+          }
+        }
+      }
+    }
+
+    if (candidates.length === 0) {
+      return {
+        aiMessage: 'Não consegui encontrar materiais nas bases acadêmicas para este pedido. Tente reformular sua busca.',
+        results: [],
+      };
+    }
+
+    // Fase 3: Análise e Ponderação
+    const candidatesText = candidates.slice(0, 15)
+      .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 150)}`)
+      .join('\n');
+
+    try {
+      const rawSynthesis = await this.ai.complete({
+        system: `Você é um assistente de recomendação acadêmica senior.
+            Considere o PERFIL DO USUÁRIO abaixo para selecionar e justificar os materiais:
+            ${userProfileText}
+
+            Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
+            Retorne um JSON com:
+            - "aiMessage": Uma síntese técnica e amigável em português explicando por que esses materiais são ideais para este usuário específico.
+            - "selectedIds": IDs dos top materiais (máximo 8).`,
+        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "selectedIds": ["id1", "id2"]}`,
+        maxTokens: 1024,
+      });
+      const text = rawSynthesis.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+      const { aiMessage, selectedIds } = JSON.parse(text);
+
+      const finalResults = candidates
+        .filter(c => selectedIds.includes(c.id))
+        .map(c => ({
+          ...c,
+          relevance: 100 - selectedIds.indexOf(c.id),
+          aiExplanation: 'Selecionado via Chat inteligente.',
+        }));
+
+      return { aiMessage, results: finalResults };
+    } catch (e) {
+      this.logger.error(`Erro na síntese da IA: ${e.message}`);
+      return {
+        aiMessage: 'Encontrei alguns materiais que podem te ajudar na sua pesquisa.',
+        results: candidates.slice(0, 5),
+      };
+    }
+  }
+
+  private async rankWithAi(query: string, userId: string, candidates: MaterialDto[]): Promise<MaterialDto[]> {
     const [favorites, recentSearches] = await Promise.all([
       this.prisma.favorite.findMany({
         where: { userId },
@@ -128,20 +243,9 @@ export class MaterialsService {
       .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 200)}`)
       .join('\n');
 
-    const response = await this.anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: [
-        {
-          type: 'text' as const,
-          text: 'Você é um assistente de recomendação acadêmica. Analise os resultados de busca e o perfil do usuário para explicar a relevância de cada material. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.',
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: `PESQUISA ATUAL: "${query}"
+    const raw = await this.ai.complete({
+      system: 'Você é um assistente de recomendação acadêmica. Analise os resultados de busca e o perfil do usuário para explicar a relevância de cada material. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.',
+      user: `PESQUISA ATUAL: "${query}"
 
 FAVORITOS DO USUÁRIO:
 ${favoritesText}
@@ -158,11 +262,8 @@ Para cada resultado:
 3. Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado".
 
 JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
-        },
-      ],
+      maxTokens: 1024,
     });
-
-    const raw = response.content[0].type === 'text' ? response.content[0].text : '';
     const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed = JSON.parse(text);
 

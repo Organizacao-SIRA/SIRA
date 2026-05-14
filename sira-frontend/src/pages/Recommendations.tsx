@@ -1,18 +1,14 @@
 import React from 'react';
 import {
-  Filter as FilterIcon, Search, Sparkles, ChevronLeft, ChevronRight, X
+  Sparkles, X, User, Bot, ChevronRight
 } from 'lucide-react';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-
-const PAGE_SIZE = 4;
+import { AutoResizeTextarea } from '../components/ui/AutoResizeTextarea';
 
 interface RecommendationsProps {
   results: any[];
-  total: number;
-  page: number;
-  onPageChange: (page: number) => void;
+  aiMessage: string;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   handleSearch: (e: React.FormEvent) => void;
@@ -24,10 +20,9 @@ interface RecommendationsProps {
 }
 
 export const Recommendations = ({
-  results, total, page, onPageChange, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
+  results, aiMessage, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
   viewDetails, toggleFavorite, isFavorite, isLoading,
 }: RecommendationsProps) => {
-  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleClearSearch = () => {
     setSearchQuery('');
@@ -35,172 +30,97 @@ export const Recommendations = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
-      {/* BARRA DE PESQUISA SUPERIOR */}
-      <div className="mb-8 max-w-4xl">
-        <form onSubmit={handleSearch} className="relative flex items-center shadow-sm rounded-full bg-white border border-gray-200 focus-within:border-primary transition-all">
-          <Search className="absolute left-5 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Pesquisar artigos e livros..."
-            className="w-full py-3.5 pl-14 pr-32 rounded-full text-base text-gray-800 outline-none placeholder-gray-400"
-            required
-          />
-          <div className="absolute right-1.5 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              title="Limpar pesquisa e voltar para IA"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <Button
-              type="submit"
-              variant="primary"
-              className="px-6 py-2"
-              isLoading={isLoading}
-            >
-              {!isLoading && 'Pesquisar'}
-            </Button>
-          </div>
-        </form>
+    <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn flex flex-col h-full min-h-[calc(100vh-68px)] relative">
+      {/* HEADER / VOLTAR */}
+      <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-4">
+        <div className="flex items-center gap-2">
+           <div className="p-2 bg-primary/10 rounded-lg">
+              <Sparkles className="w-5 h-5 text-primary" />
+           </div>
+           <h1 className="text-xl font-bold text-primary-dark">Busca Inteligente</h1>
+        </div>
+        <button 
+          onClick={handleClearSearch}
+          className="text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 text-sm font-medium"
+        >
+          <X className="w-4 h-4" /> Nova pesquisa
+        </button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-t border-gray-100 pt-6">
-        <div>
-          <h2 className="text-2xl font-bold text-primary-dark">
-            Resultados para: <span className="text-primary">"{searchQuery || 'Sua Pesquisa'}"</span>
-          </h2>
+      <div className="flex-1 space-y-10 pb-40">
+        {/* MENSAGEM DO USUÁRIO */}
+        <div className="flex gap-4 animate-fadeIn justify-end">
+          <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-sm max-w-[80%] md:max-w-2xl">
+            <p className="text-sm md:text-base leading-relaxed font-medium">
+              {searchQuery}
+            </p>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-primary-dark flex items-center justify-center flex-shrink-0 shadow-sm">
+            <User className="w-5 h-5 text-white" />
+          </div>
         </div>
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm text-sm font-bold text-green-700">
-          <Sparkles className="w-4 h-4" />
-          <span>{total} recomendações precisas</span>
-        </div>
-      </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-
-        {/* BARRA LATERAL DE FILTROS */}
-        <aside className="w-full lg:w-72 flex-shrink-0">
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm sticky top-24">
-            <div className="flex items-center gap-2 mb-6 text-primary-dark font-bold border-b pb-4 border-gray-50">
-              <FilterIcon className="w-5 h-5 text-primary" />
-              <span>Filtros</span>
+        {/* RESPOSTA DA IA */}
+        {isLoading ? (
+          <div className="flex gap-4 animate-pulse">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Bot className="w-6 h-6 text-primary" />
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Tipo de Material</h4>
-                <div className="space-y-2">
-                  {['Artigos Científicos', 'Livros'].map(item => (
-                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-                      <span className="group-hover:translate-x-0.5 transition-transform">{item}</span>
-                    </label>
-                  ))}
-                </div>
+            <div className="flex-1 space-y-4">
+              <div className="h-20 bg-gray-200 rounded-2xl w-full"></div>
+              <div className="space-y-4 pt-4">
+                <div className="h-32 bg-gray-100 rounded-2xl w-full"></div>
+                <div className="h-32 bg-gray-100 rounded-2xl w-full"></div>
               </div>
-
-              <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Base de Origem</h4>
-                <div className="space-y-2">
-                  {['Semantic Scholar', 'arXiv', 'Google Books'].map(item => (
-                    <label key={item} className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary" />
-                      <span className="group-hover:translate-x-0.5 transition-transform">{item}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">Idioma</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300 text-primary" /> 
-                    <span className="group-hover:translate-x-0.5 transition-transform">Português</span>
-                  </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-primary font-medium group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary" /> 
-                    <span className="group-hover:translate-x-0.5 transition-transform">Inglês</span>
-                  </label>
-                </div>
-              </div>
-
-              <Button 
-                variant="primary"
-                className="w-full mt-4 flex items-center justify-center gap-2 group"
-              >
-                <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                Aplicar Filtros
-              </Button>
             </div>
           </div>
-        </aside>
-
-        {/* LISTA DE RESULTADOS */}
-        <div className="flex-1 space-y-4">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
-              <p className="text-xs font-bold text-primary-dark uppercase tracking-widest">Analisando com IA...</p>
+        ) : (
+          <div className="flex gap-4 animate-fadeIn">
+            <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Bot className="w-6 h-6 text-primary" />
             </div>
-          ) : (
-            <>
-              {results.map((item: any) => (
-                <RecommendationCard
-                  key={item.id}
-                  item={item}
-                  viewDetails={viewDetails}
-                  toggleFavorite={toggleFavorite}
-                  isFavorite={isFavorite(item.id)}
-                />
-              ))}
+            <div className="flex-1 space-y-6">
+              {/* Balão de Texto da IA */}
+              <div className="bg-white border border-gray-100 p-5 rounded-2xl rounded-tl-none shadow-sm relative">
+                 <p className="text-gray-700 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                    {aiMessage}
+                 </p>
+              </div>
 
-              {results.length === 0 && (
-                <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center animate-fadeIn">
-                  <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                  <p className="text-gray-400 font-bold uppercase text-sm">Nenhum resultado encontrado</p>
-                  <p className="text-gray-400 text-xs mt-1">Tente ajustar sua busca para encontrar mais materiais.</p>
+              {/* Cards de Materiais */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Materiais Selecionados</h3>
+                  <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full uppercase">IA Verified</span>
                 </div>
-              )}
+                
+                {results.map((item: any) => (
+                  <RecommendationCard
+                    key={item.id}
+                    item={item}
+                    viewDetails={viewDetails}
+                    toggleFavorite={toggleFavorite}
+                    isFavorite={isFavorite(item.id)}
+                  />
+                ))}
 
-              {/* PAGINAÇÃO: Correção visual final usando o átomo Button ajustado */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-6 pt-8 pb-4">
-                  <Button
-                    onClick={() => onPageChange(page - 1)}
-                    disabled={page === 0}
-                    variant="secondary"
-                    className="w-10 h-10 p-0 flex items-center justify-center shadow-sm"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-bold text-primary-dark uppercase tracking-widest">
-                      Página {page + 1}
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                      de {totalPages} páginas
-                    </span>
+                {results.length === 0 && (
+                  <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center">
+                    <p className="text-gray-400 text-sm font-medium">Não consegui encontrar materiais específicos para este pedido nas bases acadêmicas no momento.</p>
                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-                  <Button
-                    onClick={() => onPageChange(page + 1)}
-                    disabled={page === totalPages - 1}
-                    variant="secondary"
-                    className="w-10 h-10 p-0 flex items-center justify-center shadow-sm"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
+      {/* RODAPÉ INFORMATIVO (Removido input para garantir turno único) */}
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent pt-10 pb-8 px-4 z-40">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">
+            SIRA AI • Análise Baseada em Claude 3.5, Google Books e Semantic Scholar.
+          </p>
         </div>
       </div>
     </div>

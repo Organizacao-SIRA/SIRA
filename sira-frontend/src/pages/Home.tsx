@@ -1,7 +1,8 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Bot, ChevronRight } from 'lucide-react';
 import { AiRecommendations } from './AiRecommendations';
 import type { AuthUser } from '../types';
+import { AutoResizeTextarea } from '../components/ui/AutoResizeTextarea';
 
 interface HomeProps {
   searchQuery: string;
@@ -15,46 +16,79 @@ interface HomeProps {
 }
 
 export const Home = ({ searchQuery, setSearchQuery, handleSearch, user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen }: HomeProps) => (
-  <div className="flex-1 flex flex-col bg-gray-50 min-h-[calc(100vh-68px)] animate-fadeIn">
-    <div className="max-w-4xl w-full mx-auto px-4 pt-10 pb-6 text-center space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark tracking-tight">
-          O que você está investigando hoje?
-        </h1>
-        <p className="text-base text-gray-600 max-w-xl mx-auto leading-relaxed">
-          Nossa IA encontra os livros e artigos científicos mais relevantes para o seu contexto acadêmico.
-        </p>
+  <div className="flex-1 flex flex-col bg-gray-50 min-h-[calc(100vh-68px)] animate-fadeIn relative overflow-hidden">
+    
+    {/* ÁREA CENTRAL */}
+    <div className="flex-1 flex flex-col items-center justify-center max-w-4xl w-full mx-auto px-4 pt-10 pb-10 space-y-8">
+      
+      {/* MENSAGEM DE BOAS-VINDAS DA IA */}
+      <div className="flex flex-col items-center gap-6 animate-fadeIn text-center mb-4">
+        <div className="w-20 h-20 rounded-3xl bg-white border border-gray-100 flex items-center justify-center shadow-xl mb-2">
+          <Bot className="w-12 h-12 text-primary" />
+        </div>
+        <div className="space-y-4 max-w-2xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark">
+            Olá, {user?.name?.split(' ')[0] || 'estudante'}! 👋
+          </h1>
+          <p className="text-gray-500 text-lg md:text-xl leading-relaxed">
+            Eu sou seu assistente acadêmico. Como posso ajudar na sua pesquisa hoje? 
+            Escreva o que você está procurando abaixo.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-        <div className="relative flex items-center shadow-lg rounded-full bg-white border border-gray-200 focus-within:border-primary transition-all">
-          <Search className="absolute left-5 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Ex: IA na gestão pública..."
-            className="w-full py-4 pl-14 pr-32 rounded-full text-base text-gray-800 outline-none placeholder-gray-400"
-            required
-          />
-          <button
-            type="submit"
-            className="absolute right-1.5 bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm"
-          >
-            Pesquisar
-          </button>
+      {/* INPUT CENTRALIZADO NA HOME - Minimalista e Redondo */}
+      <div className="w-full max-w-3xl animate-fadeIn" style={{ animationDelay: '200ms' }}>
+        <form 
+          onSubmit={handleSearch} 
+          className="flex items-end rounded-[32px] bg-white border border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/5 transition-all p-1.5 pr-3"
+        >
+          <div className="flex-1">
+            <AutoResizeTextarea
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="O que você deseja investigar hoje?..."
+              required
+              autoFocus
+              className="pr-2"
+            />
+          </div>
+          <div className="pb-1.5">
+            <button
+              type="submit"
+              className="bg-primary hover:bg-primary-dark text-white w-12 h-12 flex items-center justify-center rounded-full transition-all active:scale-95 shadow-sm flex-shrink-0"
+              aria-label="Enviar"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* SUGESTÕES DE PROMPTS - Espaçamento Estável */}
+      <div className="h-32 flex flex-col items-center justify-start">
+        <div className="flex flex-wrap justify-center gap-3 opacity-70">
+           {['Encontre livros sobre redes neurais', 'Artigos de 2024 sobre sustentabilidade', 'Materiais introdutórios de Python'].map(hint => (
+             <button
+               key={hint}
+               type="button"
+               onClick={() => { 
+                 setSearchQuery(hint);
+               }}
+               className="text-sm bg-white border border-gray-100 px-6 py-2.5 rounded-xl text-gray-600 hover:border-primary hover:text-primary transition-all shadow-sm font-medium hover:shadow-md active:scale-95"
+             >
+               "{hint}"
+             </button>
+           ))}
         </div>
-      </form>
+      </div>
     </div>
 
-    <div className="flex-1">
-      <AiRecommendations
-        user={user}
-        viewDetails={viewDetails}
-        toggleFavorite={toggleFavorite}
-        isFavorite={isFavorite}
-        setCurrentScreen={setCurrentScreen}
-      />
+    {/* RODAPÉ INFORMATIVO */}
+    <div className="py-8 text-center bg-gray-50/80 backdrop-blur-sm">
+       <p className="text-[10px] text-gray-400 font-medium tracking-widest uppercase">
+          Sistema Inteligente de Recomendações Acadêmicas
+       </p>
     </div>
   </div>
 );
