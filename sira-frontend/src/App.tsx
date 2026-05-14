@@ -342,7 +342,7 @@ export default function App() {
           />
         )}
 
-        <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative">
+        <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable]">
           {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
