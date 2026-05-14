@@ -48,3 +48,23 @@ export type CompleteOnboardingPayload = {
   interests: string[];
   academicGoal?: string;
 };
+
+export type CatalogItem = {
+  id: string;
+  type: 'book' | 'article';
+  title: string;
+  authors: string;
+  year: string;
+  source: string;
+  relevance: number;
+  abstract?: string;
+  image?: string | null;
+  url?: string;
+  thematicArea?: string;
+  doi?: string;
+  isbn?: string;
+  level?: string;
+  aiJustification?: string | null;
+  aiExplanation?: string | null;
+  keywords?: string[];
+};

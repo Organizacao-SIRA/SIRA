@@ -1,6 +1,7 @@
 import React from 'react';
-import { Star, FileText, BookOpen, ChevronRight } from 'lucide-react';
+import { FileText, BookOpen, ChevronRight } from 'lucide-react';
 import { StatusBadge } from './ui/StatusBadge';
+import { FavoriteButton } from './ui/FavoriteButton';
 
 export const FavoriteCard = ({ item, toggleFavorite, viewDetails }: any) => (
   <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm flex flex-col h-full hover:shadow-md transition-all">
@@ -10,13 +11,7 @@ export const FavoriteCard = ({ item, toggleFavorite, viewDetails }: any) => (
       ) : (
         <StatusBadge variant="warning" icon={<BookOpen className="w-3 h-3" />}>Livro</StatusBadge>
       )}
-      <button
-        aria-label="Remover dos favoritos"
-        onClick={() => toggleFavorite(item)}
-        className="text-primary hover:text-danger-strong transition-colors cursor-pointer"
-      >
-        <Star className="w-5 h-5" fill="currentColor" />
-      </button>
+      <FavoriteButton isFavorite={true} onToggle={() => toggleFavorite(item)} />
     </div>
     <h3 className="font-bold text-primary-dark dark:text-text text-lg mb-2 line-clamp-2 leading-tight">{item.title}</h3>
     <p className="text-sm text-text-muted mb-6 flex-grow">{item.authors} • {item.year}</p>

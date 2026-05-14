@@ -19,9 +19,10 @@ export class MaterialsController {
   async search(
     @Query('q') query: string,
     @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @CurrentUser() user?: JwtPayload,
   ): Promise<{ items: MaterialDto[]; total: number }> {
-    return this.materialsService.search(query, user?.sub, Number(page) || 0);
+    return this.materialsService.search(query, user?.sub, Number(page) || 0, Number(limit) || 4);
   }
 
   @Get('chat')
