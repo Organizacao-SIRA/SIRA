@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   searchAcademicContent, 
   chatSearchMaterials, 
@@ -50,6 +50,8 @@ export default function App() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   // Sincroniza as mudanças de estado com o sessionStorage
   useEffect(() => { sessionStorage.setItem('@sira:currentScreen', currentScreen); }, [currentScreen]);
@@ -63,6 +65,18 @@ export default function App() {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
+
+  // Restaura posição de scroll ao voltar para os resultados
+  useEffect(() => {
+    if (currentScreen === 'results') {
+      const savedY = sessionStorage.getItem('@sira:resultsScrollY');
+      if (savedY && mainRef.current) {
+        requestAnimationFrame(() => {
+          if (mainRef.current) mainRef.current.scrollTop = parseInt(savedY, 10);
+        });
+      }
+    }
+  }, [currentScreen]);
 
   // Integração com History API do browser (habilita o botão voltar do navegador)
   const AUTH_SCREENS = ['login', 'register', 'onboarding', 'interests'];
@@ -218,6 +232,9 @@ export default function App() {
   };
 
   const viewDetails = (item: any) => {
+    if (mainRef.current) {
+      sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
+    }
     setPreviousScreen(currentScreen);
     setSelectedItem(item);
     setCurrentScreen('details');
@@ -226,16 +243,22 @@ export default function App() {
   const toggleFavorite = async (item: any) => {
     const isFav = favorites.some(f => f.id === item.id);
 
+    // Optimistic update — feedback imediato antes da resposta da API
+    setFavorites(prev => isFav ? prev.filter(f => f.id !== item.id) : [...prev, item]);
+
     try {
       if (isFav) {
         await removeFavoriteApi(item.id);
-        setFavorites(prev => prev.filter(f => f.id !== item.id));
       } else {
         await addFavorite(item);
-        setFavorites(prev => [...prev, item]);
       }
-    } catch (error) {
+      setFavoriteError(null);
+    } catch (error: any) {
       console.error('Erro ao alternar favorito:', error);
+      setFavoriteError(error?.message || 'Erro desconhecido ao favoritar');
+      setTimeout(() => setFavoriteError(null), 5000);
+      // Rollback em caso de falha
+      setFavorites(prev => isFav ? [...prev, item] : prev.filter(f => f.id !== item.id));
     }
   };
 
@@ -244,7 +267,13 @@ export default function App() {
   const handleSidebarNavigation = (screen: string) => {
     if (screen === 'home') {
       if (currentScreen === 'home') return;
-      setCurrentScreen('home');
+      if (currentScreen === 'results') {
+        // Estando nos resultados → voltar ao input
+        setCurrentScreen('home');
+        return;
+      }
+      // Vindo de outra aba → restaurar resultados se existirem
+      setCurrentScreen(results.length > 0 ? 'results' : 'home');
     } else {
       setCurrentScreen(screen);
     }
@@ -275,6 +304,12 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+      {favoriteError && (
+        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
+          <span>⭐ Erro ao favoritar: {favoriteError}</span>
+          <button onClick={() => setFavoriteError(null)} className="text-red-400 hover:text-red-600 font-bold">×</button>
+        </div>
+      )}
       <Navbar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -295,7 +330,7 @@ export default function App() {
           />
         )}
 
-        <main className="flex-1 overflow-y-auto w-full relative">
+        <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative">
           {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>

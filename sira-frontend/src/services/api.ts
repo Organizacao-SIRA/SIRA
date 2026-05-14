@@ -116,13 +116,16 @@ export const addFavorite = async (material: any) => {
       authors: material.authors,
       year: String(material.year),
       source: material.source,
-      abstract: material.abstract || null,
-      url: material.url || null,
-      image: material.image || null,
+      abstract: material.abstract ?? undefined,
+      url: material.url ?? undefined,
+      image: material.image ?? undefined,
       relevance: material.relevance || 0,
     }),
   });
-  if (!response.ok) throw new Error('Erro ao adicionar aos favoritos');
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(`[${response.status}] ${Array.isArray(body.message) ? body.message.join('; ') : body.message || 'Erro ao adicionar aos favoritos'}`);
+  }
   return response.json();
 };
 
@@ -131,7 +134,10 @@ export const removeFavoriteApi = async (materialId: string) => {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
-  if (!response.ok) throw new Error('Erro ao remover dos favoritos');
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(`[${response.status}] ${body.message || 'Erro ao remover dos favoritos'}`);
+  }
   return response.json();
 };
 

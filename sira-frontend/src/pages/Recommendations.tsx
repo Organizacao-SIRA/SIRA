@@ -91,10 +91,17 @@ export const Recommendations = ({
               {/* Cards de Materiais */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-1">
-                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Materiais Selecionados</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Materiais Selecionados</h3>
+                    {results.length > 0 && (
+                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {results.length} {results.length === 1 ? 'material' : 'materiais'}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full uppercase">IA Verified</span>
                 </div>
-                
+
                 {results.map((item: any) => (
                   <RecommendationCard
                     key={item.id}
@@ -106,8 +113,15 @@ export const Recommendations = ({
                 ))}
 
                 {results.length === 0 && (
-                  <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center">
+                  <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center space-y-4">
                     <p className="text-gray-400 text-sm font-medium">Não consegui encontrar materiais específicos para este pedido nas bases acadêmicas no momento.</p>
+                    <Button
+                      onClick={() => handleSearch({ preventDefault: () => {} } as React.FormEvent)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Tentar novamente
+                    </Button>
                   </div>
                 )}
               </div>
@@ -117,7 +131,7 @@ export const Recommendations = ({
       </div>
 
       {/* RODAPÉ INFORMATIVO (Removido input para garantir turno único) */}
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent pt-10 pb-8 px-4 z-40">
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent pt-10 pb-8 px-4 z-40 pointer-events-none">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">
             SIRA AI • Análise Baseada em Claude 3.5, Google Books e Semantic Scholar.
