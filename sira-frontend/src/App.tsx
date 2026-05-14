@@ -351,7 +351,7 @@ export default function App() {
           )}
 
           {currentScreen === 'home' && (
-            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
+            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} />
           )}
           {currentScreen === 'results' && (
             <Recommendations 
