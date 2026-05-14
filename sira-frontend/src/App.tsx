@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   searchAcademicContent, 
   chatSearchMaterials, 
@@ -45,11 +45,16 @@ export default function App() {
     const saved = sessionStorage.getItem('@sira:selectedItem');
     return saved ? JSON.parse(saved) : null;
   });
+  const [lastSearchScreen, setLastSearchScreen] = useState<'home' | 'results'>(() =>
+    (sessionStorage.getItem('@sira:lastSearchScreen') as 'home' | 'results') || 'home'
+  );
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   // Sincroniza as mudanças de estado com o sessionStorage
   useEffect(() => { sessionStorage.setItem('@sira:currentScreen', currentScreen); }, [currentScreen]);
@@ -59,10 +64,43 @@ export default function App() {
   useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
   useEffect(() => { sessionStorage.setItem('@sira:aiMessage', aiMessage); }, [aiMessage]);
   useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
-  useEffect(() => { 
+  useEffect(() => {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
+  useEffect(() => { sessionStorage.setItem('@sira:lastSearchScreen', lastSearchScreen); }, [lastSearchScreen]);
+
+  // Restaura posição de scroll ao voltar para os resultados
+  useEffect(() => {
+    if (currentScreen === 'results') {
+      const savedY = sessionStorage.getItem('@sira:resultsScrollY');
+      if (savedY && mainRef.current) {
+        requestAnimationFrame(() => {
+          if (mainRef.current) mainRef.current.scrollTop = parseInt(savedY, 10);
+        });
+      }
+    }
+  }, [currentScreen]);
+
+  // Integração com History API do browser (habilita o botão voltar do navegador)
+  const AUTH_SCREENS = ['login', 'register', 'onboarding', 'interests'];
+  useEffect(() => {
+    if (AUTH_SCREENS.includes(currentScreen)) return;
+    if (!window.history.state?.screen) {
+      window.history.replaceState({ screen: currentScreen }, '');
+    } else if (window.history.state.screen !== currentScreen) {
+      window.history.pushState({ screen: currentScreen }, '');
+    }
+  }, [currentScreen]);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const target = e.state?.screen;
+      if (target) setCurrentScreen(target);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -198,6 +236,9 @@ export default function App() {
   };
 
   const viewDetails = (item: any) => {
+    if (mainRef.current) {
+      sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
+    }
     setPreviousScreen(currentScreen);
     setSelectedItem(item);
     setCurrentScreen('details');
@@ -206,16 +247,22 @@ export default function App() {
   const toggleFavorite = async (item: any) => {
     const isFav = favorites.some(f => f.id === item.id);
 
+    // Optimistic update — feedback imediato antes da resposta da API
+    setFavorites(prev => isFav ? prev.filter(f => f.id !== item.id) : [...prev, item]);
+
     try {
       if (isFav) {
         await removeFavoriteApi(item.id);
-        setFavorites(prev => prev.filter(f => f.id !== item.id));
       } else {
         await addFavorite(item);
-        setFavorites(prev => [...prev, item]);
       }
-    } catch (error) {
+      setFavoriteError(null);
+    } catch (error: any) {
       console.error('Erro ao alternar favorito:', error);
+      setFavoriteError(error?.message || 'Erro desconhecido ao favoritar');
+      setTimeout(() => setFavoriteError(null), 5000);
+      // Rollback em caso de falha
+      setFavorites(prev => isFav ? [...prev, item] : prev.filter(f => f.id !== item.id));
     }
   };
 
@@ -223,15 +270,23 @@ export default function App() {
 
   const handleSidebarNavigation = (screen: string) => {
     if (screen === 'home') {
-      // Se já estiver na aba "Recomendações" (seja IA ou resultados), não faz nada
-      if (currentScreen === 'home' || currentScreen === 'results') return;
-      // Se tiver uma busca ativa salva, volta para os resultados
-      if (results && results.length > 0) {
-        setCurrentScreen('results');
-      } else {
+      if (currentScreen === 'home') return;
+      if (currentScreen === 'results') {
+        // Dentro da seção de busca: resultados → input
+        setLastSearchScreen('home');
         setCurrentScreen('home');
+        return;
       }
+      // Vindo de outra aba → restaurar exatamente onde o usuário estava
+      setCurrentScreen(lastSearchScreen);
     } else {
+      // Saindo da seção de busca → memorizar onde estávamos e salvar scroll
+      if (currentScreen === 'home' || currentScreen === 'results') {
+        setLastSearchScreen(currentScreen as 'home' | 'results');
+        if (currentScreen === 'results' && mainRef.current) {
+          sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
+        }
+      }
       setCurrentScreen(screen);
     }
   };
@@ -240,7 +295,7 @@ export default function App() {
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
     return (
-      <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+      <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
         <Navbar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -252,7 +307,7 @@ export default function App() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+            <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
           </div>
         </div>
       </div>
@@ -260,7 +315,13 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+    <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
+      {favoriteError && (
+        <div className="fixed top-4 right-4 z-50 bg-danger-soft border border-danger-border text-danger-strong px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
+          <span>⭐ Erro ao favoritar: {favoriteError}</span>
+          <button onClick={() => setFavoriteError(null)} className="text-danger-strong hover:opacity-70 font-bold">×</button>
+        </div>
+      )}
       <Navbar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -281,16 +342,16 @@ export default function App() {
           />
         )}
 
-        <main className="flex-1 overflow-y-auto w-full relative">
+        <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative">
           {isLoading && currentScreen !== 'results' && (
-            <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+            <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Buscando...</p>
+              <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Buscando...</p>
             </div>
           )}
 
           {currentScreen === 'home' && (
-            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} setCurrentScreen={setCurrentScreen} />
+            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} />
           )}
           {currentScreen === 'results' && (
             <Recommendations 

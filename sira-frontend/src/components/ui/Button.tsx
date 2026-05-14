@@ -20,8 +20,8 @@ export const Button = ({
   
   const variants = {
     primary: 'bg-primary hover:bg-primary-dark text-white shadow-md focus:ring-primary border border-transparent',
-    secondary: 'bg-white hover:bg-gray-50 text-primary border border-gray-200 focus:ring-gray-200',
-    ghost: 'bg-transparent hover:bg-blue-50 text-primary border border-transparent focus:ring-blue-50',
+    secondary: 'bg-surface hover:bg-surface-muted text-primary border border-border-strong focus:ring-border-strong',
+    ghost: 'bg-transparent hover:bg-primary-soft text-primary border border-transparent focus:ring-primary-soft',
     danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm focus:ring-red-600 border border-transparent',
   };
 

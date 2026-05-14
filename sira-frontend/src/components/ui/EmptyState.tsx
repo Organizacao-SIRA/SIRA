@@ -20,12 +20,12 @@ export const EmptyState = ({
   className = '',
 }: EmptyStateProps) => {
   return (
-    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200 ${className}`}>
-      <div className="w-16 h-16 text-gray-300 mb-4 flex items-center justify-center">
+    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-surface rounded-2xl border-2 border-dashed border-border-strong ${className}`}>
+      <div className="w-16 h-16 text-text-subtle mb-4 flex items-center justify-center">
         {icon || <PackageOpen className="w-full h-full" />}
       </div>
-      <h3 className="text-lg font-bold text-gray-500 uppercase tracking-wide mb-2">{title}</h3>
-      <p className="text-sm text-gray-400 max-w-sm mb-6 leading-relaxed">
+      <h3 className="text-lg font-bold text-text-muted uppercase tracking-wide mb-2">{title}</h3>
+      <p className="text-sm text-text-subtle max-w-sm mb-6 leading-relaxed">
         {description}
       </p>
       {actionLabel && onAction && (

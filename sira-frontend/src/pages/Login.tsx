@@ -24,7 +24,6 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
     try {
       const response = await loginUser({ email, password });
       login(response.user, response.access_token);
-      // App.tsx decidirá a tela com base em hasCompletedOnboarding
     } catch (err: any) {
       setError(err.message || 'Erro ao tentar fazer login.');
     } finally {
@@ -33,25 +32,25 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-surface rounded-2xl shadow-lg border border-border overflow-hidden">
           <div className="p-6 md:p-8">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-50 rounded-xl mb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-soft rounded-xl mb-3">
                 <User className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-primary-dark">Acesse o SIRA+</h2>
-              <p className="text-gray-500 mt-1 text-xs font-medium">Entre com a sua conta para continuar</p>
+              <h2 className="text-2xl font-bold text-primary-dark dark:text-text">Acesse o SIRA+</h2>
+              <p className="text-text-muted mt-1 text-xs font-medium">Entre com a sua conta para continuar</p>
             </div>
 
             <form className="space-y-4" onSubmit={handleLogin}>
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100 font-medium text-center">
+                <div className="p-3 bg-danger-soft text-danger-strong text-xs rounded-xl border border-danger-border font-medium text-center">
                   {error}
                 </div>
               )}
-              
+
               <Input
                 label="E-mail"
                 type="email"
@@ -64,7 +63,7 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
 
               <div className="space-y-1">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Senha</label>
+                  <label className="text-[10px] font-bold text-text-subtle uppercase tracking-widest">Senha</label>
                   <button
                     type="button"
                     onClick={() => setCurrentScreen('forgot-password')}
@@ -93,8 +92,8 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
             </form>
           </div>
 
-          <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+          <div className="bg-surface-muted p-4 text-center border-t border-border">
+            <p className="text-xs text-text-muted">
               Novo por aqui? <button onClick={() => setCurrentScreen('register')} className="text-primary font-bold hover:underline">Crie sua conta</button>
             </p>
           </div>

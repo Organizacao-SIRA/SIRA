@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Settings, Sparkles, ChevronRight, Loader2, AlertCircle, Target } from 'lucide-react';
+import { GraduationCap, Settings, Sparkles, ChevronRight, AlertCircle, Target } from 'lucide-react';
 import { getPreferenceOptions } from '../services/api';
 import type { PreferenceOptions } from '../types';
 import { Input } from '../components/ui/Input';
@@ -14,7 +14,6 @@ interface OnboardingProps {
 }
 
 export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: OnboardingProps) => {
-  // Mantive o estado de opções da API (develop) para garantir que o formulário seja sempre atualizado
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [optionsError, setOptionsError] = useState('');
@@ -33,7 +32,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Sincronização de dados iniciais (develop) para permitir que o usuário retorne e edite
   useEffect(() => {
     if (profileData && profileData.course) {
       setFormData({
@@ -113,13 +111,12 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     setCurrentScreen('interests');
   };
 
-  // UI de Loading: Usei variáveis semânticas (primary) em vez de cores hardcoded
   if (isLoadingOptions) {
     return (
-      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando opções...</p>
+          <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando opções...</p>
         </div>
       </div>
     );
@@ -127,15 +124,12 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
 
   if (optionsError) {
     return (
-      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
-          <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-primary-dark mb-2">Erro ao carregar opções</h3>
-          <p className="text-gray-500 text-sm mb-4">{optionsError}</p>
-          <Button
-            onClick={loadPreferenceOptions}
-            className="px-6"
-          >
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
+        <div className="bg-surface rounded-2xl shadow-sm border border-border p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">Erro ao carregar opções</h3>
+          <p className="text-text-muted text-sm mb-4">{optionsError}</p>
+          <Button onClick={loadPreferenceOptions} className="px-6">
             Tentar novamente
           </Button>
         </div>
@@ -146,33 +140,31 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   const options = preferenceOptions!;
 
   return (
-    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
-      <div className="w-full max-w-2xl bg-white px-8 py-6 rounded-2xl shadow-sm border border-gray-100">
+    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
+      <div className="w-full max-w-2xl bg-surface px-8 py-6 rounded-2xl shadow-sm border border-border">
         <div className="text-center mb-4">
-          <div className="w-10 h-10 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto mb-2">
+          <div className="w-10 h-10 bg-primary-soft text-primary rounded-full flex items-center justify-center mx-auto mb-2">
             <Sparkles className="w-5 h-5" />
           </div>
-          <h2 className="text-xl font-bold text-primary-dark">Bem-vindo ao SIRA+</h2>
-          <p className="text-gray-500 mt-1 text-xs">
+          <h2 className="text-xl font-bold text-primary-dark dark:text-text">Bem-vindo ao SIRA+</h2>
+          <p className="text-text-muted mt-1 text-xs">
             Para personalizarmos as suas recomendações, precisamos conhecer seu perfil acadêmico.
           </p>
         </div>
 
         {validationErrors.length > 0 && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl">
+          <div className="mb-4 p-3 bg-danger-soft border border-danger-border rounded-xl">
             {validationErrors.map((err, i) => (
-              <p key={i} className="text-red-600 text-xs font-medium">{err}</p>
+              <p key={i} className="text-danger-strong text-xs font-medium">{err}</p>
             ))}
           </div>
         )}
 
-        {/* Usei space-y-6 para dar mais espaçamento vertical entre as seções (design-system) */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <section>
-            <h3 className="text-sm font-bold text-primary-dark mb-4 flex items-center gap-2 border-b pb-2">
+            <h3 className="text-sm font-bold text-primary-dark dark:text-text mb-4 flex items-center gap-2 border-b border-border pb-2">
               <GraduationCap className="w-4 h-4" /> Perfil Acadêmico
             </h3>
-            {/* Substituí os inputs nativos por componentes atômicos (Input/Select) para consistência visual */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Curso"
@@ -209,14 +201,13 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-primary-dark mb-4 flex items-center gap-2 border-b pb-2">
+            <h3 className="text-sm font-bold text-primary-dark dark:text-text mb-4 flex items-center gap-2 border-b border-border pb-2">
               <Settings className="w-4 h-4" /> Preferências
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-5 rounded-xl border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-surface-muted p-5 rounded-xl border border-border">
               <div className="space-y-3">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Línguas</span>
+                <span className="text-[10px] font-bold text-text-subtle uppercase block">Línguas</span>
                 <div className="space-y-2">
-                  {/* Map dinâmico baseado no backend em vez de lista estática */}
                   {options.languages.map((lang) => (
                     <Checkbox
                       key={lang}
@@ -228,7 +219,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                 </div>
               </div>
               <div className="space-y-3">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Nível</span>
+                <span className="text-[10px] font-bold text-text-subtle uppercase block">Nível</span>
                 <div className="space-y-2">
                   {options.materialLevels.map((level) => (
                     <Checkbox
@@ -241,7 +232,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
                 </div>
               </div>
               <div className="space-y-3">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Formato</span>
+                <span className="text-[10px] font-bold text-text-subtle uppercase block">Formato</span>
                 <div className="space-y-2">
                   <Checkbox
                     label="Livros"
@@ -259,9 +250,9 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-primary-dark mb-4 flex items-center gap-2 border-b pb-2">
+            <h3 className="text-sm font-bold text-primary-dark dark:text-text mb-4 flex items-center gap-2 border-b border-border pb-2">
               <Target className="w-4 h-4" /> Objetivo Acadêmico
-              <span className="text-[10px] text-gray-400 font-normal ml-1">(opcional)</span>
+              <span className="text-[10px] text-text-subtle font-normal ml-1">(opcional)</span>
             </h3>
             <Select
               value={formData.academicGoal}

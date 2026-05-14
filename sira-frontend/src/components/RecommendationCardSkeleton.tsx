@@ -3,7 +3,7 @@ import { Skeleton } from './ui/Skeleton';
 
 export const RecommendationCardSkeleton = () => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-surface p-6 rounded-lg shadow-sm border border-border-strong">
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-2">
           <Skeleton className="w-16 h-6 rounded" />
@@ -14,15 +14,15 @@ export const RecommendationCardSkeleton = () => {
 
       <Skeleton className="w-3/4 h-7 mb-2" />
       <Skeleton className="w-1/3 h-5 mb-4" />
-      
+
       <Skeleton className="w-full h-4 mb-2" />
       <Skeleton className="w-5/6 h-4 mb-4" />
 
-      <div className="flex items-start gap-2 bg-blue-50/50 border border-blue-100/50 rounded-xl px-4 py-3 mb-4">
+      <div className="flex items-start gap-2 bg-info-soft border border-info-border rounded-xl px-4 py-3 mb-4">
         <Skeleton className="w-4 h-4 rounded-full mt-0.5" />
         <div className="flex-1 space-y-2">
-           <Skeleton className="w-full h-4" />
-           <Skeleton className="w-3/4 h-4" />
+          <Skeleton className="w-full h-4" />
+          <Skeleton className="w-3/4 h-4" />
         </div>
       </div>
 

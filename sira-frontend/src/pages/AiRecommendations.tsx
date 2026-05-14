@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Brain, LogIn, AlertCircle, RefreshCw, Clock, Settings, BookOpen } from 'lucide-react';
+import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen } from 'lucide-react';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
@@ -12,11 +12,11 @@ interface AiRecommendationsProps {
   toggleFavorite: (item: any) => void;
   isFavorite: (id: string) => boolean;
   setCurrentScreen: (screen: string) => void;
-  isChatMode?: boolean; // Nova prop opcional
+  isChatMode?: boolean;
 }
 
-export const AiRecommendations = ({ 
-  user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen, isChatMode 
+export const AiRecommendations = ({
+  user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen, isChatMode
 }: AiRecommendationsProps) => {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number; preferences: boolean } | null>(null);
@@ -76,13 +76,11 @@ export const AiRecommendations = ({
     return `Baseado em: ${parts.join(' + ')}`;
   };
 
-  const isOnboardingError = error.toLowerCase().includes('preferência') || error.toLowerCase().includes('onboarding') || error.toLowerCase().includes('preferencia');
-
   if (!user) {
     return (
-      <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center shadow-sm">
+      <div className="bg-surface rounded-3xl border border-border p-10 text-center shadow-sm">
         <LogIn className="h-10 w-10 text-primary opacity-20 mx-auto mb-4" />
-        <p className="text-gray-500 text-sm mb-6">Faça login para ver suas recomendações.</p>
+        <p className="text-text-muted text-sm mb-6">Faça login para ver suas recomendações.</p>
         <Button onClick={() => setCurrentScreen('login')} size="sm">Entrar</Button>
       </div>
     );
@@ -99,9 +97,9 @@ export const AiRecommendations = ({
 
   if (error) {
     return (
-      <div className="bg-white rounded-2xl border border-red-50 p-8 text-center">
-        <AlertCircle className="h-8 w-8 text-red-300 mx-auto mb-3" />
-        <p className="text-gray-500 text-xs mb-4">{error}</p>
+      <div className="bg-surface rounded-2xl border border-danger-border p-8 text-center">
+        <AlertCircle className="h-8 w-8 text-danger-strong mx-auto mb-3" />
+        <p className="text-text-muted text-xs mb-4">{error}</p>
         <Button onClick={loadRecommendations} size="sm" variant="secondary">Tentar novamente</Button>
       </div>
     );
@@ -109,33 +107,32 @@ export const AiRecommendations = ({
 
   const basedOnMessage = getBasedOnMessage();
 
-  // Se estiver em modo CHAT, renderizamos uma versão mais enxuta
   if (isChatMode) {
     return (
       <div className="space-y-4 animate-fadeIn">
         {recommendations.length === 0 ? (
-          <div className="bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 p-10 text-center">
-            <BookOpen className="h-8 w-8 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-400 text-xs">Explore o catálogo ou faça buscas para gerar sugestões.</p>
+          <div className="bg-surface-muted rounded-2xl border border-dashed border-border-strong p-10 text-center">
+            <BookOpen className="h-8 w-8 text-text-subtle mx-auto mb-3" />
+            <p className="text-text-subtle text-xs">Explore o catálogo ou faça buscas para gerar sugestões.</p>
           </div>
         ) : (
           <>
             {recommendations.map((item: any) => (
-              <RecommendationCard 
-                key={item.id} 
-                item={item} 
-                viewDetails={viewDetails} 
-                toggleFavorite={toggleFavorite} 
-                isFavorite={isFavorite(item.id)} 
+              <RecommendationCard
+                key={item.id}
+                item={item}
+                viewDetails={viewDetails}
+                toggleFavorite={toggleFavorite}
+                isFavorite={isFavorite(item.id)}
               />
             ))}
             <div className="flex items-center justify-between pt-2 px-1">
               <div className="flex items-center gap-3">
-                 {basedOnMessage && <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">{basedOnMessage}</span>}
-                 {generatedAt && <span className="text-[9px] font-medium text-gray-300 flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {formatDate(generatedAt)}</span>}
+                {basedOnMessage && <span className="text-[9px] font-bold text-text-subtle uppercase tracking-tighter">{basedOnMessage}</span>}
+                {generatedAt && <span className="text-[9px] font-medium text-text-subtle flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {formatDate(generatedAt)}</span>}
               </div>
-              <button 
-                onClick={handleRefresh} 
+              <button
+                onClick={handleRefresh}
                 disabled={isRefreshing}
                 className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1 uppercase tracking-wider"
               >
@@ -149,11 +146,10 @@ export const AiRecommendations = ({
     );
   }
 
-  // Versão original (Página cheia - se ainda for usada em algum lugar)
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
       <div className="flex justify-between items-center mb-8 gap-4">
-        <h1 className="text-2xl font-bold text-primary-dark flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-primary-dark dark:text-text flex items-center gap-2">
           <Brain className="w-6 h-6 text-primary" /> Recomendações
         </h1>
         <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm" className="flex items-center gap-2">
@@ -163,12 +159,12 @@ export const AiRecommendations = ({
 
       <div className="space-y-4">
         {recommendations.map((item: any) => (
-          <RecommendationCard 
-            key={item.id} 
-            item={item} 
-            viewDetails={viewDetails} 
-            toggleFavorite={toggleFavorite} 
-            isFavorite={isFavorite(item.id)} 
+          <RecommendationCard
+            key={item.id}
+            item={item}
+            viewDetails={viewDetails}
+            toggleFavorite={toggleFavorite}
+            isFavorite={isFavorite(item.id)}
           />
         ))}
       </div>

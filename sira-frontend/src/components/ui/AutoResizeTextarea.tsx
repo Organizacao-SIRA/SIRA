@@ -42,7 +42,7 @@ export const AutoResizeTextarea = ({ value, maxHeight = 200, ...props }: AutoRes
       value={value}
       onKeyDown={handleKeyDown}
       rows={1}
-      className={`w-full py-4 pl-6 pr-4 text-base md:text-lg text-gray-800 outline-none placeholder-gray-300 resize-none bg-transparent block ${props.className || ''}`}
+      className={`w-full py-4 pl-6 pr-4 text-base md:text-lg text-text outline-none placeholder-text-subtle resize-none bg-transparent block ${props.className || ''}`}
       style={{ 
         minHeight: '56px',
         maxHeight: `${maxHeight}px`,

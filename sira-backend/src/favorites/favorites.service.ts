@@ -19,6 +19,7 @@ export class FavoritesService {
         source: dto.source,
         abstract: dto.abstract,
         url: dto.url,
+        image: dto.image,
         relevance: dto.relevance ?? 0,
       },
     });

@@ -3,6 +3,7 @@ import {
   FileText, BookOpen, Star, ChevronRight, Sparkles,
   Globe, Calendar, UserCircle, ArrowLeft, Tag, Link as LinkIcon, Library, ExternalLink
 } from 'lucide-react';
+import { StatusBadge } from '../components/ui/StatusBadge';
 
 interface DetailsProps {
   item: any;
@@ -13,14 +14,13 @@ interface DetailsProps {
 }
 
 export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite, isFavorite }: DetailsProps) => {
-  
-  // SEGURANÇA: Impede a tela branca se o item for nulo
+
   if (!item) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-20 text-center">
-        <BookOpen className="w-16 h-16 text-gray-200 mb-4" />
-        <h2 className="text-xl font-bold text-gray-400">Nenhum detalhe disponível</h2>
-        <button 
+        <BookOpen className="w-16 h-16 text-text-subtle mb-4" />
+        <h2 className="text-xl font-bold text-text-subtle">Nenhum detalhe disponível</h2>
+        <button
           onClick={() => setCurrentScreen('home')}
           className="mt-4 text-primary font-bold hover:underline flex items-center gap-2"
         >
@@ -38,89 +38,81 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen animate-fadeIn">
-      {/* Navegação Superior */}
-      <nav className="flex items-center text-sm text-gray-500 mb-6 font-medium">
-        <button 
-          onClick={() => setCurrentScreen(previousScreen || 'home')} 
+      <nav className="flex items-center text-sm text-text-muted mb-6 font-medium">
+        <button
+          onClick={() => setCurrentScreen(previousScreen || 'home')}
           className="flex items-center gap-2 text-primary hover:underline font-bold"
         >
           <ArrowLeft className="w-4 h-4" /> {backLabels[previousScreen] || 'Voltar'}
         </button>
-        <ChevronRight className="w-4 h-4 mx-2 text-gray-300" />
-        <span className="truncate max-w-[300px] text-gray-400">{item.title}</span>
+        <ChevronRight className="w-4 h-4 mx-2 text-text-subtle" />
+        <span className="truncate max-w-[300px] text-text-subtle">{item.title}</span>
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* COLUNA PRINCIPAL */}
+
         <div className="lg:col-span-2 space-y-8">
           <section>
             <div className="flex gap-2 mb-4">
               {item.type === 'article' ? (
-                <span className="inline-flex items-center gap-1 bg-blue-50 text-primary text-xs font-bold px-3 py-1 rounded border border-blue-200 uppercase">
-                  <FileText className="w-3 h-3" /> Artigo Científico
-                </span>
+                <StatusBadge variant="info" icon={<FileText className="w-3 h-3" />} className="text-xs px-3 py-1">Artigo Científico</StatusBadge>
               ) : (
-                <span className="inline-flex items-center gap-1 bg-yellow-50 text-yellow-800 text-xs font-bold px-3 py-1 rounded border border-yellow-200 uppercase">
-                  <BookOpen className="w-3 h-3" /> Livro Acadêmico
-                </span>
+                <StatusBadge variant="warning" icon={<BookOpen className="w-3 h-3" />} className="text-xs px-3 py-1">Livro Acadêmico</StatusBadge>
               )}
             </div>
-            
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-dark leading-tight mb-6 italic">
+
+            <h1 className="text-3xl md:text-4xl font-bold text-primary-dark dark:text-text leading-tight mb-6 italic">
               {item.title}
             </h1>
-            
-            {/* Grid de Informações Técnicas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-text bg-surface p-6 rounded-2xl border border-border shadow-sm">
               <div className="flex items-start gap-3">
-                <UserCircle className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div><span className="font-bold text-gray-900 block mb-0.5">Autores</span> {item.authors}</div>
+                <UserCircle className="w-5 h-5 text-text-subtle mt-0.5" />
+                <div><span className="font-bold text-text block mb-0.5">Autores</span> {item.authors}</div>
               </div>
               <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div><span className="font-bold text-gray-900 block mb-0.5">Ano</span> {item.year}</div>
+                <Calendar className="w-5 h-5 text-text-subtle mt-0.5" />
+                <div><span className="font-bold text-text block mb-0.5">Ano</span> {item.year}</div>
               </div>
               <div className="flex items-start gap-3">
-                <Globe className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div><span className="font-bold text-gray-900 block mb-0.5">Fonte</span> {item.source}</div>
+                <Globe className="w-5 h-5 text-text-subtle mt-0.5" />
+                <div><span className="font-bold text-text block mb-0.5">Fonte</span> {item.source}</div>
               </div>
               {item.doi && (
                 <div className="flex items-start gap-3">
-                  <LinkIcon className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div><span className="font-bold text-gray-900 block mb-0.5">DOI</span> <span className="text-primary">{item.doi}</span></div>
+                  <LinkIcon className="w-5 h-5 text-text-subtle mt-0.5" />
+                  <div><span className="font-bold text-text block mb-0.5">DOI</span> <span className="text-primary">{item.doi}</span></div>
                 </div>
               )}
               {item.isbn && (
                 <div className="flex items-start gap-3">
-                  <Tag className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div><span className="font-bold text-gray-900 block mb-0.5">ISBN</span> {item.isbn}</div>
+                  <Tag className="w-5 h-5 text-text-subtle mt-0.5" />
+                  <div><span className="font-bold text-text block mb-0.5">ISBN</span> {item.isbn}</div>
                 </div>
               )}
-              <div className="md:col-span-2 flex items-start gap-3 pt-3 border-t border-gray-50 mt-1">
-                <Library className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div><span className="font-bold text-gray-900 block mb-1">Área Temática</span> 
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">{item.thematicArea || 'Geral'}</span>
+              <div className="md:col-span-2 flex items-start gap-3 pt-3 border-t border-border mt-1">
+                <Library className="w-5 h-5 text-text-subtle mt-0.5" />
+                <div><span className="font-bold text-text block mb-1">Área Temática</span>
+                  <span className="px-2 py-1 bg-surface-subtle text-text rounded text-xs font-semibold">{item.thematicArea || 'Geral'}</span>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Resumo */}
-          <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-bold text-primary-dark mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-               Resumo Acadêmico
+          <section className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+            <h2 className="text-xl font-bold text-primary-dark dark:text-text mb-6 flex items-center gap-2 border-b border-border pb-4">
+              Resumo Acadêmico
             </h2>
-            <p className="text-gray-700 leading-relaxed text-justify text-lg">
+            <p className="text-text leading-relaxed text-justify text-lg">
               {item.abstract}
             </p>
 
             {item.keywords && item.keywords.length > 0 && (
               <div className="mt-10">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Palavras-chave</h3>
+                <h3 className="text-xs font-bold text-text-subtle uppercase tracking-widest mb-4">Palavras-chave</h3>
                 <div className="flex flex-wrap gap-2">
                   {item.keywords.map((kw: string, idx: number) => (
-                    <span key={idx} className="bg-blue-50 text-primary px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">
+                    <span key={idx} className="bg-info-soft text-info-strong px-3 py-1.5 rounded-lg text-sm font-medium border border-info-border">
                       {kw}
                     </span>
                   ))}
@@ -130,7 +122,6 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
           </section>
         </div>
 
-        {/* COLUNA LATERAL (SIDEBAR) */}
         <div className="space-y-6">
           <div className="bg-accent-light border-l-4 border-accent p-6 rounded-r-2xl shadow-sm">
             <div className="flex items-center gap-2 mb-4">
@@ -146,15 +137,15 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
                 <span>{item.relevance || 90}%</span>
               </div>
               <div className="w-full bg-white/50 rounded-full h-2">
-                <div 
-                  className="bg-success h-2 rounded-full transition-all" 
+                <div
+                  className="bg-success h-2 rounded-full transition-all"
                   style={{ width: `${item.relevance || 90}%` }}
                 ></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+          <div className="bg-surface p-4 rounded-2xl border border-border shadow-sm space-y-3">
             {item.url && (
               <a
                 href={item.url}
@@ -170,8 +161,8 @@ export const Details = ({ item, setCurrentScreen, previousScreen, toggleFavorite
               onClick={() => toggleFavorite(item)}
               className={`w-full py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 isFavorite(item.id)
-                  ? 'bg-blue-50 border-primary text-primary'
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-primary'
+                  ? 'bg-primary-soft border-primary text-primary'
+                  : 'bg-surface border-border-strong text-text hover:border-primary'
               }`}
             >
               <Star className="w-5 h-5" fill={isFavorite(item.id) ? 'currentColor' : 'none'} />

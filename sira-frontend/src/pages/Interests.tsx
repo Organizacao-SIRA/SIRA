@@ -85,8 +85,6 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
     try {
       const updatedUser = await completeOnboarding(payload);
-      
-      // Sincroniza o estado global de autenticação
       updateUser({ hasCompletedOnboarding: true });
 
       setProfileData({
@@ -108,10 +106,10 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
   if (isLoadingTopics) {
     return (
-      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
+          <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
         </div>
       </div>
     );
@@ -119,15 +117,12 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
   if (error && topics.length === 0) {
     return (
-      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
-          <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-primary-dark mb-2">Erro ao carregar temas</h3>
-          <p className="text-gray-500 text-sm mb-4">{error}</p>
-          <Button
-            onClick={loadTopics}
-            className="px-6"
-          >
+      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
+        <div className="bg-surface rounded-2xl shadow-sm border border-border p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">Erro ao carregar temas</h3>
+          <p className="text-text-muted text-sm mb-4">{error}</p>
+          <Button onClick={loadTopics} className="px-6">
             Tentar novamente
           </Button>
         </div>
@@ -136,19 +131,19 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
   }
 
   return (
-    <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 overflow-hidden">
-      <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 animate-fadeIn">
+    <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted overflow-hidden">
+      <div className="w-full max-w-2xl bg-surface p-6 md:p-8 rounded-2xl shadow-lg border border-border animate-fadeIn">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-primary-dark">Quais temas te interessam?</h2>
-          <p className="text-gray-500 mt-1 text-xs">
+          <h2 className="text-2xl font-bold text-primary-dark dark:text-text">Quais temas te interessam?</h2>
+          <p className="text-text-muted mt-1 text-xs">
             Selecione pelo menos <span className="font-bold text-primary">3 áreas</span> para personalizar suas recomendações.
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-            <p className="text-red-600 text-xs font-medium">{error}</p>
+          <div className="mb-4 p-3 bg-danger-soft border border-danger-border rounded-xl flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-danger-strong mt-0.5 flex-shrink-0" />
+            <p className="text-danger-strong text-xs font-medium">{error}</p>
           </div>
         )}
 
@@ -161,15 +156,17 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
                 key={topic.id}
                 onClick={() => toggleTheme(topic.id)}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer h-24 relative ${
-                  isSelected ? 'border-primary bg-blue-50/50 shadow-sm' : 'border-gray-50 bg-gray-50/50 hover:border-gray-200'
+                  isSelected
+                    ? 'border-primary bg-primary-soft shadow-sm'
+                    : 'border-border bg-surface-muted hover:border-border-strong'
                 }`}
                 title={topic.description}
               >
                 {isSelected && (
                   <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />
                 )}
-                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-gray-300'}`} />
-                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-primary-dark' : 'text-gray-600'}`}>
+                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-text-subtle'}`} />
+                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-primary' : 'text-text-muted'}`}>
                   {topic.label}
                 </span>
               </button>
@@ -177,16 +174,16 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           })}
         </div>
 
-        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+        <div className="flex justify-between items-center pt-4 border-t border-border">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCurrentScreen('onboarding')}
-              className="text-gray-500 hover:text-primary-dark text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
+              className="text-text-muted hover:text-primary text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               Voltar
             </button>
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${canFinish ? 'text-green-600' : 'text-gray-400'}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${canFinish ? 'text-success-strong' : 'text-text-subtle'}`}>
               {selected.length} / 3 mín. selecionados
             </span>
           </div>
