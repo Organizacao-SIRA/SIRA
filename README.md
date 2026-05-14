@@ -8,6 +8,7 @@ O SIRA+ é um ecossistema acadêmico moderno projetado para agregar, recomendar 
     *   **Segurança:** Autenticação via JWT (JSON Web Tokens) e Hashing de senhas utilizando o algoritmo moderno **scrypt** (módulo nativo `node:crypto`).
     *   **Persistência:** PostgreSQL 17 gerenciado via **Prisma ORM**.
     *   **Integrações:** Agregação em tempo real das APIs Google Books e Semantic Scholar.
+    *   **IA:** Busca conversacional e ranking de materiais via Anthropic (Claude), com fallback automático para Google Gemini.
 *   **Frontend (React 19):** Interface performática construída com Vite 8.
     *   **Estado Global:** Context API para gerenciamento de sessão e persistência de token em LocalStorage.
     *   **Estilização:** Tailwind CSS 4 para uma interface limpa e responsiva.
@@ -16,111 +17,206 @@ O SIRA+ é um ecossistema acadêmico moderno projetado para agregar, recomendar 
 ## ✨ Funcionalidades Implementadas
 
 - [x] **Sistema de Usuários:** Registro e Login com proteção de rotas.
-- [x] **Busca Acadêmica:** Pesquisa integrada em múltiplas bases científicas com cache inteligente em memória.
-- [x] **Favoritos Persistentes:** Salve artigos e livros diretamente no seu perfil. Os dados são sincronizados no PostgreSQL e permanecem disponíveis em qualquer dispositivo.
-- [x] **Catálogo Integrado:** Navegação por categorias (Ciências da Computação, Direito, etc.) com paginação simulada via APIs externas.
+- [x] **Busca Conversacional por IA:** Chat inteligente que interpreta o pedido, busca nas bases acadêmicas e retorna uma seleção justificada.
+- [x] **Busca Acadêmica Direta:** Pesquisa integrada em múltiplas bases científicas com cache inteligente em memória e ranking por IA.
+- [x] **Recomendações Personalizadas:** Sugestões baseadas no perfil, favoritos e histórico de buscas do usuário.
+- [x] **Favoritos Persistentes:** Salve artigos e livros diretamente no seu perfil.
+- [x] **Catálogo Integrado:** Navegação por categorias com paginação via APIs externas.
 - [x] **Documentação Automática:** Swagger UI configurado para testes rápidos dos endpoints.
 
 ## 🏗️ Padrões de Platform Engineering
 
-1.  **Zero-Dependency Security:** Uso de módulos nativos do Node.js para criptografia, eliminando vulnerabilidades de pacotes de terceiros e problemas de compilação C++ em containers.
-2.  **Hot Reload Full-Stack:** Docker Compose Watch para sincronização automática de código e rebuild apenas quando necessário.
-3.  **Dockerização Otimizada:** Imagens multi-stage para manter o ambiente de produção leve e seguro, rodando sob usuário não-root.
-4.  **Resiliência de Inicialização:** Sistema de healthcheck garantindo que a API só inicie após o banco de dados estar pronto para conexões.
+1.  **AI Provider Agnóstico:** Abstração `AiProvider` com fallback automático Claude → Gemini, sem impacto no código de negócio.
+2.  **Zero-Dependency Security:** Uso de módulos nativos do Node.js para criptografia.
+3.  **Hot Reload Full-Stack:** Docker Compose Watch para sincronização automática de código.
+4.  **Dockerização Otimizada:** Imagens multi-stage para produção leve e segura, rodando sob usuário não-root.
+5.  **Resiliência de Inicialização:** Healthcheck garantindo que a API só inicie após o banco estar pronto.
 
-## 🚀 Como Iniciar o Projeto
+---
 
-### 1. Requisitos
-- Docker e Docker Compose instalados.
+## 🚀 Como Executar o Projeto
 
-### 2. Configuração de Ambiente
-Antes de subir os containers, crie os arquivos `.env` a partir dos exemplos:
+Há dois modos de execução. Escolha o que se encaixa no seu objetivo:
+
+| Modo | Quando usar |
+|------|-------------|
+| **Local** | Desenvolvimento diário — hot reload nativo, debug com breakpoint, iteração rápida |
+| **Docker Completo** | Testar integração entre serviços, simular ambiente de produção antes de um merge |
+
+---
+
+### Pré-requisitos (ambos os modos)
+
+- Node.js 22+
+- Docker e Docker Compose
+- Chaves de API (veja abaixo)
+
+#### Chaves de API necessárias
+
+| Variável | Obrigatória | Onde obter |
+|----------|-------------|------------|
+| `ANTHROPIC_API_KEY` | **Sim** — toda a funcionalidade de IA depende dela | [console.anthropic.com](https://console.anthropic.com) |
+| `GEMINI_API_KEY` | Não — fallback automático se o Claude estiver indisponível | [aistudio.google.com](https://aistudio.google.com) |
+| `GOOGLE_BOOKS_API_KEY` | Não — aumenta o limite de requisições ao Google Books | [console.cloud.google.com](https://console.cloud.google.com) |
+| `SEMANTIC_SCHOLAR_API_KEY` | Não — aumenta o limite de requisições ao Semantic Scholar | [api.semanticscholar.org](https://api.semanticscholar.org) |
+
+---
+
+### Modo 1 — Desenvolvimento Local
+
+Roda apenas o banco de dados no Docker. Backend e frontend sobem diretamente na sua máquina com hot reload nativo do Node e do Vite.
+
+**1. Configure as variáveis de ambiente**
+
 ```bash
 cp sira-backend/.env.example sira-backend/.env
 cp sira-frontend/.env.example sira-frontend/.env
 ```
 
-Edite o arquivo `sira-backend/.env` e configure sua chave secreta:
+Edite `sira-backend/.env` com suas chaves. O `DATABASE_URL` já aponta para `localhost:5433` (porta exposta pelo container do Postgres):
+
 ```env
-DATABASE_URL="postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public"
-JWT_SECRET="sua_chave_secreta_aqui"
-# Opcional para aumentar limites de busca
-GOOGLE_BOOKS_API_KEY=""
-SEMANTIC_SCHOLAR_API_KEY=""
+ANTHROPIC_API_KEY="sua_chave_aqui"
+JWT_SECRET="uma_string_secreta_qualquer"
 ```
 
-Observacao: no ambiente Docker, o backend acessa o banco por `postgres:5432`. A porta publicada para acesso a partir da sua maquina host e `localhost:5433`.
+**2. Suba apenas o banco de dados**
 
-### 3. Subir o Ambiente
+```bash
+docker compose up sira-postgres -d
+```
+
+**3. Instale as dependências e rode os serviços**
+
+Abra dois terminais:
+
+```bash
+# Terminal 1 — Backend (http://localhost:3000)
+cd sira-backend
+npm install
+npm run dev
+```
+
+```bash
+# Terminal 2 — Frontend (http://localhost:5173)
+cd sira-frontend
+npm install
+npm run dev
+```
+
+**4. Acesse**
+
+- **Interface:** [http://localhost:5173](http://localhost:5173)
+- **Swagger:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- **Healthcheck:** [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
+
+> **Nota:** No modo local, o frontend aponta para `http://localhost:3000` (sem Docker) via `VITE_API_URL` no `.env`.
+
+---
+
+### Modo 2 — Docker Completo
+
+Tudo containerizado. Simula o ambiente de produção e valida a comunicação entre os serviços.
+
+**1. Configure as variáveis de ambiente**
+
+```bash
+cp sira-backend/.env.example sira-backend/.env
+cp sira-frontend/.env.example sira-frontend/.env
+```
+
+Edite `sira-backend/.env`. O `DATABASE_URL` para Docker usa o hostname interno `postgres`:
+
+```env
+DATABASE_URL="postgresql://sira_user:sira_password@postgres:5432/sira_db?schema=public"
+ANTHROPIC_API_KEY="sua_chave_aqui"
+JWT_SECRET="uma_string_secreta_qualquer"
+```
+
+**2. Suba o ambiente completo**
+
 ```bash
 docker compose up --watch
 ```
 
-Esse comando faz o build das imagens, sobe os containers e ativa o hot reload para desenvolvimento.
+Esse comando faz o build das imagens, sobe todos os containers e ativa o hot reload via Docker Compose Watch.
 
-### 4. Acessar os Serviços
+**3. Acesse**
+
 - **Interface:** [http://localhost:5173](http://localhost:5173)
-- **Documentação Swagger:** [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
+- **Swagger:** [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
 - **Healthcheck:** [http://localhost:3002/api/v1/health](http://localhost:3002/api/v1/health)
-- **Interface pgAdmin:** [http://localhost:5050](http://localhost:5050) *(Login: admin@sira.com / Senha: admin)*
-- **PostgreSQL no host:** `localhost:5433`
+- **PostgreSQL (host):** `localhost:5433`
 
-### 5. Acompanhar os Logs
-Se quiser acompanhar os logs separadamente, abra 2 terminais:
-- Frontend: `docker compose logs -f frontend`
-- Backend: `docker compose logs -f backend`
+> **pgAdmin (opcional):** Para subir a interface gráfica do banco, use:
+> ```bash
+> docker compose --profile tools up -d pgadmin
+> ```
+> Acesse [http://localhost:5050](http://localhost:5050) — Login: `admin@sira.com` / Senha: `admin`
+
+**4. Acompanhar logs**
+
+```bash
+# Todos os serviços
+docker compose logs -f
+
+# Separadamente
+docker compose logs -f sira-backend
+docker compose logs -f sira-frontend
+```
 
 ---
 
 ## 🛠️ Comandos de Desenvolvimento e Manutenção
 
-### Banco de Dados (Prisma via Docker)
-Como o projeto é orquestrado via Docker, todos os comandos do banco devem ser executados através do container do backend para garantir paridade de ambiente.
+### Banco de Dados (Prisma)
 
-- **Sincronizar Schema com Banco (Sem histórico):**
-  ```bash
-  docker exec sira-backend npx prisma db push
-  ```
+No modo **Local**, rode os comandos diretamente na pasta `sira-backend`:
 
-- **Gerar Tipos do Prisma Client (Sync TypeScript):**
-  Necessário sempre que o Schema mudar para evitar erros de compilação.
-  ```bash
-  docker exec sira-backend npx prisma generate
-  ```
-
-- **Criar Histórico de Migração (Modo DevOps):**
-  ```bash
-  docker exec sira-backend npx prisma migrate dev --name "descricao_da_mudanca"
-  ```
-
-### Solução de Problemas (Troubleshooting)
-
-**1. Erro de compilação TS2353 (Propriedade inexistente no Prisma):**
-Se você alterou o schema e o compilador do NestJS continua reclamando que o campo não existe, o Docker pode estar usando uma versão cacheada do `node_modules`. Execute:
 ```bash
-# 1. Atualiza o banco e gera novos tipos localmente
-docker exec sira-backend npx prisma db push
-docker exec sira-backend npx prisma generate
-
-# 2. Força o rebuild do backend sem usar cache do Docker
-docker compose build --no-cache backend
-docker compose up -d backend
+cd sira-backend
+npx prisma generate          # Regenera os tipos do client (obrigatório após mudar o schema)
+npx prisma db push           # Sincroniza o schema com o banco sem criar histórico
+npx prisma migrate dev --name "descricao"  # Cria uma migração com histórico
 ```
 
-**2. Containers não sincronizam (Hot Reload parado):**
-Se o `docker compose up --watch` parar de refletir mudanças:
+No modo **Docker**, prefixe com `docker exec sira-backend`:
+
 ```bash
-# Limpa estados residuais e reinicia
+docker exec sira-backend npx prisma generate
+docker exec sira-backend npx prisma db push
+docker exec sira-backend npx prisma migrate dev --name "descricao"
+```
+
+---
+
+## 🔧 Solução de Problemas
+
+**Erro TS2353 — propriedade inexistente no Prisma Client:**
+Acontece após mudar o `schema.prisma` ou atualizar a versão do Prisma sem regenerar o client.
+```bash
+# Modo Local
+cd sira-backend && npx prisma generate
+
+# Modo Docker
+docker exec sira-backend npx prisma generate
+# Se persistir, force o rebuild:
+docker compose build --no-cache sira-backend && docker compose up -d sira-backend
+```
+
+**Hot reload parou de funcionar (modo Docker):**
+```bash
 docker compose down
 docker compose up --watch
 ```
 
-**3. Reset total do ambiente:**
+**Reset total do ambiente Docker:**
 ```bash
 docker compose down -v && docker compose up --build --watch
 ```
 
-### Orquestração (Docker)
-- **Ver logs em tempo real:** `docker compose logs -f`
-- **Ver status dos containers:** `docker compose ps`
-- **Verificar se banco está Healthy:** `docker inspect -f '{{.State.Health.Status}}' sira-postgres`
+**Ver status dos containers:**
+```bash
+docker compose ps
+docker inspect -f '{{.State.Health.Status}}' sira-postgres
+```
