@@ -59,10 +59,30 @@ export default function App() {
   useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
   useEffect(() => { sessionStorage.setItem('@sira:aiMessage', aiMessage); }, [aiMessage]);
   useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
-  useEffect(() => { 
+  useEffect(() => {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
+
+  // Integração com History API do browser (habilita o botão voltar do navegador)
+  const AUTH_SCREENS = ['login', 'register', 'onboarding', 'interests'];
+  useEffect(() => {
+    if (AUTH_SCREENS.includes(currentScreen)) return;
+    if (!window.history.state?.screen) {
+      window.history.replaceState({ screen: currentScreen }, '');
+    } else if (window.history.state.screen !== currentScreen) {
+      window.history.pushState({ screen: currentScreen }, '');
+    }
+  }, [currentScreen]);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const target = e.state?.screen;
+      if (target) setCurrentScreen(target);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -223,14 +243,8 @@ export default function App() {
 
   const handleSidebarNavigation = (screen: string) => {
     if (screen === 'home') {
-      // Se já estiver na aba "Recomendações" (seja IA ou resultados), não faz nada
-      if (currentScreen === 'home' || currentScreen === 'results') return;
-      // Se tiver uma busca ativa salva, volta para os resultados
-      if (results && results.length > 0) {
-        setCurrentScreen('results');
-      } else {
-        setCurrentScreen('home');
-      }
+      if (currentScreen === 'home') return;
+      setCurrentScreen('home');
     } else {
       setCurrentScreen(screen);
     }

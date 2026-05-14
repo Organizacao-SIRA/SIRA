@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Sparkles, X, User, Bot, ChevronRight
+  Sparkles, ArrowLeft, User, Bot, ChevronRight
 } from 'lucide-react';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { Button } from '../components/ui/Button';
@@ -33,18 +33,19 @@ export const Recommendations = ({
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn flex flex-col h-full min-h-[calc(100vh-68px)] relative">
       {/* HEADER / VOLTAR */}
       <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-4">
-        <div className="flex items-center gap-2">
-           <div className="p-2 bg-primary/10 rounded-lg">
-              <Sparkles className="w-5 h-5 text-primary" />
-           </div>
-           <h1 className="text-xl font-bold text-primary-dark">Busca Inteligente</h1>
-        </div>
-        <button 
+        <button
           onClick={handleClearSearch}
-          className="text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 text-sm font-medium"
+          className="flex items-center gap-2 text-primary-dark hover:text-primary transition-colors font-semibold group"
         >
-          <X className="w-4 h-4" /> Nova pesquisa
+          <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
+          <span className="text-sm">Nova pesquisa</span>
         </button>
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <h1 className="text-xl font-bold text-primary-dark hidden sm:block">Busca Inteligente</h1>
+        </div>
       </div>
 
       <div className="flex-1 space-y-10 pb-40">
