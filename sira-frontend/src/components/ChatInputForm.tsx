@@ -13,7 +13,7 @@ interface ChatInputFormProps {
 export const ChatInputForm = ({ value, onChange, onSubmit, placeholder, autoFocus }: ChatInputFormProps) => (
   <form
     onSubmit={onSubmit}
-    className="flex items-end rounded-[32px] bg-white border border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/5 transition-all p-1.5 pr-3"
+    className="flex items-end rounded-[32px] bg-surface border border-border-strong focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/5 transition-all p-1.5 pr-3"
   >
     <div className="flex-1">
       <AutoResizeTextarea

@@ -1,6 +1,7 @@
 import React from 'react';
 import { RecommendationCard } from './RecommendationCard';
 import { Button } from './ui/Button';
+import { StatusBadge } from './ui/StatusBadge';
 
 interface MaterialsSectionProps {
   results: any[];
@@ -14,14 +15,14 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
   <div className="space-y-4">
     <div className="flex items-center justify-between px-1">
       <div className="flex items-center gap-2">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Materiais Selecionados</h3>
+        <h3 className="text-[10px] font-bold text-text-subtle uppercase tracking-[0.2em]">Materiais Selecionados</h3>
         {results.length > 0 && (
-          <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold text-text-muted bg-surface-subtle px-2 py-0.5 rounded-full">
             {results.length} {results.length === 1 ? 'material' : 'materiais'}
           </span>
         )}
       </div>
-      <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full uppercase">IA Verified</span>
+      <StatusBadge variant="success" className="rounded-full border-0">IA Verified</StatusBadge>
     </div>
 
     {results.map((item: any) => (
@@ -35,8 +36,8 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
     ))}
 
     {results.length === 0 && (
-      <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center space-y-4">
-        <p className="text-gray-400 text-sm font-medium">
+      <div className="bg-surface p-8 rounded-2xl border border-dashed border-border-strong text-center space-y-4">
+        <p className="text-text-subtle text-sm font-medium">
           Não consegui encontrar materiais específicos para este pedido nas bases acadêmicas no momento.
         </p>
         <Button onClick={onRetry} variant="secondary" size="sm">

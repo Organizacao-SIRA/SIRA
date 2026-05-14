@@ -36,30 +36,30 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-gray-50 animate-fadeIn">
+    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-surface rounded-2xl shadow-lg border border-border overflow-hidden">
           <div className="p-6 md:p-8">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-50 rounded-xl mb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-soft rounded-xl mb-3">
                 <UserPlus className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-primary-dark">Criar Conta</h2>
-              <p className="text-gray-500 mt-1 text-xs font-medium">Junte-se ao SIRA+ </p>
+              <h2 className="text-2xl font-bold text-primary-dark dark:text-text">Criar Conta</h2>
+              <p className="text-text-muted mt-1 text-xs font-medium">Junte-se ao SIRA+ </p>
             </div>
 
             <form className="space-y-4" onSubmit={handleRegister}>
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100 font-medium text-center">
+                <div className="p-3 bg-danger-soft text-danger-strong text-xs rounded-xl border border-danger-border font-medium text-center">
                   {error}
                 </div>
               )}
               {success && (
-                <div className="p-3 bg-green-50 text-green-600 text-xs rounded-xl border border-green-100 font-medium text-center">
+                <div className="p-3 bg-success-soft text-success-strong text-xs rounded-xl border border-success-border font-medium text-center">
                   Cadastro realizado com sucesso! Redirecionando...
                 </div>
               )}
-              
+
               <Input
                 label="Nome Completo"
                 type="text"
@@ -101,8 +101,8 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
             </form>
           </div>
 
-          <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+          <div className="bg-surface-muted p-4 text-center border-t border-border">
+            <p className="text-xs text-text-muted">
               Já possui uma conta? <button onClick={() => setCurrentScreen('login')} className="text-primary font-bold hover:underline">Faça login</button>
             </p>
           </div>

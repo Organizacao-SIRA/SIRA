@@ -16,12 +16,12 @@ export const ErrorState = ({
   className = '',
 }: ErrorStateProps) => {
   return (
-    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-red-50/50 rounded-2xl border border-red-100 ${className}`}>
-      <div className="w-14 h-14 text-red-400 mb-4 flex items-center justify-center">
+    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-danger-soft rounded-2xl border border-danger-border ${className}`}>
+      <div className="w-14 h-14 text-danger-strong mb-4 flex items-center justify-center">
         <AlertTriangle className="w-full h-full" />
       </div>
-      <h3 className="text-xl font-bold text-red-900 mb-2">{title}</h3>
-      <p className="text-sm text-red-700 max-w-md mb-6 leading-relaxed">
+      <h3 className="text-xl font-bold text-danger-strong mb-2">{title}</h3>
+      <p className="text-sm text-danger-strong max-w-md mb-6 leading-relaxed">
         {message}
       </p>
       {onRetry && (

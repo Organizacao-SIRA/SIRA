@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
 import { NavLogoutButton } from './NavLogoutButton';
+import { ThemeToggle } from './ui/ThemeToggle';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
@@ -31,6 +32,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
           />
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {user ? (
               <>
                 <UserProfileChip

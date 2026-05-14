@@ -19,7 +19,7 @@ interface HomeProps {
 }
 
 export const Home = ({ searchQuery, setSearchQuery, handleSearch, user }: HomeProps) => (
-  <div className="flex-1 flex flex-col bg-gray-50 min-h-[calc(100vh-68px)] animate-fadeIn relative overflow-hidden">
+  <div className="flex-1 flex flex-col bg-surface-muted min-h-[calc(100vh-68px)] animate-fadeIn relative overflow-hidden">
     <div className="flex-1 flex flex-col items-center justify-center max-w-4xl w-full mx-auto px-4 pt-10 pb-10 space-y-8">
 
       <AiGreeting userName={user?.name?.split(' ')[0]} />

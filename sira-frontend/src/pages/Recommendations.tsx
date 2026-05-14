@@ -32,19 +32,19 @@ export const Recommendations = ({
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn flex flex-col h-full min-h-[calc(100vh-68px)] relative">
 
-      <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-4">
+      <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
         <button
           onClick={handleClearSearch}
-          className="flex items-center gap-2 text-primary-dark hover:text-primary transition-colors font-semibold group"
+          className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group"
         >
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
           <span className="text-sm">Nova pesquisa</span>
         </button>
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-primary-soft rounded-lg">
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-primary-dark hidden sm:block">Busca Inteligente</h1>
+          <h1 className="text-xl font-bold text-primary-dark dark:text-text hidden sm:block">Busca Inteligente</h1>
         </div>
       </div>
 

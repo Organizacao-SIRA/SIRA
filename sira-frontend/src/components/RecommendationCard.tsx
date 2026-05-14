@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FileText, BookOpen, Sparkles, Star, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { StatusBadge } from './ui/StatusBadge';
 
 interface RecommendationCardProps {
   item: any;
@@ -26,43 +27,37 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
 
   return (
     <div
-      className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:scale-[1.015] transition-all animate-fadeIn cursor-pointer group"
+      className="bg-surface p-6 rounded-2xl shadow-sm border border-border hover:shadow-md hover:scale-[1.015] transition-all animate-fadeIn cursor-pointer group"
       onClick={() => viewDetails(item)}
     >
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-2">
           {item.type === 'article' ? (
-            <span className="inline-flex items-center gap-1 bg-blue-50 text-primary text-[10px] font-bold px-2.5 py-1 rounded-md border border-blue-100 uppercase tracking-wider">
-              <FileText className="w-3 h-3" /> Artigo
-            </span>
+            <StatusBadge variant="info" icon={<FileText className="w-3 h-3" />}>Artigo</StatusBadge>
           ) : (
-            <span className="inline-flex items-center gap-1 bg-yellow-50 text-yellow-800 text-[10px] font-bold px-2.5 py-1 rounded-md border border-yellow-200 uppercase tracking-wider">
-              <BookOpen className="w-3 h-3" /> Livro
-            </span>
+            <StatusBadge variant="warning" icon={<BookOpen className="w-3 h-3" />}>Livro</StatusBadge>
           )}
-          <span className="inline-flex items-center text-gray-400 text-[10px] font-bold px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 uppercase tracking-wider">
-            {item.source}
-          </span>
+          <StatusBadge variant="neutral">{item.source}</StatusBadge>
         </div>
-        <div className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-100 text-[10px] font-bold uppercase tracking-wider">
-          <Sparkles className="w-3 h-3" /> {item.relevance}% Relevância
-        </div>
+        <StatusBadge variant="success" icon={<Sparkles className="w-3 h-3" />}>
+          {item.relevance}% Relevância
+        </StatusBadge>
       </div>
 
-      <h3 className="text-xl font-bold text-primary-dark mb-2 leading-tight group-hover:text-primary transition-colors">
+      <h3 className="text-xl font-bold text-primary-dark dark:text-text mb-2 leading-tight group-hover:text-primary transition-colors">
         {item.title}
       </h3>
-      <p className="text-sm text-gray-500 mb-4 font-medium">{item.authors} • {item.year}</p>
+      <p className="text-sm text-text-muted mb-4 font-medium">{item.authors} • {item.year}</p>
 
       {item.aiExplanation && (
-        <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
-          <Brain className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-primary font-medium italic">{item.aiExplanation}</p>
+        <div className="flex items-start gap-2 bg-info-soft border border-info-border rounded-xl px-4 py-3 mb-4">
+          <Brain className="w-4 h-4 text-info-strong mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-info-strong font-medium italic">{item.aiExplanation}</p>
         </div>
       )}
 
       <div className="mb-5">
-        <p className={`text-gray-600 text-sm leading-relaxed italic ${expanded ? '' : 'line-clamp-2'}`}>
+        <p className={`text-text-muted text-sm leading-relaxed italic ${expanded ? '' : 'line-clamp-2'}`}>
           {item.abstract}
         </p>
         {abstractIsLong && (
@@ -78,7 +73,7 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
         )}
       </div>
 
-      <div className="flex justify-end pt-4 border-t border-gray-50">
+      <div className="flex justify-end pt-4 border-t border-border">
         <button
           type="button"
           aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -87,7 +82,7 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all disabled:opacity-60 ${
             isFavorite
               ? 'bg-primary border-primary text-white shadow-md hover:bg-primary-dark'
-              : 'bg-white border-gray-200 text-primary hover:bg-gray-50'
+              : 'bg-surface border-border-strong text-primary hover:bg-surface-muted'
           }`}
         >
           {isTogglingFavorite

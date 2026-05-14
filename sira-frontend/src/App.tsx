@@ -295,7 +295,7 @@ export default function App() {
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
     return (
-      <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+      <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
         <Navbar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -307,7 +307,7 @@ export default function App() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+            <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
           </div>
         </div>
       </div>
@@ -315,11 +315,11 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+    <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
       {favoriteError && (
-        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
+        <div className="fixed top-4 right-4 z-50 bg-danger-soft border border-danger-border text-danger-strong px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
           <span>⭐ Erro ao favoritar: {favoriteError}</span>
-          <button onClick={() => setFavoriteError(null)} className="text-red-400 hover:text-red-600 font-bold">×</button>
+          <button onClick={() => setFavoriteError(null)} className="text-danger-strong hover:opacity-70 font-bold">×</button>
         </div>
       )}
       <Navbar
@@ -344,9 +344,9 @@ export default function App() {
 
         <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative">
           {isLoading && currentScreen !== 'results' && (
-            <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+            <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Buscando...</p>
+              <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Buscando...</p>
             </div>
           )}
 
