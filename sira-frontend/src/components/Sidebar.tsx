@@ -1,5 +1,6 @@
-import { Library, Sparkles, Bookmark, Settings } from 'lucide-react';
 import type { AuthUser } from '../types';
+import { SidebarNavItem } from './ui/SidebarNavItem';
+import { SIDEBAR_ITEMS } from './sidebar/sidebarItems';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -16,57 +17,56 @@ export const Sidebar = ({
   setCurrentScreen,
   user,
 }: SidebarProps) => {
+  const menuItems = SIDEBAR_ITEMS.filter(item => !item.authRequired || !!user);
 
-  const menuItems = [
-    { id: 'catalog', label: 'Catálogo de Livros', icon: Library },
-    { id: 'home', label: 'Recomendações', icon: Sparkles },
-    { id: 'favorites', label: 'Meus Favoritos', icon: Bookmark },
-    ...(user ? [{ id: 'profile', label: 'Configurações', icon: Settings }] : []),
-  ];
+  const isActive = (id: string) =>
+    currentScreen === id ||
+    (id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
+
+  const handleItemClick = (id: string) => {
+    setCurrentScreen(id);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
+  };
 
   return (
     <aside
-      className={`${
-        isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'
-      } absolute md:relative z-40 bg-surface border-r border-border-strong transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 flex flex-col shadow-lg md:shadow-none min-h-[calc(100vh-68px)]`}
+      aria-label="Menu lateral"
+      className={`
+        flex-shrink-0 flex flex-col
+        bg-surface border-r border-border-strong
+        transition-all duration-300 ease-in-out
+        absolute md:relative z-40
+        min-h-[calc(100vh-68px)] shadow-lg md:shadow-none
+        overflow-hidden
+        ${isSidebarOpen
+          ? 'w-64 translate-x-0'
+          : 'w-0 -translate-x-full md:w-16 md:translate-x-0'
+        }
+      `}
     >
+      {/* Cabeçalho visível apenas em mobile */}
       <div className="p-4 border-b border-border bg-surface-muted flex justify-between items-center md:hidden">
         <span className="font-bold text-primary-dark dark:text-text">Menu Principal</span>
         <button
           aria-label="Fechar menu"
           onClick={() => setIsSidebarOpen(false)}
-          className="cursor-pointer text-text-muted hover:text-danger-strong text-2xl"
+          className="cursor-pointer text-text-muted hover:text-danger-strong text-2xl leading-none"
         >
           &times;
         </button>
       </div>
 
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 py-4" aria-label="Navegação principal">
         <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentScreen === item.id ||
-              (item.id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
-
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => {
-                    setCurrentScreen(item.id);
-                    if (window.innerWidth < 768) setIsSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors cursor-pointer ${
-                    isActive
-                      ? 'bg-primary-soft text-primary border-l-4 border-primary'
-                      : 'text-text hover:bg-surface-subtle border-l-4 border-transparent'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-primary' : 'text-text-subtle'}`} />
-                  {item.label}
-                </button>
-              </li>
-            );
-          })}
+          {menuItems.map(item => (
+            <SidebarNavItem
+              key={item.id}
+              item={item}
+              isActive={isActive(item.id)}
+              isExpanded={isSidebarOpen}
+              onClick={() => handleItemClick(item.id)}
+            />
+          ))}
         </ul>
       </nav>
     </aside>
