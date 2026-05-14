@@ -45,6 +45,9 @@ export default function App() {
     const saved = sessionStorage.getItem('@sira:selectedItem');
     return saved ? JSON.parse(saved) : null;
   });
+  const [lastSearchScreen, setLastSearchScreen] = useState<'home' | 'results'>(() =>
+    (sessionStorage.getItem('@sira:lastSearchScreen') as 'home' | 'results') || 'home'
+  );
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -65,6 +68,7 @@ export default function App() {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
+  useEffect(() => { sessionStorage.setItem('@sira:lastSearchScreen', lastSearchScreen); }, [lastSearchScreen]);
 
   // Restaura posição de scroll ao voltar para os resultados
   useEffect(() => {
@@ -268,13 +272,21 @@ export default function App() {
     if (screen === 'home') {
       if (currentScreen === 'home') return;
       if (currentScreen === 'results') {
-        // Estando nos resultados → voltar ao input
+        // Dentro da seção de busca: resultados → input
+        setLastSearchScreen('home');
         setCurrentScreen('home');
         return;
       }
-      // Vindo de outra aba → restaurar resultados se existirem
-      setCurrentScreen(results.length > 0 ? 'results' : 'home');
+      // Vindo de outra aba → restaurar exatamente onde o usuário estava
+      setCurrentScreen(lastSearchScreen);
     } else {
+      // Saindo da seção de busca → memorizar onde estávamos e salvar scroll
+      if (currentScreen === 'home' || currentScreen === 'results') {
+        setLastSearchScreen(currentScreen as 'home' | 'results');
+        if (currentScreen === 'results' && mainRef.current) {
+          sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
+        }
+      }
       setCurrentScreen(screen);
     }
   };
