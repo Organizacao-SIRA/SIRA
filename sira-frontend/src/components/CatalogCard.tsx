@@ -1,10 +1,13 @@
 import React from 'react';
-import { BookOpen, FileText, ChevronRight, ExternalLink, Star } from 'lucide-react';
+import { BookOpen, FileText, ChevronRight } from 'lucide-react';
+import { FavoriteButton } from './ui/FavoriteButton';
+import { MaterialTypeBadge } from './ui/MaterialTypeBadge';
+import type { CatalogItem } from '../types';
 
 interface CatalogCardProps {
-  book: any;
-  viewDetails: (item: any) => void;
-  toggleFavorite: (item: any) => void;
+  book: CatalogItem;
+  viewDetails: (item: CatalogItem) => void;
+  toggleFavorite: (item: CatalogItem) => void;
   isFavorite: boolean;
 }
 
@@ -12,92 +15,56 @@ export const CatalogCard = ({ book, viewDetails, toggleFavorite, isFavorite }: C
   const isArticle = book.type === 'article';
 
   return (
-    <div className="bg-surface rounded-xl border border-border-strong shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group relative">
-
-      <button
-        aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleFavorite(book);
-        }}
-        className={`absolute top-2 left-2 z-20 p-2 rounded-full backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
-          isFavorite
-            ? 'bg-primary border-primary text-white'
-            : 'bg-white/40 border-white/20 text-white hover:bg-surface hover:text-primary'
-        }`}
-      >
-        <Star className="w-4 h-4" fill={isFavorite ? 'currentColor' : 'none'} />
-      </button>
-
-      <div className={`h-40 flex flex-col items-center justify-center p-4 text-center relative overflow-hidden ${
-        isArticle
-          ? 'bg-gradient-to-br from-primary-dark to-[#0a4a86]'
-          : 'bg-gradient-to-br from-primary to-[#1e67e3]'
-      }`}>
-
-        <div className="absolute top-2 right-2 z-10">
-          <span className="bg-white/20 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded font-bold border border-white/10">
-            {book.year || 'S/D'}
-          </span>
-        </div>
-
+    <div
+      onClick={() => viewDetails(book)}
+      className="bg-surface rounded-xl border border-border-strong shadow-sm overflow-hidden flex flex-col cursor-pointer group hover:shadow-xl hover:scale-[1.04] transition-all duration-200"
+    >
+      {/* Cover — clean, sem overlays flutuantes */}
+      <div className="h-44 overflow-hidden flex-shrink-0">
         {book.image ? (
-          <img
-            src={book.image}
-            alt={book.title}
-            className="h-full object-contain shadow-2xl transform group-hover:scale-105 transition-transform duration-300"
-          />
+          <div className="w-full h-full bg-surface-subtle flex items-center justify-center overflow-hidden">
+            <img
+              src={book.image}
+              alt={book.title}
+              className="h-full w-auto object-contain group-hover:scale-110 transition-transform duration-300"
+            />
+          </div>
         ) : (
-          <div className="flex flex-col items-center">
-            {isArticle ? (
-              <FileText className="w-12 h-12 text-white/20 mb-2" />
-            ) : (
-              <BookOpen className="w-12 h-12 text-white/20 mb-2" />
-            )}
-            <span className="text-white/90 font-bold text-[11px] line-clamp-3 px-4 leading-tight uppercase tracking-tight">
-              {book.title}
-            </span>
+          <div className={`w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 group-hover:scale-110 ${
+            isArticle
+              ? 'bg-gradient-to-br from-primary-dark to-[#0a4a86]'
+              : 'bg-gradient-to-br from-primary to-[#1e67e3]'
+          }`}>
+            {isArticle
+              ? <FileText className="w-16 h-16 text-white/20" />
+              : <BookOpen className="w-16 h-16 text-white/20" />
+            }
           </div>
         )}
       </div>
 
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex gap-2 mb-3">
-          <span className="text-[10px] font-bold text-accent-dark bg-accent-light px-2.5 py-1 rounded border border-accent/20 truncate max-w-full uppercase tracking-wider">
-            {book.thematicArea ? book.thematicArea.split(' / ')[0] : 'Geral'}
-          </span>
+      {/* Corpo do card — tudo em fluxo normal */}
+      <div className="p-4 flex flex-col flex-1">
+
+        {/* Linha superior: badge de tipo + botão favorito */}
+        <div className="flex items-center justify-between mb-3">
+          <MaterialTypeBadge type={book.type} />
+          <FavoriteButton isFavorite={isFavorite} onToggle={() => toggleFavorite(book)} size="sm" />
         </div>
 
-        <h3 className="font-bold text-primary-dark dark:text-text text-base mb-1 line-clamp-2 min-h-[44px] leading-tight group-hover:text-primary transition-colors">
+        <h3 className="font-bold text-primary-dark dark:text-text text-base leading-snug line-clamp-2 min-h-[48px] mb-3 group-hover:text-primary transition-colors">
           {book.title}
         </h3>
 
-        <p className="text-[12px] text-text-muted mb-4 line-clamp-1 italic font-medium">
+        <p className="text-sm font-semibold text-text line-clamp-1 mb-1">
           {book.authors || 'Autor desconhecido'}
         </p>
 
-        <div className="mt-auto pt-4 border-t border-border space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] text-text-subtle font-black uppercase tracking-widest">
-              {book.source || 'SIRA+'}
-            </span>
-            <button
-              onClick={() => viewDetails(book)}
-              className="text-primary hover:text-primary-dark text-sm font-bold flex items-center gap-1 transition-colors"
-            >
-              Ver Detalhes <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          {book.url && (
-            <a
-              href={book.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-primary border border-primary hover:bg-primary-soft py-1.5 rounded-lg transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> Acessar Material
-            </a>
-          )}
+        <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
+          <span className="text-xs text-text-muted font-medium">
+            {book.year || 'S/D'} · {book.source || 'SIRA+'}
+          </span>
+          <ChevronRight className="w-4 h-4 text-text-subtle group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200" />
         </div>
       </div>
     </div>

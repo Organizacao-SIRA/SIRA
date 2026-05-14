@@ -49,9 +49,9 @@ export class MaterialsService {
     });
   }
 
-  async search(query: string, userId?: string, page = 0): Promise<{ items: MaterialDto[]; total: number }> {
-    const PAGE_SIZE = 4;
-    const MAX_RESULTS = 20;
+  async search(query: string, userId?: string, page = 0, pageSize = 4): Promise<{ items: MaterialDto[]; total: number }> {
+    const MAX_RESULTS = 40;
+    const PAGE_SIZE = Math.min(Math.max(1, pageSize), MAX_RESULTS);
 
     if (!query || query.trim().length < 2) return { items: [], total: 0 };
 
@@ -88,18 +88,7 @@ export class MaterialsService {
     const total = capped.length;
     const pageItems = capped.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-    if (!userId || pageItems.length === 0) {
-      return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
-    }
-
-    this.logger.log(`Classificando com IA ${pageItems.length} itens da página ${page} (userId: ${userId})`);
-    try {
-      const ranked = await this.rankWithAi(query, userId, pageItems);
-      return { items: ranked, total };
-    } catch (error) {
-      this.logger.error(`Erro ao classificar com IA: ${error.message}`, error.stack);
-      return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
-    }
+    return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
   }
 
   async chatSearch(prompt: string, userId?: string): Promise<ChatSearchResponseDto> {
@@ -137,14 +126,19 @@ export class MaterialsService {
     let queries: string[] = [];
     try {
       const rawKeywords = await this.ai.complete({
-        system: `Você é um assistente acadêmico. Considere o perfil do usuário para extrair termos de busca.
-            ${userProfileText}
-            Extraia até 3 termos de busca otimizados (em inglês ou português) para APIs de livros e artigos.
-            Retorne apenas os termos separados por vírgula.`,
+        system: `Você é um especialista em pesquisa bibliográfica acadêmica.
+            Perfil do usuário: ${userProfileText}
+            Sua tarefa: extrair 2 a 3 termos de busca EM INGLÊS para usar nas APIs Google Books e Semantic Scholar.
+            Regras:
+            - Cada termo deve ter 1 a 4 palavras
+            - Use inglês, pois as APIs retornam mais resultados em inglês
+            - Seja específico ao tópico principal do pedido
+            - Retorne APENAS os termos separados por vírgula, sem explicações, sem pontuação extra
+            Exemplo de resposta: "data mining, machine learning, pattern recognition"`,
         user: prompt,
-        maxTokens: 200,
+        maxTokens: 100,
       });
-      queries = rawKeywords.split(',').map(q => q.trim()).filter(Boolean);
+      queries = rawKeywords.split(',').map(q => q.trim()).filter(q => q.length > 0 && q.length < 60);
     } catch (error) {
       this.logger.error(`Erro ao extrair keywords via Claude: ${error.message}`);
       queries = [prompt.trim()];
@@ -239,8 +233,9 @@ export class MaterialsService {
       .map(s => `- "${s.query}"`)
       .join('\n') || 'Nenhuma busca recente';
 
-    const candidatesText = candidates
-      .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 200)}`)
+    const topCandidates = candidates.slice(0, 10);
+    const candidatesText = topCandidates
+      .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 150)}`)
       .join('\n');
 
     const raw = await this.ai.complete({
@@ -262,7 +257,7 @@ Para cada resultado:
 3. Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado".
 
 JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
-      maxTokens: 1024,
+      maxTokens: 2048,
     });
     const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed = JSON.parse(text);
@@ -278,7 +273,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
       ]),
     );
 
-    return candidates
+    return topCandidates
       .map(c => ({
         ...c,
         aiExplanation: metaMap.get(c.id)?.explanation ?? null,
@@ -311,7 +306,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
   private async fetchGoogleBooks(query: string): Promise<MaterialDto[]> {
     const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
-    const url = `${this.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=8${apiKey ? `&key=${apiKey}` : ''}`;
+    const url = `${this.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=20${apiKey ? `&key=${apiKey}` : ''}`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
@@ -340,7 +335,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
   private async fetchSemanticScholar(query: string): Promise<MaterialDto[]> {
     const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
     const headers = apiKey ? { 'x-api-key': apiKey } : {};
-    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,abstract,venue,url,openAccessPdf`;
+    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url, { headers })));

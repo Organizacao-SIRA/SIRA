@@ -1,4 +1,4 @@
-import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload } from '../types';
+import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload, CatalogItem } from '../types';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1`;
 
@@ -71,25 +71,36 @@ export const chatSearchMaterials = async (prompt: string): Promise<{ aiMessage: 
   }
 };
 
-export const fetchCatalogBooks = async (category: string) => {
-  const terms: Record<string, string> = {
-    'Todas': 'science',
-    'Ciências da Computação': 'computer science',
-    'Administração Pública': 'public administration',
-    'Direito': 'law',
-  };
-  const queryTerm = terms[category] || category;
-  try {
-    const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(queryTerm)}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Erro na resposta do servidor');
-    const data = await response.json();
-    return data.items ?? data;
-  } catch (error) {
-    console.error('Erro ao buscar catálogo:', error);
-    return [];
+export const TOPIC_SEARCH_QUERIES: Record<string, string> = {
+  all: 'science research',
+  ia: 'technology artificial intelligence',
+  gp: 'public administration governance',
+  dir: 'law legal rights',
+  cd: 'data science analytics',
+  edu: 'education pedagogy learning',
+  sau: 'health medicine',
+  eco: 'economics finance',
+  soc: 'sociology social science',
+  amb: 'environment ecology sustainability',
+};
+
+const CATALOG_PAGE_SIZE = 10;
+
+export const searchCatalogItems = async (
+  query: string,
+  page = 0,
+  signal?: AbortSignal,
+): Promise<{ items: CatalogItem[]; total: number }> => {
+  if (!query || query.trim().length < 2) return { items: [], total: 0 };
+  const response = await fetch(
+    `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query.trim())}&page=${page}&limit=${CATALOG_PAGE_SIZE}`,
+    { headers: getAuthHeaders(), signal },
+  );
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Erro ${response.status} ao buscar materiais`);
   }
+  return response.json();
 };
 
 // --- Favorites ---
