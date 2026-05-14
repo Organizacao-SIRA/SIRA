@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { searchAcademicContent, fetchFavorites, addFavorite, removeFavoriteApi, getProfile } from './services/api';
+import { 
+  searchAcademicContent, 
+  chatSearchMaterials, 
+  fetchFavorites, 
+  addFavorite, 
+  removeFavoriteApi, 
+  getProfile 
+} from './services/api';
 import { Home } from './pages/Home';
 import { Recommendations } from './pages/Recommendations';
 import { Favorites } from './pages/Favorites';
@@ -29,6 +36,7 @@ export default function App() {
     const saved = sessionStorage.getItem('@sira:searchTotal');
     return saved ? parseInt(saved, 10) : 0;
   });
+  const [aiMessage, setAiMessage] = useState(() => sessionStorage.getItem('@sira:aiMessage') || '');
   const [searchPage, setSearchPage] = useState(() => {
     const saved = sessionStorage.getItem('@sira:searchPage');
     return saved ? parseInt(saved, 10) : 0;
@@ -49,6 +57,7 @@ export default function App() {
   useEffect(() => { sessionStorage.setItem('@sira:searchQuery', searchQuery); }, [searchQuery]);
   useEffect(() => { sessionStorage.setItem('@sira:results', JSON.stringify(results)); }, [results]);
   useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
+  useEffect(() => { sessionStorage.setItem('@sira:aiMessage', aiMessage); }, [aiMessage]);
   useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
   useEffect(() => { 
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
@@ -110,10 +119,11 @@ export default function App() {
     if (isProfileLoading) return;
 
     // Lógica de redirecionamento baseada em fatos (profileData finalizado)
-    if (currentScreen === 'login' || currentScreen === 'register' || currentScreen === 'onboarding') {
+    const authScreens = ['login', 'register', 'onboarding'];
+    if (authScreens.includes(currentScreen)) {
       if (profileData.hasCompletedOnboarding) {
         setCurrentScreen('home');
-      } else if (currentScreen !== 'onboarding' && currentScreen !== 'interests') {
+      } else if (currentScreen !== 'onboarding') {
         setCurrentScreen('onboarding');
       }
     }
@@ -160,11 +170,13 @@ export default function App() {
     setCurrentScreen('results');
     setSearchPage(0);
     try {
-      const { items, total } = await searchAcademicContent(searchQuery, 0);
+      const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery);
       setResults(items);
-      setSearchTotal(total);
+      setAiMessage(msg);
+      setSearchTotal(items.length);
     } catch {
       setResults([]);
+      setAiMessage('Desculpe, tive um erro ao processar sua busca conversacional.');
       setSearchTotal(0);
     } finally {
       setIsLoading(false);
@@ -270,7 +282,7 @@ export default function App() {
         )}
 
         <main className="flex-1 overflow-y-auto w-full relative">
-          {isLoading && (
+          {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
               <p className="mt-4 text-primary-dark font-bold text-xs uppercase tracking-widest">Buscando...</p>
@@ -287,9 +299,7 @@ export default function App() {
               handleSearch={handleSearch}
               setCurrentScreen={setCurrentScreen}
               results={results} 
-              total={searchTotal} 
-              page={searchPage} 
-              onPageChange={handleSearchPage} 
+              aiMessage={aiMessage}
               viewDetails={viewDetails} 
               toggleFavorite={toggleFavorite} 
               isFavorite={isFavorite} 

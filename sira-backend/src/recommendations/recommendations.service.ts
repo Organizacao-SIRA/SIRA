@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../prisma/prisma.service';
 import { MaterialsService } from '../materials/materials.service';
 import { MaterialDto, MaterialType } from '../materials/dto/material.dto';
 import { getPreferenceTopicKeywords, getPreferenceTopicLabels } from '../users/preferences-options';
+import { AiProvider } from '../ai/ai-provider.abstract';
 
 export interface RecommendationItem extends MaterialDto {
   aiExplanation: string | null;
@@ -32,11 +32,11 @@ type RecommendationUser = {
 @Injectable()
 export class RecommendationsService {
   private readonly logger = new Logger(RecommendationsService.name);
-  private readonly anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly materialsService: MaterialsService,
+    private readonly ai: AiProvider,
   ) {}
 
   async getRecommendations(userId: string): Promise<RecommendationResult> {
@@ -217,25 +217,11 @@ export class RecommendationsService {
     const topN = Math.min(8, candidates.length);
 
     try {
-      const response = await this.anthropic.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: [
-          {
-            type: 'text' as const,
-            text: 'Você é um sistema de recomendação acadêmica. Analise o perfil do usuário e selecione os materiais mais relevantes da lista de candidatos. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.',
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
-        messages: [
-          {
-            role: 'user',
-            content: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nPREFERÊNCIAS DECLARADAS:\n${preferencesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
-          },
-        ],
+      const raw = await this.ai.complete({
+        system: 'Você é um sistema de recomendação acadêmica. Analise o perfil do usuário e selecione os materiais mais relevantes da lista de candidatos. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.',
+        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nPREFERÊNCIAS DECLARADAS:\n${preferencesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
+        maxTokens: 1024,
       });
-
-      const raw = response.content[0].type === 'text' ? response.content[0].text : '';
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
       const parsed = JSON.parse(text);
 

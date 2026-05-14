@@ -12,9 +12,12 @@ interface AiRecommendationsProps {
   toggleFavorite: (item: any) => void;
   isFavorite: (id: string) => boolean;
   setCurrentScreen: (screen: string) => void;
+  isChatMode?: boolean; // Nova prop opcional
 }
 
-export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen }: AiRecommendationsProps) => {
+export const AiRecommendations = ({ 
+  user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen, isChatMode 
+}: AiRecommendationsProps) => {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number; preferences: boolean } | null>(null);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
@@ -63,170 +66,112 @@ export const AiRecommendations = ({ user, viewDetails, toggleFavorite, isFavorit
     });
   };
 
-  /** Gera a mensagem contextual do basedOn */
   const getBasedOnMessage = () => {
     if (!basedOn) return null;
     const parts: string[] = [];
-    if (basedOn.favorites > 0) {
-      parts.push(`${basedOn.favorites} favorito${basedOn.favorites !== 1 ? 's' : ''}`);
-    }
-    if (basedOn.searches > 0) {
-      parts.push(`${basedOn.searches} busca${basedOn.searches !== 1 ? 's' : ''} recente${basedOn.searches !== 1 ? 's' : ''}`);
-    }
-    if (basedOn.preferences) {
-      parts.push('suas preferências acadêmicas');
-    }
+    if (basedOn.favorites > 0) parts.push(`${basedOn.favorites} favs`);
+    if (basedOn.searches > 0) parts.push(`${basedOn.searches} buscas`);
+    if (basedOn.preferences) parts.push('perfil');
     if (parts.length === 0) return null;
-    return `Baseado em ${parts.join(', ')}`;
+    return `Baseado em: ${parts.join(' + ')}`;
   };
 
-  /** Verifica se o erro indica necessidade de onboarding */
   const isOnboardingError = error.toLowerCase().includes('preferência') || error.toLowerCase().includes('onboarding') || error.toLowerCase().includes('preferencia');
 
   if (!user) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-fadeIn">
-        <div className="bg-white rounded-3xl border-2 border-dashed border-gray-100 p-12">
-          <Brain className="h-14 w-14 text-primary opacity-30 mx-auto mb-5" />
-          <h2 className="text-2xl font-bold text-primary-dark mb-3">Recomendações Personalizadas</h2>
-          <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-            Faça login para receber recomendações baseadas nos seus favoritos e histórico de buscas.
-          </p>
-          <Button
-            onClick={() => setCurrentScreen('login')}
-            className="mx-auto"
-          >
-            Fazer Login
-          </Button>
-        </div>
+      <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center shadow-sm">
+        <LogIn className="h-10 w-10 text-primary opacity-20 mx-auto mb-4" />
+        <p className="text-gray-500 text-sm mb-6">Faça login para ver suas recomendações.</p>
+        <Button onClick={() => setCurrentScreen('login')} size="sm">Entrar</Button>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-              <div className="h-8 w-64 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse mt-2"></div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <RecommendationCardSkeleton />
-          <RecommendationCardSkeleton />
-        </div>
+      <div className="space-y-4">
+        <RecommendationCardSkeleton />
+        <RecommendationCardSkeleton />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-fadeIn">
-        <div className="bg-white rounded-3xl border border-gray-100 p-12 shadow-sm">
-          <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-primary-dark mb-2">Não foi possível gerar recomendações</h3>
-          <p className="text-gray-500 mb-8 max-w-sm mx-auto">{error}</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              onClick={loadRecommendations}
-            >
-              Tentar novamente
-            </Button>
-            {isOnboardingError ? (
-              <Button
-                onClick={() => setCurrentScreen('onboarding')}
-                variant="secondary"
-                className="flex items-center justify-center gap-2"
-              >
-                <Settings className="w-4 h-4" />
-                Configurar preferências
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setCurrentScreen('home')}
-                variant="secondary"
-              >
-                Fazer buscas primeiro
-              </Button>
-            )}
-          </div>
-        </div>
+      <div className="bg-white rounded-2xl border border-red-50 p-8 text-center">
+        <AlertCircle className="h-8 w-8 text-red-300 mx-auto mb-3" />
+        <p className="text-gray-500 text-xs mb-4">{error}</p>
+        <Button onClick={loadRecommendations} size="sm" variant="secondary">Tentar novamente</Button>
       </div>
     );
   }
 
   const basedOnMessage = getBasedOnMessage();
 
+  // Se estiver em modo CHAT, renderizamos uma versão mais enxuta
+  if (isChatMode) {
+    return (
+      <div className="space-y-4 animate-fadeIn">
+        {recommendations.length === 0 ? (
+          <div className="bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 p-10 text-center">
+            <BookOpen className="h-8 w-8 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-400 text-xs">Explore o catálogo ou faça buscas para gerar sugestões.</p>
+          </div>
+        ) : (
+          <>
+            {recommendations.map((item: any) => (
+              <RecommendationCard 
+                key={item.id} 
+                item={item} 
+                viewDetails={viewDetails} 
+                toggleFavorite={toggleFavorite} 
+                isFavorite={isFavorite(item.id)} 
+              />
+            ))}
+            <div className="flex items-center justify-between pt-2 px-1">
+              <div className="flex items-center gap-3">
+                 {basedOnMessage && <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">{basedOnMessage}</span>}
+                 {generatedAt && <span className="text-[9px] font-medium text-gray-300 flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {formatDate(generatedAt)}</span>}
+              </div>
+              <button 
+                onClick={handleRefresh} 
+                disabled={isRefreshing}
+                className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1 uppercase tracking-wider"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Atualizando...' : 'Novas Sugestões'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Versão original (Página cheia - se ainda for usada em algum lugar)
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <Brain className="w-6 h-6 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-primary-dark">Recomendações para você</h1>
-          </div>
-          <div className="flex flex-col gap-0.5 ml-1">
-            {basedOnMessage && (
-              <p className="text-gray-400 text-sm">{basedOnMessage}</p>
-            )}
-            {generatedAt && (
-              <p className="text-gray-300 text-xs flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Gerado em {formatDate(generatedAt)}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm text-sm font-bold text-green-700">
-            <Sparkles className="w-4 h-4" />
-            <span>{recommendations.length} recomendações</span>
-          </div>
-          <Button
-            onClick={handleRefresh}
-            isLoading={isRefreshing}
-            variant="primary"
-            size="sm"
-            className="flex items-center gap-2"
-            title="Gerar novas recomendações com IA"
-          >
-            {!isRefreshing && <RefreshCw className="w-4 h-4" />}
-            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-          </Button>
-        </div>
+      <div className="flex justify-between items-center mb-8 gap-4">
+        <h1 className="text-2xl font-bold text-primary-dark flex items-center gap-2">
+          <Brain className="w-6 h-6 text-primary" /> Recomendações
+        </h1>
+        <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm" className="flex items-center gap-2">
+          <RefreshCw className="w-4 h-4" /> Atualizar
+        </Button>
       </div>
 
-      {recommendations.length === 0 ? (
-        <div className="bg-white rounded-3xl border-2 border-dashed border-gray-100 p-12 text-center">
-          <BookOpen className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-primary-dark mb-2">Nenhuma recomendação ainda</h3>
-          <p className="text-gray-500 mb-8 max-w-xs mx-auto">Salve favoritos e faça buscas para receber recomendações personalizadas.</p>
-          <Button
-            onClick={() => setCurrentScreen('home')}
-            className="mx-auto px-8"
-          >
-            Explorar conteúdos
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {recommendations.map((item: any) => (
-            <RecommendationCard 
-              key={item.id} 
-              item={item} 
-              viewDetails={viewDetails} 
-              toggleFavorite={toggleFavorite} 
-              isFavorite={isFavorite(item.id)} 
-            />
-          ))}
-        </div>
-      )}
+      <div className="space-y-4">
+        {recommendations.map((item: any) => (
+          <RecommendationCard 
+            key={item.id} 
+            item={item} 
+            viewDetails={viewDetails} 
+            toggleFavorite={toggleFavorite} 
+            isFavorite={isFavorite(item.id)} 
+          />
+        ))}
+      </div>
     </div>
   );
 };
