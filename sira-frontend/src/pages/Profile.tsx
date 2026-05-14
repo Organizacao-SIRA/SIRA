@@ -11,6 +11,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Checkbox } from '../components/ui/Checkbox';
+import { UserAvatar } from '../components/ui/UserAvatar';
 
 const TOPIC_ICONS: Record<string, React.ElementType> = {
   ia: Cpu,
@@ -126,12 +127,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
       <div className="space-y-6">
         {/* Identificação: Mantive variáveis semânticas para textos e cores */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5">
-          <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-100 overflow-hidden text-primary">
-            <svg viewBox="0 0 100 100" className="w-16 h-16 mt-4">
-              <circle cx="50" cy="35" r="25" fill="currentColor" opacity="0.8" />
-              <path d="M10 100 Q50 50 90 100" fill="currentColor" opacity="0.8" />
-            </svg>
-          </div>
+          <UserAvatar name={profileData.name} size="lg" />
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-primary-dark">{profileData.name}</h2>
             <p className="text-gray-500 text-sm">{profileData.email}</p>
