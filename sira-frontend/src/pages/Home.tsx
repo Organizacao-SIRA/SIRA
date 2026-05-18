@@ -22,12 +22,12 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, user }: HomePr
   <div className="flex-1 flex flex-col bg-surface-muted min-h-[calc(100vh-68px)] animate-fadeIn relative overflow-hidden">
 
     {/* Logo ancorada — min-height fixo, não encolhe quando o chat cresce */}
-    <div className="min-h-[40vh] flex flex-col items-center justify-end max-w-4xl w-full mx-auto px-4 pt-10 pb-8">
+    <div className="min-h-[30vh] sm:min-h-[40vh] flex flex-col items-center justify-end max-w-4xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-6 sm:pb-8">
       <AiGreeting userName={user?.name?.split(' ')[0]} />
     </div>
 
     {/* Chat + sugestões — crescem para baixo */}
-    <div className="flex flex-col items-center max-w-4xl w-full mx-auto px-4 pb-10 gap-8">
+    <div className="flex flex-col items-center max-w-4xl w-full mx-auto px-4 sm:px-6 pb-8 sm:pb-10 gap-6 sm:gap-8">
       <div className="w-full max-w-3xl animate-fadeIn" style={{ animationDelay: '200ms' }}>
         <ChatInputForm
           value={searchQuery}
@@ -36,7 +36,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, user }: HomePr
           autoFocus
         />
       </div>
-      <div className="h-32 flex flex-col items-center justify-start">
+      <div className="min-h-[8rem] flex flex-col items-center justify-start">
         <PromptSuggestions suggestions={PROMPT_SUGGESTIONS} onSelect={setSearchQuery} />
       </div>
     </div>

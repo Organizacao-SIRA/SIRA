@@ -18,22 +18,22 @@ export const ProfileHeaderCard = ({
   hasCompletedOnboarding,
   onAvatarChangeRequest,
 }: ProfileHeaderCardProps) => (
-  <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row items-center sm:items-center gap-5">
+  <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
     <ProfileAvatar
       name={name}
       avatarUrl={resolveAvatarUrl(avatarUrl)}
       onChangeRequest={onAvatarChangeRequest}
     />
-    <div className="flex-1 min-w-0 text-center sm:text-left">
-      <h2 className="text-2xl font-bold text-primary-dark dark:text-text truncate">{name}</h2>
+    <div className="flex-1 min-w-0 text-center sm:text-left w-full">
+      <h2 className="text-xl sm:text-2xl font-bold text-primary-dark dark:text-text truncate">{name}</h2>
       <p className="text-text-muted text-sm truncate">{email}</p>
     </div>
     {hasCompletedOnboarding ? (
-      <StatusBadge variant="success" icon={<ShieldCheck className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs">
+      <StatusBadge variant="success" icon={<ShieldCheck className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
         Preferências concluídas
       </StatusBadge>
     ) : (
-      <StatusBadge variant="warning" icon={<AlertTriangle className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs">
+      <StatusBadge variant="warning" icon={<AlertTriangle className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
         Preferências pendentes
       </StatusBadge>
     )}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { RecommendationCard } from './RecommendationCard';
 import { Button } from './ui/Button';
 import { StatusBadge } from './ui/StatusBadge';
@@ -13,8 +12,8 @@ interface MaterialsSectionProps {
 
 export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite, isFavorite }: MaterialsSectionProps) => (
   <div className="space-y-4">
-    <div className="flex items-center justify-between px-1">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+      <div className="flex items-center gap-2 flex-wrap">
         <h3 className="text-[10px] font-bold text-text-subtle uppercase tracking-[0.2em]">Materiais Selecionados</h3>
         {results.length > 0 && (
           <span className="text-[10px] font-bold text-text-muted bg-surface-subtle px-2 py-0.5 rounded-full">
@@ -36,7 +35,7 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
     ))}
 
     {results.length === 0 && (
-      <div className="bg-surface p-8 rounded-2xl border border-dashed border-border-strong text-center space-y-4">
+      <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-dashed border-border-strong text-center space-y-4">
         <p className="text-text-subtle text-sm font-medium">
           Não consegui encontrar materiais específicos para este pedido nas bases acadêmicas no momento.
         </p>

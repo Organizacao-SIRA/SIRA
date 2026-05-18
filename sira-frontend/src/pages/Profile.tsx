@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { updateProfile, getPreferenceOptions } from '../services/api';
 import type { PreferenceTopic, PreferenceOptions, UserProfile } from '../types';
@@ -51,7 +51,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
 
   if (!profileData) {
     return (
-      <div className="p-20 text-center font-bold text-primary-dark dark:text-text">
+      <div className="p-12 sm:p-20 text-center font-bold text-primary-dark dark:text-text">
         Carregando perfil...
       </div>
     );
@@ -120,15 +120,15 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
   const academicGoalsList     = preferenceOptions?.academicGoals   || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
-      <div className="flex items-start justify-between mb-8 gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
+      <div className="flex flex-col gap-4 mb-6 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           icon={Settings}
           title="Meu Perfil"
           subtitle="Gerencie suas informações e preferências."
         />
         {!isEditing && (
-          <Button onClick={() => setIsEditing(true)} className="mt-1">
+          <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto sm:mt-1">
             <Pencil className="w-4 h-4" /> Editar Perfil
           </Button>
         )}
@@ -143,7 +143,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
           onAvatarChangeRequest={() => setIsAvatarModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PersonalInfoCard
             isEditing={isEditing}
             name={profileData.name}

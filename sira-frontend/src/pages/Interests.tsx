@@ -106,7 +106,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
   if (isLoadingTopics) {
     return (
-      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando temas...</p>
@@ -117,8 +117,8 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
 
   if (error && topics.length === 0) {
     return (
-      <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
-        <div className="bg-surface rounded-2xl shadow-sm border border-border p-8 max-w-md text-center">
+      <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
+        <div className="bg-surface rounded-2xl shadow-sm border border-border p-6 sm:p-8 max-w-md w-full text-center">
           <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
           <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">Erro ao carregar temas</h3>
           <p className="text-text-muted text-sm mb-4">{error}</p>
@@ -131,11 +131,11 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
   }
 
   return (
-    <div className="h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted overflow-hidden">
-      <div className="w-full max-w-2xl bg-surface p-6 md:p-8 rounded-2xl shadow-lg border border-border animate-fadeIn">
+    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center px-4 py-6 sm:py-10 bg-surface-muted">
+      <div className="w-full max-w-2xl bg-surface p-5 sm:p-6 md:p-8 rounded-2xl shadow-lg border border-border animate-fadeIn">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-primary-dark dark:text-text">Quais temas te interessam?</h2>
-          <p className="text-text-muted mt-1 text-xs">
+          <h2 className="text-xl sm:text-2xl font-bold text-primary-dark dark:text-text">Quais temas te interessam?</h2>
+          <p className="text-text-muted mt-1 text-xs sm:text-sm">
             Selecione pelo menos <span className="font-bold text-primary">3 áreas</span> para personalizar suas recomendações.
           </p>
         </div>
@@ -147,7 +147,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           {topics.map((topic) => {
             const Icon = TOPIC_ICONS[topic.id] || Globe;
             const isSelected = selected.includes(topic.id);
@@ -155,7 +155,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
               <button
                 key={topic.id}
                 onClick={() => toggleTheme(topic.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer h-24 relative ${
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer min-h-[88px] sm:min-h-[96px] relative ${
                   isSelected
                     ? 'border-primary bg-primary-soft shadow-sm'
                     : 'border-border bg-surface-muted hover:border-border-strong'
@@ -166,7 +166,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
                   <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />
                 )}
                 <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-text-subtle'}`} />
-                <span className={`text-[10px] font-bold leading-tight text-center ${isSelected ? 'text-primary' : 'text-text-muted'}`}>
+                <span className={`text-[10px] sm:text-xs font-bold leading-tight text-center ${isSelected ? 'text-primary' : 'text-text-muted'}`}>
                   {topic.label}
                 </span>
               </button>
@@ -174,8 +174,8 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           })}
         </div>
 
-        <div className="flex justify-between items-center pt-4 border-t border-border">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 pt-4 border-t border-border sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between sm:justify-start gap-3">
             <button
               onClick={() => setCurrentScreen('onboarding')}
               className="text-text-muted hover:text-primary text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer"
@@ -190,7 +190,7 @@ export const Interests = ({ setCurrentScreen, profileData, setProfileData }: Int
           <Button
             onClick={handleFinish}
             disabled={!canFinish || isSaving}
-            className="flex items-center gap-2"
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <>

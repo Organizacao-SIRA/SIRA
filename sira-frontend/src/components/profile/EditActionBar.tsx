@@ -8,15 +8,15 @@ interface EditActionBarProps {
 }
 
 export const EditActionBar = ({ isSaving, error, onCancel, onSave }: EditActionBarProps) => (
-  <div className="flex flex-col items-end gap-3 pt-2 pb-8">
+  <div className="flex flex-col items-stretch sm:items-end gap-3 pt-2 pb-6 sm:pb-8">
     {error && (
-      <p role="alert" className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
+      <p role="alert" className="text-sm text-red-600 dark:text-red-400 font-medium sm:text-right">{error}</p>
     )}
-    <div className="flex gap-3">
-      <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
+    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+      <Button variant="secondary" onClick={onCancel} disabled={isSaving} className="w-full sm:w-auto">
         Cancelar
       </Button>
-      <Button onClick={onSave} isLoading={isSaving}>
+      <Button onClick={onSave} isLoading={isSaving} className="w-full sm:w-auto">
         Salvar Alterações
       </Button>
     </div>

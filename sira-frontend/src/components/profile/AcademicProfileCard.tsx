@@ -25,7 +25,7 @@ interface AcademicProfileCardProps {
 }
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="grid grid-cols-[120px_1fr] items-center text-sm border-b border-border pb-3 last:border-b-0 last:pb-0 min-h-[44px]">
+  <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] sm:items-center text-sm border-b border-border pb-3 last:border-b-0 last:pb-0 gap-1 sm:gap-3 sm:min-h-[44px]">
     <span className="text-text-muted">{label}</span>
     {children}
   </div>
@@ -45,7 +45,7 @@ export const AcademicProfileCard = ({
       <Row label="Curso">
         {isEditing
           ? <Input value={editData.course} onChange={(e) => onChange('course', e.target.value)} />
-          : <span className="text-text font-bold">{data.course}</span>
+          : <span className="text-text font-bold break-words">{data.course}</span>
         }
       </Row>
 
@@ -72,7 +72,7 @@ export const AcademicProfileCard = ({
             ]}
           />
         ) : (
-          <span className="text-text font-bold">
+          <span className="text-text font-bold break-words">
             {topicsList.find(t => t.id === data.mainArea)?.label || data.mainArea}
           </span>
         )}
@@ -89,8 +89,8 @@ export const AcademicProfileCard = ({
             ]}
           />
         ) : (
-          <span className="text-text font-bold flex items-center gap-1.5">
-            <Target className="w-3.5 h-3.5 text-text-subtle" />
+          <span className="text-text font-bold flex items-center gap-1.5 break-words">
+            <Target className="w-3.5 h-3.5 text-text-subtle flex-shrink-0" />
             {data.academicGoal || 'Não informado'}
           </span>
         )}

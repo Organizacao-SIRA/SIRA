@@ -30,9 +30,9 @@ export const Recommendations = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn flex flex-col h-full min-h-[calc(100vh-68px)] relative">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn flex flex-col min-h-[calc(100vh-68px)] relative">
 
-      <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
+      <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3 border-b border-border pb-4">
         <button
           onClick={handleClearSearch}
           className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group"
@@ -40,15 +40,15 @@ export const Recommendations = ({
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
           <span className="text-sm">Nova pesquisa</span>
         </button>
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary-soft rounded-lg">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-2 bg-primary-soft rounded-lg flex-shrink-0">
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-primary-dark dark:text-text hidden sm:block">Busca Inteligente</h1>
+          <h1 className="text-base sm:text-xl font-bold text-primary-dark dark:text-text hidden sm:block truncate">Busca Inteligente</h1>
         </div>
       </div>
 
-      <div className="flex-1 space-y-10 pb-40">
+      <div className="flex-1 space-y-8 sm:space-y-10 pb-32 sm:pb-40">
         <UserMessageBubble message={searchQuery} />
 
         {isLoading ? (
@@ -68,7 +68,7 @@ export const Recommendations = ({
 
       <PageFooter
         text="SIRA AI • Análise Baseada em Claude 3.5, Google Books e Semantic Scholar."
-        variant="fixed"
+        variant="sticky"
       />
     </div>
   );
