@@ -1,4 +1,3 @@
-import React from 'react';
 import { Library } from 'lucide-react';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
@@ -26,14 +25,14 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProp
   } = useCatalog();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn">
       <PageHeader
         icon={Library}
         title="Catálogo Acadêmico"
         subtitle="Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos."
       />
 
-      <div className="bg-surface p-4 rounded-xl border border-border-strong shadow-sm mb-6 flex flex-col gap-3">
+      <div className="bg-surface p-3 sm:p-4 rounded-xl border border-border-strong shadow-sm mb-6 flex flex-col gap-3">
         <CatalogSearchBar
           value={searchQuery}
           onChange={setSearchQuery}

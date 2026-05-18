@@ -22,21 +22,21 @@ const FEATURES = [
 export const AuthVisualPanel = () => (
   <aside
     aria-hidden="true"
-    className="hidden md:flex md:w-1/2 lg:w-5/12 xl:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary-dark text-white"
+    className="hidden lg:flex lg:w-5/12 xl:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary-dark text-white"
   >
     {/* Decorative gradient blobs */}
     <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
     <div className="absolute -bottom-32 -left-16 w-[28rem] h-[28rem] rounded-full bg-accent/10 blur-3xl" />
 
-    <div className="relative z-10 flex flex-col justify-between p-10 lg:p-14 w-full">
+    <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 xl:p-14 w-full">
       <div className="flex flex-col gap-6">
         <img
           src={logoSiraPlus}
           alt=""
-          className="max-w-[200px] w-full object-contain drop-shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+          className="max-w-[180px] xl:max-w-[200px] w-full object-contain drop-shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
         />
         <div className="space-y-3 max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-extrabold leading-tight tracking-tight">
+          <h1 className="text-2xl xl:text-4xl font-extrabold leading-tight tracking-tight">
             Sua jornada acadêmica, <span className="text-accent">potencializada por IA</span>.
           </h1>
           <p className="text-blue-100 text-sm xl:text-base leading-relaxed">
@@ -45,7 +45,7 @@ export const AuthVisualPanel = () => (
         </div>
       </div>
 
-      <ul className="space-y-5 mt-10">
+      <ul className="space-y-4 xl:space-y-5 mt-8 xl:mt-10">
         {FEATURES.map(({ icon: Icon, title, description }) => (
           <li key={title} className="flex items-start gap-3.5">
             <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center backdrop-blur-sm">

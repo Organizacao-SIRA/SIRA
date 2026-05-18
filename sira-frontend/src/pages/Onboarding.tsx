@@ -125,7 +125,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   if (optionsError) {
     return (
       <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
-        <div className="bg-surface rounded-2xl shadow-sm border border-border p-8 max-w-md text-center">
+        <div className="bg-surface rounded-2xl shadow-sm border border-border p-6 sm:p-8 max-w-md w-full text-center">
           <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
           <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">Erro ao carregar opções</h3>
           <p className="text-text-muted text-sm mb-4">{optionsError}</p>
@@ -140,14 +140,14 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   const options = preferenceOptions!;
 
   return (
-    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
-      <div className="w-full max-w-2xl bg-surface px-8 py-6 rounded-2xl shadow-sm border border-border">
-        <div className="text-center mb-4">
+    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center px-4 py-6 sm:py-10 bg-surface-muted animate-fadeIn">
+      <div className="w-full max-w-2xl bg-surface px-5 py-5 sm:px-8 sm:py-6 rounded-2xl shadow-sm border border-border">
+        <div className="text-center mb-4 sm:mb-6">
           <div className="w-10 h-10 bg-primary-soft text-primary rounded-full flex items-center justify-center mx-auto mb-2">
             <Sparkles className="w-5 h-5" />
           </div>
-          <h2 className="text-xl font-bold text-primary-dark dark:text-text">Bem-vindo ao SIRA+</h2>
-          <p className="text-text-muted mt-1 text-xs">
+          <h2 className="text-xl sm:text-2xl font-bold text-primary-dark dark:text-text">Bem-vindo ao SIRA+</h2>
+          <p className="text-text-muted mt-1 text-xs sm:text-sm">
             Para personalizarmos as suas recomendações, precisamos conhecer seu perfil acadêmico.
           </p>
         </div>
@@ -204,7 +204,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
             <h3 className="text-sm font-bold text-primary-dark dark:text-text mb-4 flex items-center gap-2 border-b border-border pb-2">
               <Settings className="w-4 h-4" /> Preferências
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-surface-muted p-5 rounded-xl border border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 bg-surface-muted p-4 sm:p-5 rounded-xl border border-border">
               <div className="space-y-3">
                 <span className="text-[10px] font-bold text-text-subtle uppercase block">Línguas</span>
                 <div className="space-y-2">

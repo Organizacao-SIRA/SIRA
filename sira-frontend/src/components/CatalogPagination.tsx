@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CatalogPaginationProps {
@@ -12,7 +11,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8 flex-wrap">
+    <div className="flex flex-wrap items-center justify-center gap-2 gap-y-3 mt-6 sm:mt-8">
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page === 0}
@@ -22,7 +21,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
         <ChevronLeft className="w-4 h-4" />
       </button>
 
-      <div className="flex gap-1">
+      <div className="flex flex-wrap justify-center gap-1 max-w-full">
         {Array.from({ length: totalPages }, (_, i) => (
           <button
             key={i}
@@ -47,7 +46,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
         <ChevronRight className="w-4 h-4" />
       </button>
 
-      <span className="text-xs text-text-muted ml-1 font-medium">
+      <span className="text-xs text-text-muted ml-1 font-medium basis-full sm:basis-auto text-center sm:text-left">
         {total} {total === 1 ? 'resultado' : 'resultados'}
       </span>
     </div>
