@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { updateProfile, getPreferenceOptions } from '../services/api';
-import type { PreferenceTopic, PreferenceOptions, UserProfile } from '../types';
+import type { Dispatch, SetStateAction } from 'react';
+import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -14,8 +15,8 @@ import { EditActionBar } from '../components/profile/EditActionBar';
 import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
 
 interface ProfileProps {
-  profileData: any;
-  setProfileData: (data: any) => void;
+  profileData: ProfileData;
+  setProfileData: Dispatch<SetStateAction<ProfileData>>;
 }
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
@@ -92,7 +93,24 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
         academicGoal: editData.academicGoal,
       };
       const saved = await updateProfile(payload);
-      setProfileData((prev: any) => ({ ...prev, ...saved }));
+      setProfileData((prev) => ({
+        ...prev,
+        name: saved.name || prev.name,
+        email: saved.email,
+        course: saved.course || '',
+        educationLevel: saved.educationLevel || prev.educationLevel,
+        mainArea: saved.mainArea || '',
+        subAreas: saved.subAreas || '',
+        languages: saved.languages?.length ? saved.languages : prev.languages,
+        materialLevels: saved.materialLevels?.length ? saved.materialLevels : prev.materialLevels,
+        wantsBooks: saved.wantsBooks,
+        wantsArticles: saved.wantsArticles,
+        interests: saved.interests?.length ? saved.interests : prev.interests,
+        academicGoal: saved.academicGoal || '',
+        avatarUrl: saved.avatarUrl ?? prev.avatarUrl,
+        hasCompletedOnboarding: saved.hasCompletedOnboarding,
+        onboardingCompletedAt: saved.onboardingCompletedAt,
+      }));
       updateUser({ name: saved.name });
       setIsEditing(false);
     } catch (err: any) {
@@ -109,7 +127,10 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
   };
 
   const handleAvatarUpdated = (updated: UserProfile) => {
-    setProfileData((prev: any) => ({ ...prev, ...updated }));
+    setProfileData((prev) => ({
+      ...prev,
+      avatarUrl: updated.avatarUrl,
+    }));
     updateUser({ avatarUrl: updated.avatarUrl });
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import type { ProfileData } from './types';
 import { 
   searchAcademicContent, 
   chatSearchMaterials, 
@@ -18,7 +19,6 @@ import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Onboarding } from './pages/Onboarding';
-import { Interests } from './pages/Interests';
 import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
@@ -83,7 +83,7 @@ export default function App() {
   }, [currentScreen]);
 
   // Integração com History API do browser (habilita o botão voltar do navegador)
-  const AUTH_SCREENS = ['login', 'register', 'onboarding', 'interests'];
+  const AUTH_SCREENS = ['login', 'register', 'onboarding'];
   useEffect(() => {
     if (AUTH_SCREENS.includes(currentScreen)) return;
     if (!window.history.state?.screen) {
@@ -102,7 +102,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const [profileData, setProfileData] = useState({
+  const [profileData, setProfileData] = useState<ProfileData>({
     name: user?.name || '',
     email: user?.email || '',
     course: '',
@@ -113,11 +113,11 @@ export default function App() {
     materialLevels: ['Intermediário'],
     wantsBooks: true,
     wantsArticles: true,
-    interests: [] as string[],
+    interests: [],
     academicGoal: '',
-    avatarUrl: user?.avatarUrl ?? null as string | null,
+    avatarUrl: user?.avatarUrl ?? null,
     hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
-    onboardingCompletedAt: null as string | null,
+    onboardingCompletedAt: null,
   });
 
   useEffect(() => {
@@ -296,7 +296,7 @@ export default function App() {
     }
   };
 
-  const showSidebar = !['login', 'register', 'onboarding', 'interests'].includes(currentScreen);
+  const showSidebar = !['login', 'register', 'onboarding'].includes(currentScreen);
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
     return (
@@ -388,9 +388,6 @@ export default function App() {
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'onboarding' && (
             <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
-          )}
-          {currentScreen === 'interests' && (
-            <Interests setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
           )}
         </main>
       </div>
