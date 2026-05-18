@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogIn } from 'lucide-react';
 import type { AuthUser } from '../types';
 import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
@@ -44,13 +45,11 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
             ) : (
               <Button
                 onClick={() => setCurrentScreen('login')}
-                variant={currentScreen === 'login' ? 'secondary' : 'primary'}
+                variant="navbarAction"
                 size="sm"
-                className={currentScreen === 'login' ? '' : 'bg-primary-dark hover:bg-primary-darker border-blue-800'}
+                disabled={currentScreen === 'login'}
               >
-                <div className="w-4 h-4 mr-2 rounded-full flex items-center justify-center bg-white/20">
-                  <span className="text-[10px] font-black">?</span>
-                </div>
+                {currentScreen !== 'login' && <LogIn className="w-4 h-4" />}
                 {currentScreen === 'login' ? 'Acessando...' : 'Entrar'}
               </Button>
             )}

@@ -8,6 +8,7 @@ import { updateProfile, getPreferenceOptions } from '../services/api';
 import type { PreferenceTopic, PreferenceOptions } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Checkbox } from '../components/ui/Checkbox';
@@ -37,6 +38,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
   const [editProfileData, setEditProfileData] = useState(profileData || {});
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (profileData) setEditProfileData(profileData);
@@ -77,15 +79,29 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError('');
     try {
-      const saved = await updateProfile(editProfileData);
-      setProfileData({ ...editProfileData, ...saved });
+      const payload = {
+        name: editProfileData.name,
+        course: editProfileData.course,
+        educationLevel: editProfileData.educationLevel,
+        mainArea: editProfileData.mainArea,
+        subAreas: editProfileData.subAreas,
+        languages: editProfileData.languages,
+        materialLevels: editProfileData.materialLevels,
+        wantsBooks: editProfileData.wantsBooks,
+        wantsArticles: editProfileData.wantsArticles,
+        interests: editProfileData.interests,
+        academicGoal: editProfileData.academicGoal,
+      };
+      const saved = await updateProfile(payload);
+      setProfileData(prev => ({ ...prev, ...saved }));
       updateUser({ name: saved.name });
-    } catch {
-      console.error("Erro ao salvar perfil");
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      setSaveError(err.message || 'Erro ao salvar perfil. Tente novamente.');
     } finally {
       setIsSaving(false);
-      setIsEditingProfile(false);
     }
   };
 
@@ -110,13 +126,14 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
-      <div className="mb-6 flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold text-primary-dark dark:text-text">Meu Perfil</h1>
-          <p className="text-text-muted text-sm mt-1">Gerencie suas informações e preferências.</p>
-        </div>
+      <div className="flex items-start justify-between mb-8">
+        <PageHeader
+          icon={Settings}
+          title="Meu Perfil"
+          subtitle="Gerencie suas informações e preferências."
+        />
         {!isEditingProfile && (
-          <Button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2">
+          <Button onClick={() => setIsEditingProfile(true)} className="mt-1">
             <Pencil className="w-4 h-4" /> Editar Perfil
           </Button>
         )}
@@ -156,10 +173,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
               </div>
               <div className="grid grid-cols-[120px_1fr] items-center text-sm min-h-[44px]">
                 <span className="text-text-muted">E-mail</span>
-                {isEditingProfile ?
-                  <Input type="email" value={editProfileData.email} onChange={(e) => handleChange('email', e.target.value)} /> :
-                  <span className="text-text">{profileData.email}</span>
-                }
+                <span className="text-text text-sm">{profileData.email}</span>
               </div>
             </div>
           </div>
@@ -227,9 +241,11 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
         </div>
 
         <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-border flex items-center gap-2 text-primary-dark dark:text-text">
-            <School className="w-5 h-5" />
-            <h3 className="font-bold">Áreas de Interesse</h3>
+          <div className="px-6 py-4 border-b border-border bg-surface-muted/30 flex items-center gap-2.5">
+            <div className="p-1.5 bg-primary rounded-md flex-shrink-0">
+              <School className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-bold text-primary-dark dark:text-text">Áreas de Interesse</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -244,18 +260,19 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
                     key={topic.id}
                     onClick={() => toggleInterest(topic.id)}
                     disabled={!isEditingProfile}
-                    className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all ${
+                    aria-pressed={isSelected}
+                    className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.97] ${
                       isSelected
-                        ? 'border-primary bg-primary-soft'
-                        : 'border-border bg-surface-muted'
-                    } ${isEditingProfile ? 'cursor-pointer hover:border-border-strong shadow-sm' : 'cursor-default'}`}
+                        ? 'border-primary bg-primary text-white shadow-sm'
+                        : 'border-border bg-surface-muted text-text-muted'
+                    } ${isEditingProfile ? 'cursor-pointer hover:border-primary hover:bg-primary/10 shadow-sm' : 'cursor-default'}`}
                     title={topic.description}
                   >
-                    {isSelected && isEditingProfile && (
-                      <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />
+                    {isSelected && (
+                      <CheckCircle2 className={`absolute top-2 right-2 w-4 h-4 ${isEditingProfile ? 'text-white/80' : 'text-white/60'}`} />
                     )}
-                    <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-primary' : 'text-text-subtle'}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-primary' : 'text-text-muted'}`}>
+                    <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-white' : 'text-text-subtle dark:text-text-muted'}`} />
+                    <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-text-muted'}`}>
                       {topic.label}
                     </span>
                   </button>
@@ -320,13 +337,18 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
         </div>
 
         {isEditingProfile && (
-          <div className="flex justify-end gap-3 pt-2 pb-8">
-            <Button variant="secondary" onClick={() => setIsEditingProfile(false)} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} isLoading={isSaving}>
-              Salvar Alterações
-            </Button>
+          <div className="flex flex-col items-end gap-3 pt-2 pb-8">
+            {saveError && (
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{saveError}</p>
+            )}
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => { setIsEditingProfile(false); setSaveError(''); }} disabled={isSaving}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} isLoading={isSaving}>
+                Salvar Alterações
+              </Button>
+            </div>
           </div>
         )}
       </div>

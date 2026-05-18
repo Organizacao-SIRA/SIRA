@@ -16,7 +16,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page === 0}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98]"
         aria-label="Página anterior"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -27,10 +27,10 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
           <button
             key={i}
             onClick={() => onPageChange(i)}
-            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] ${
               i === page
                 ? 'bg-primary text-white shadow-sm'
-                : 'border border-border-strong text-text-muted hover:border-primary hover:text-primary'
+                : 'border border-border-strong text-text-muted hover:border-primary hover:text-primary hover:bg-primary-soft'
             }`}
           >
             {i + 1}
@@ -41,7 +41,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages - 1}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98]"
         aria-label="Próxima página"
       >
         <ChevronRight className="w-4 h-4" />

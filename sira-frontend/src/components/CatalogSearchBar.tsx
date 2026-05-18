@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, X } from 'lucide-react';
+import { Button } from './ui/Button';
 
 interface CatalogSearchBarProps {
   value: string;
@@ -25,7 +26,7 @@ export const CatalogSearchBar = ({ value, onChange, onSubmit, onClear }: Catalog
         <button
           type="button"
           onClick={onClear}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text transition-colors cursor-pointer"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text transition-colors duration-150 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
           aria-label="Limpar pesquisa"
         >
           <X className="w-4 h-4" />
@@ -33,12 +34,9 @@ export const CatalogSearchBar = ({ value, onChange, onSubmit, onClear }: Catalog
       )}
     </div>
 
-    <button
-      type="submit"
-      className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-dark transition-colors cursor-pointer flex-shrink-0"
-    >
+    <Button type="submit" size="sm" className="flex-shrink-0">
       <Search className="w-4 h-4" />
       Buscar
-    </button>
+    </Button>
   </form>
 );

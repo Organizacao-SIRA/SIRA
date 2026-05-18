@@ -12,10 +12,10 @@ export const FavoriteButton = ({ isFavorite, onToggle, size = 'md' }: FavoriteBu
     type="button"
     aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
     onClick={e => { e.stopPropagation(); onToggle(e); }}
-    className={`p-2 rounded-full border transition-all cursor-pointer flex-shrink-0 ${
+    className={`p-2 rounded-full border transition-all duration-150 cursor-pointer flex-shrink-0 active:scale-[0.98] ${
       isFavorite
-        ? 'bg-primary border-primary text-white'
-        : 'bg-surface-muted border-border-strong text-text-subtle hover:border-primary hover:text-primary'
+        ? 'bg-primary border-primary text-white hover:bg-primary-dark hover:border-primary-dark'
+        : 'bg-surface-muted border-border-strong text-text-subtle hover:border-primary hover:text-primary hover:bg-primary-soft'
     }`}
   >
     <Star
