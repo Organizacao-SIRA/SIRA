@@ -2,6 +2,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  avatarUrl?: string | null;
 }
 
 export type PreferenceTopic = {
@@ -32,6 +33,7 @@ export type UserProfile = {
   wantsArticles: boolean;
   interests: string[];
   academicGoal: string | null;
+  avatarUrl: string | null;
   onboardingCompletedAt: string | null;
   hasCompletedOnboarding: boolean;
 };

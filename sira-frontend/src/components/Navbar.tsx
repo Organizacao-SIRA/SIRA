@@ -1,6 +1,7 @@
 import React from 'react';
 import { LogIn } from 'lucide-react';
 import type { AuthUser } from '../types';
+import { resolveAvatarUrl } from '../services/api';
 import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
@@ -38,6 +39,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
               <>
                 <UserProfileChip
                   name={displayName}
+                  avatarUrl={resolveAvatarUrl(user.avatarUrl)}
                   onClick={() => setCurrentScreen('profile')}
                 />
                 <NavLogoutButton onLogout={onLogout} />

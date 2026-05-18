@@ -24,6 +24,7 @@ model User {
   wantsArticles         Boolean              @default(true)
   interests             String[]
   academicGoal          String?
+  avatarUrl             String?
   onboardingCompletedAt DateTime?
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt

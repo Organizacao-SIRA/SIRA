@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
@@ -9,6 +11,9 @@ import {
   MATERIAL_LEVELS,
   PREFERENCE_TOPICS,
 } from './preferences-options';
+
+const AVATAR_PUBLIC_PREFIX = '/uploads/avatars/';
+const AVATAR_DISK_DIR = join(process.cwd(), 'uploads', 'avatars');
 
 @Injectable()
 export class UsersService {
@@ -82,6 +87,45 @@ export class UsersService {
     return this.safeUser(user);
   }
 
+  async updateAvatar(userId: string, filename: string) {
+    const current = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!current) throw new NotFoundException('Usuário não encontrado');
+
+    this.deleteAvatarFile(current.avatarUrl);
+
+    const avatarUrl = `${AVATAR_PUBLIC_PREFIX}${filename}`;
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+
+    return this.safeUser(user);
+  }
+
+  async removeAvatar(userId: string) {
+    const current = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!current) throw new NotFoundException('Usuário não encontrado');
+
+    this.deleteAvatarFile(current.avatarUrl);
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+    });
+
+    return this.safeUser(user);
+  }
+
+  private deleteAvatarFile(avatarUrl: string | null) {
+    if (!avatarUrl?.startsWith(AVATAR_PUBLIC_PREFIX)) return;
+    const filename = avatarUrl.slice(AVATAR_PUBLIC_PREFIX.length);
+    if (!filename || filename.includes('/') || filename.includes('\\')) return;
+    const fullPath = join(AVATAR_DISK_DIR, filename);
+    if (existsSync(fullPath)) {
+      try { unlinkSync(fullPath); } catch { /* ignora falha de I/O */ }
+    }
+  }
+
   private hasRecommendationRelevantChanges(dto: UpdateProfileDto) {
     return [
       'course',
@@ -116,6 +160,7 @@ export class UsersService {
       wantsArticles: user.wantsArticles,
       interests: user.interests,
       academicGoal: user.academicGoal,
+      avatarUrl: user.avatarUrl,
       onboardingCompletedAt: user.onboardingCompletedAt,
       hasCompletedOnboarding: Boolean(user.onboardingCompletedAt),
     };

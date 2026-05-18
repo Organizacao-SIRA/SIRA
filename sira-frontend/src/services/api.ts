@@ -172,6 +172,36 @@ export const updateProfile = async (data: Record<string, any>) => {
   return response.json();
 };
 
+const BACKEND_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+export const resolveAvatarUrl = (path: string | null | undefined): string | null =>
+  path ? `${BACKEND_BASE_URL}${path}` : null;
+
+export const uploadAvatar = async (file: File): Promise<UserProfile> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch(`${API_BASE_URL}/users/profile/avatar`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(Array.isArray(body.message) ? body.message.join('; ') : body.message || 'Erro ao enviar imagem');
+  }
+  return body;
+};
+
+export const removeAvatar = async (): Promise<UserProfile> => {
+  const response = await fetch(`${API_BASE_URL}/users/profile/avatar`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.message || 'Erro ao remover imagem');
+  return body;
+};
+
 // --- Preference Options & Onboarding ---
 
 export const getPreferenceOptions = async (): Promise<PreferenceOptions> => {
