@@ -359,17 +359,18 @@ export default function App() {
             <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} />
           )}
           {currentScreen === 'results' && (
-            <Recommendations 
-              searchQuery={searchQuery} 
+            <Recommendations
+              searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               handleSearch={handleSearch}
               setCurrentScreen={setCurrentScreen}
-              results={results} 
+              results={results}
               aiMessage={aiMessage}
-              viewDetails={viewDetails} 
-              toggleFavorite={toggleFavorite} 
-              isFavorite={isFavorite} 
-              isLoading={isLoading} 
+              viewDetails={viewDetails}
+              toggleFavorite={toggleFavorite}
+              isFavorite={isFavorite}
+              isLoading={isLoading}
+              user={user}
             />
           )}
           {currentScreen === 'details' && (

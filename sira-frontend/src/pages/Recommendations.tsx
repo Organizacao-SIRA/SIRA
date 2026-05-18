@@ -5,6 +5,7 @@ import { AiMessageBubble } from '../components/AiMessageBubble';
 import { ChatLoadingSkeleton } from '../components/ChatLoadingSkeleton';
 import { MaterialsSection } from '../components/MaterialsSection';
 import { PageFooter } from '../components/ui/PageFooter';
+import type { AuthUser } from '../types';
 
 interface RecommendationsProps {
   results: any[];
@@ -17,11 +18,12 @@ interface RecommendationsProps {
   toggleFavorite: (item: any) => void;
   isFavorite: (id: any) => boolean;
   isLoading?: boolean;
+  user?: AuthUser | null;
 }
 
 export const Recommendations = ({
   results, aiMessage, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
-  viewDetails, toggleFavorite, isFavorite, isLoading,
+  viewDetails, toggleFavorite, isFavorite, isLoading, user,
 }: RecommendationsProps) => {
 
   const handleClearSearch = () => {
@@ -49,7 +51,7 @@ export const Recommendations = ({
       </div>
 
       <div className="flex-1 space-y-8 sm:space-y-10 pb-32 sm:pb-40">
-        <UserMessageBubble message={searchQuery} />
+        <UserMessageBubble message={searchQuery} user={user} />
 
         {isLoading ? (
           <ChatLoadingSkeleton />

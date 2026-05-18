@@ -142,7 +142,7 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
-      <div className="flex flex-col gap-4 mb-6 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 mb-0 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           icon={Settings}
           title="Meu Perfil"
