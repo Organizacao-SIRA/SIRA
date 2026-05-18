@@ -51,6 +51,24 @@ export type CompleteOnboardingPayload = {
   academicGoal?: string;
 };
 
+export type ProfileData = {
+  name: string;
+  email: string;
+  course: string;
+  educationLevel: string;
+  mainArea: string;
+  subAreas: string;
+  languages: string[];
+  materialLevels: string[];
+  wantsBooks: boolean;
+  wantsArticles: boolean;
+  interests: string[];
+  academicGoal: string;
+  avatarUrl: string | null;
+  hasCompletedOnboarding: boolean;
+  onboardingCompletedAt: string | null;
+};
+
 export type CatalogItem = {
   id: string;
   type: 'book' | 'article';
