@@ -80,17 +80,17 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
     setSaveError('');
     try {
       const payload = {
-        name: editData.name,
-        course: editData.course,
-        educationLevel: editData.educationLevel,
-        mainArea: editData.mainArea,
-        subAreas: editData.subAreas,
+        name: editData.name || undefined,
+        course: editData.course || undefined,
+        educationLevel: editData.educationLevel || undefined,
+        mainArea: editData.mainArea || undefined,
+        subAreas: editData.subAreas || undefined,
         languages: editData.languages,
         materialLevels: editData.materialLevels,
         wantsBooks: editData.wantsBooks,
         wantsArticles: editData.wantsArticles,
         interests: editData.interests,
-        academicGoal: editData.academicGoal,
+        academicGoal: editData.academicGoal || undefined,
       };
       const saved = await updateProfile(payload);
       setProfileData((prev) => ({
