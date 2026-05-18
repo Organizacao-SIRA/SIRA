@@ -29,7 +29,7 @@ export const ChatInputForm = ({ value, onChange, onSubmit, placeholder, autoFocu
       <button
         type="submit"
         aria-label="Enviar"
-        className="bg-primary hover:bg-primary-dark text-white w-12 h-12 flex items-center justify-center rounded-full transition-all active:scale-95 shadow-sm flex-shrink-0"
+        className="bg-primary hover:bg-primary-dark text-white w-12 h-12 flex items-center justify-center rounded-full transition-all duration-150 active:scale-[0.98] shadow-sm flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       >
         <ChevronRight className="w-6 h-6" />
       </button>

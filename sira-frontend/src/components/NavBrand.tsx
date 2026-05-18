@@ -1,4 +1,5 @@
 import { Menu } from 'lucide-react';
+import { Button } from './ui/Button';
 
 interface NavBrandProps {
   showMenuButton: boolean;
@@ -9,19 +10,21 @@ interface NavBrandProps {
 export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick }: NavBrandProps) => (
   <div className="flex items-center">
     {showMenuButton && (
-      <button
+      <Button
+        variant="navbarAction"
+        size="icon"
         aria-label="Abrir Menu Principal"
         onClick={onMenuToggle}
-        className="mr-4 p-2 hover:bg-primary-dark rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white"
         title="Menu Principal"
+        className="mr-3"
       >
-        <Menu className="w-6 h-6" />
-      </button>
+        <Menu className="w-5 h-5" />
+      </Button>
     )}
     <button
       aria-label="Ir para a página inicial"
       onClick={onLogoClick}
-      className="flex items-center group bg-transparent border-none p-0 focus:outline-none"
+      className="flex items-center group bg-transparent border-none p-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg"
     >
       <span className="font-bold text-2xl tracking-tight">
         SIRA<span className="text-accent">+</span>

@@ -10,7 +10,7 @@ export const PromptSuggestions = ({ suggestions, onSelect }: PromptSuggestionsPr
         key={hint}
         type="button"
         onClick={() => onSelect(hint)}
-        className="text-sm bg-surface border border-border px-6 py-2.5 rounded-xl text-text-muted hover:border-primary hover:text-primary transition-all shadow-sm font-medium hover:shadow-md active:scale-95"
+        className="text-sm bg-surface border border-border px-6 py-2.5 rounded-xl text-text-muted hover:border-primary hover:text-primary transition-all duration-150 shadow-sm font-medium hover:shadow-md active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
       >
         "{hint}"
       </button>

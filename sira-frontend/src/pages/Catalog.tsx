@@ -1,8 +1,10 @@
 import React from 'react';
+import { Library } from 'lucide-react';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
 import { CatalogCategoryFilter } from '../components/CatalogCategoryFilter';
 import { CatalogGrid } from '../components/CatalogGrid';
+import { PageHeader } from '../components/ui/PageHeader';
 import type { CatalogItem } from '../types';
 
 interface CatalogProps {
@@ -25,12 +27,11 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProp
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary-dark dark:text-text">Catálogo Acadêmico</h1>
-        <p className="text-text-muted mt-1 font-medium">
-          Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos.
-        </p>
-      </div>
+      <PageHeader
+        icon={Library}
+        title="Catálogo Acadêmico"
+        subtitle="Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos."
+      />
 
       <div className="bg-surface p-4 rounded-xl border border-border-strong shadow-sm mb-6 flex flex-col gap-3">
         <CatalogSearchBar

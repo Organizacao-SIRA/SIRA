@@ -134,7 +134,7 @@ export const AiRecommendations = ({
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1 uppercase tracking-wider"
+                className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors duration-150 flex items-center gap-1 uppercase tracking-wider cursor-pointer focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
               >
                 <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Atualizando...' : 'Novas Sugestões'}
@@ -152,7 +152,7 @@ export const AiRecommendations = ({
         <h1 className="text-2xl font-bold text-primary-dark dark:text-text flex items-center gap-2">
           <Brain className="w-6 h-6 text-primary" /> Recomendações
         </h1>
-        <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm" className="flex items-center gap-2">
+        <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm">
           <RefreshCw className="w-4 h-4" /> Atualizar
         </Button>
       </div>
