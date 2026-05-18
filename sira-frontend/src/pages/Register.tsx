@@ -1,113 +1,37 @@
-import React, { useState } from 'react';
-import { User, Lock, Mail, UserPlus } from 'lucide-react';
-import { registerUser } from '../services/api';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { AuthLayout } from '../components/auth/AuthLayout';
+import { AuthFormCard } from '../components/auth/AuthFormCard';
+import { RegisterForm } from '../components/auth/RegisterForm';
+import logoSiraPlus from '../assets/logo sira+.png';
 
 interface RegisterProps {
   setCurrentScreen: (screen: string) => void;
 }
 
-export const Register = ({ setCurrentScreen }: RegisterProps) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess(false);
-
-    try {
-      await registerUser({ name, email, password });
-      setSuccess(true);
-      setTimeout(() => {
-        setCurrentScreen('login');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao tentar realizar cadastro.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
-      <div className="w-full max-w-sm">
-        <div className="bg-surface rounded-2xl shadow-lg border border-border overflow-hidden">
-          <div className="p-6 md:p-8">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-soft rounded-xl mb-3">
-                <UserPlus className="w-6 h-6 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-primary-dark dark:text-text">Criar Conta</h2>
-              <p className="text-text-muted mt-1 text-xs font-medium">Junte-se ao SIRA+ </p>
-            </div>
-
-            <form className="space-y-4" onSubmit={handleRegister}>
-              {error && (
-                <div className="p-3 bg-danger-soft text-danger-strong text-xs rounded-xl border border-danger-border font-medium text-center">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="p-3 bg-success-soft text-success-strong text-xs rounded-xl border border-success-border font-medium text-center">
-                  Cadastro realizado com sucesso! Redirecionando...
-                </div>
-              )}
-
-              <Input
-                label="Nome Completo"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome"
-                icon={<User className="w-4 h-4" />}
-                required
-              />
-
-              <Input
-                label="E-mail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                icon={<Mail className="w-4 h-4" />}
-                required
-              />
-
-              <Input
-                label="Senha"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Crie uma senha"
-                icon={<Lock className="w-4 h-4" />}
-                required
-              />
-
-              <Button
-                type="submit"
-                isLoading={isLoading}
-                disabled={success}
-                className="w-full mt-2"
-              >
-                Finalizar cadastro {!isLoading && <UserPlus className="w-4 h-4 ml-2" />}
-              </Button>
-            </form>
-          </div>
-
-          <div className="bg-surface-muted p-4 text-center border-t border-border">
-            <p className="text-xs text-text-muted">
-              Já possui uma conta? <button onClick={() => setCurrentScreen('login')} className="text-primary font-bold hover:underline">Faça login</button>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+export const Register = ({ setCurrentScreen }: RegisterProps) => (
+  <AuthLayout>
+    <AuthFormCard
+      title="Criar conta"
+      subtitle="Junte-se ao SIRA+ e descubra sua próxima leitura"
+      mobileLogo={
+        <img
+          src={logoSiraPlus}
+          alt="SIRA+"
+          className="max-w-[150px] w-full object-contain"
+        />
+      }
+      footer={
+        <p className="text-sm text-text-muted">
+          Já possui uma conta?{' '}
+          <button
+            onClick={() => setCurrentScreen('login')}
+            className="text-primary font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1"
+          >
+            Faça login
+          </button>
+        </p>
+      }
+    >
+      <RegisterForm onSuccess={() => setCurrentScreen('login')} />
+    </AuthFormCard>
+  </AuthLayout>
+);
