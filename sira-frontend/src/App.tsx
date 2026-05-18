@@ -22,7 +22,7 @@ import { Interests } from './pages/Interests';
 import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, updateUser } = useAuth();
   
   // Estados persistidos via sessionStorage para sobreviver a reloads (F5)
   const [currentScreen, setCurrentScreen] = useState(() => sessionStorage.getItem('@sira:currentScreen') || 'home');
@@ -115,6 +115,7 @@ export default function App() {
     wantsArticles: true,
     interests: [] as string[],
     academicGoal: '',
+    avatarUrl: user?.avatarUrl ?? null as string | null,
     hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
     onboardingCompletedAt: null as string | null,
   });
@@ -141,7 +142,8 @@ export default function App() {
         name: '', email: '', course: '', educationLevel: 'Graduação',
         mainArea: '', subAreas: '', languages: ['Português'],
         materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
-        interests: [], academicGoal: '', hasCompletedOnboarding: false, onboardingCompletedAt: null,
+        interests: [], academicGoal: '', avatarUrl: null,
+        hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
       setIsProfileLoading(false);
     }
@@ -184,9 +186,12 @@ export default function App() {
         wantsArticles: data.wantsArticles ?? true,
         interests: data.interests || [],
         academicGoal: data.academicGoal || '',
+        avatarUrl: data.avatarUrl ?? null,
         hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,
         onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
+      // Sincroniza avatarUrl com o AuthContext para a Navbar refletir após reload
+      if (data.avatarUrl !== undefined) updateUser({ avatarUrl: data.avatarUrl });
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
     }

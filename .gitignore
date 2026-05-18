@@ -40,3 +40,9 @@ RESUMO_ALTERACOES.md
 # OS Files
 Thumbs.db
 Desktop.ini
+
+# User-uploaded files (mantém o diretório via .gitkeep)
+sira-backend/uploads/*
+!sira-backend/uploads/avatars
+sira-backend/uploads/avatars/*
+!sira-backend/uploads/avatars/.gitkeep
