@@ -8,9 +8,15 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
 @Global()
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'sira_secret',
-      signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any },
+    JwtModule.registerAsync({
+      useFactory: () => {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) throw new Error('JWT_SECRET não está definido nas variáveis de ambiente');
+        return {
+          secret,
+          signOptions: { expiresIn: '15m' },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

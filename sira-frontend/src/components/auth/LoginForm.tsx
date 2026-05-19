@@ -24,7 +24,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
 
     try {
       const response = await loginUser({ email, password });
-      login(response.user, response.access_token);
+      login(response.user);
     } catch (err: any) {
       setError(err.message || 'Erro ao tentar fazer login.');
     } finally {

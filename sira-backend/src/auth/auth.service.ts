@@ -28,6 +28,17 @@ export class AuthService {
     return timingSafeEqual(hashBuffer, derivedKey);
   }
 
+  private signAccess(user: { id: string; email: string }): string {
+    return this.jwtService.sign({ sub: user.id, email: user.email });
+  }
+
+  private signRefresh(user: { id: string }): string {
+    return this.jwtService.sign(
+      { sub: user.id, type: 'refresh' },
+      { expiresIn: '7d' },
+    );
+  }
+
   async register(dto: RegisterDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (exists) throw new ConflictException('E-mail já cadastrado');
@@ -37,7 +48,11 @@ export class AuthService {
       data: { email: dto.email, password: hashedPassword, name: dto.name },
     });
 
-    return { access_token: this.sign(user), user: this.safeUser(user) };
+    return {
+      accessToken: this.signAccess(user),
+      refreshToken: this.signRefresh(user),
+      user: this.safeUser(user),
+    };
   }
 
   async login(dto: LoginDto) {
@@ -47,11 +62,28 @@ export class AuthService {
     const valid = await this.comparePasswords(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciais inválidas');
 
-    return { access_token: this.sign(user), user: this.safeUser(user) };
+    return {
+      accessToken: this.signAccess(user),
+      refreshToken: this.signRefresh(user),
+      user: this.safeUser(user),
+    };
   }
 
-  private sign(user: { id: string; email: string }) {
-    return this.jwtService.sign({ sub: user.id, email: user.email });
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      if (payload.type !== 'refresh') throw new Error();
+
+      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      if (!user) throw new Error();
+
+      return {
+        accessToken: this.signAccess(user),
+        refreshToken: this.signRefresh(user),
+      };
+    } catch {
+      throw new UnauthorizedException('Token de atualização inválido ou expirado');
+    }
   }
 
   private safeUser(user: any) {
@@ -69,6 +101,7 @@ export class AuthService {
       wantsArticles: user.wantsArticles,
       interests: user.interests,
       academicGoal: user.academicGoal,
+      avatarUrl: user.avatarUrl,
       onboardingCompletedAt: user.onboardingCompletedAt,
       hasCompletedOnboarding: Boolean(user.onboardingCompletedAt),
     };

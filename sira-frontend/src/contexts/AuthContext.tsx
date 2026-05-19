@@ -10,35 +10,43 @@ interface User {
 
 interface AuthContextData {
   user: User | null;
-  token: string | null;
-  login: (userData: User, token: string) => void;
+  login: (userData: User) => void;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   isAuthenticated: boolean;
 }
 
+const AUTH_API = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : '/api/v1';
+
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem('@sira:user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('@sira:token');
+    const stored = localStorage.getItem('@sira:user');
+    return stored ? JSON.parse(stored) : null;
   });
 
-  const login = (userData: User, jwtToken: string) => {
-    localStorage.setItem('@sira:token', jwtToken);
+  useEffect(() => {
+    // Remove token legado do localStorage (substituído por httpOnly cookie)
+    localStorage.removeItem('@sira:token');
+
+    const handleAuthExpired = () => void logout();
+    window.addEventListener('sira:auth:expired', handleAuthExpired);
+    return () => window.removeEventListener('sira:auth:expired', handleAuthExpired);
+  }, []);
+
+  const login = (userData: User) => {
     localStorage.setItem('@sira:user', JSON.stringify(userData));
-    setToken(jwtToken);
     setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem('@sira:token');
+  const logout = async () => {
+    try {
+      await fetch(`${AUTH_API}/auth/logout`, { method: 'POST', credentials: 'include' });
+    } catch { /* erro de rede no logout é ignorado */ }
     localStorage.removeItem('@sira:user');
-    setToken(null);
     setUser(null);
   };
 
@@ -52,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

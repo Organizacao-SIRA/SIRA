@@ -5,10 +5,12 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET não está definido nas variáveis de ambiente');
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'fallback-secret-key-change-me',
+      secretOrKey: secret,
     });
   }
 

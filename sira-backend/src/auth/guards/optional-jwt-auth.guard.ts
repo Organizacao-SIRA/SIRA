@@ -12,7 +12,10 @@ export class OptionalJwtAuthGuard implements CanActivate {
 
     if (token) {
       try {
-        request['user'] = this.jwtService.verify(token);
+        const payload = this.jwtService.verify(token);
+        if (payload.type !== 'refresh') {
+          request['user'] = payload;
+        }
       } catch {
         // Token inválido — continua sem usuário autenticado
       }
@@ -22,6 +25,7 @@ export class OptionalJwtAuthGuard implements CanActivate {
   }
 
   private extractToken(request: Request): string | null {
+    if ((request.cookies as any)?.access_token) return (request.cookies as any).access_token;
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : null;
   }
