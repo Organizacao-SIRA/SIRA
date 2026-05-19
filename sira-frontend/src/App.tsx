@@ -146,6 +146,15 @@ export default function App() {
         hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
       setIsProfileLoading(false);
+      // Estado de busca pertence à sessão do usuário — limpa ao deslogar
+      setSearchQuery('');
+      setResults([]);
+      setAiMessage('');
+      setSearchTotal(0);
+      setSearchPage(0);
+      setSelectedItem(null);
+      setLastSearchScreen('home');
+      setPreviousScreen('home');
     }
   }, [isAuthenticated, user?.id, user?.hasCompletedOnboarding]);
 
