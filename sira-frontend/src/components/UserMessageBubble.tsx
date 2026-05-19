@@ -1,4 +1,5 @@
 import { UserAvatar } from './ui/UserAvatar';
+import { resolveAvatarUrl } from '../services/api';
 import type { AuthUser } from '../types';
 
 interface UserMessageBubbleProps {
@@ -13,7 +14,7 @@ export const UserMessageBubble = ({ message, user }: UserMessageBubbleProps) => 
     </div>
     <UserAvatar
       name={user?.name || '?'}
-      imageUrl={user?.avatarUrl}
+      imageUrl={resolveAvatarUrl(user?.avatarUrl)}
       size="md"
       className="flex-shrink-0 shadow-sm"
     />

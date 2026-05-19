@@ -155,8 +155,9 @@ export default function App() {
       return;
     }
 
-    // Se está autenticado mas carregando o perfil, esperamos
     if (isProfileLoading) return;
+    // profileData ainda não sincronizou com o usuário recém-logado
+    if (user && !profileData.email) return;
 
     // Lógica de redirecionamento baseada em fatos (profileData finalizado)
     const authScreens = ['login', 'register', 'onboarding'];
@@ -167,7 +168,7 @@ export default function App() {
         setCurrentScreen('onboarding');
       }
     }
-  }, [isAuthenticated, isProfileLoading, profileData.hasCompletedOnboarding, currentScreen]);
+  }, [isAuthenticated, isProfileLoading, profileData.hasCompletedOnboarding, profileData.email, currentScreen, user]);
 
   const loadProfile = async () => {
     try {
