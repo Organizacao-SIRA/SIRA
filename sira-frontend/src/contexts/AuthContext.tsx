@@ -47,6 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await fetch(`${AUTH_API}/auth/logout`, { method: 'POST', credentials: 'include' });
     } catch { /* erro de rede no logout é ignorado */ }
     localStorage.removeItem('@sira:user');
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith('@sira:'))
+      .forEach(k => sessionStorage.removeItem(k));
     setUser(null);
   };
 
