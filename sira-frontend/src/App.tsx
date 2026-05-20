@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { ProfileData } from './types';
+import type { ProfileData, SearchFilters } from './types';
 import { 
   searchAcademicContent, 
   chatSearchMaterials, 
@@ -48,11 +48,16 @@ export default function App() {
   const [lastSearchScreen, setLastSearchScreen] = useState<'home' | 'results'>(() =>
     (sessionStorage.getItem('@sira:lastSearchScreen') as 'home' | 'results') || 'home'
   );
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>(() => {
+    const saved = sessionStorage.getItem('@sira:searchFilters');
+    return saved ? JSON.parse(saved) : { types: [], area: null, openAccessOnly: false, yearFrom: null };
+  });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -69,6 +74,7 @@ export default function App() {
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
   useEffect(() => { sessionStorage.setItem('@sira:lastSearchScreen', lastSearchScreen); }, [lastSearchScreen]);
+  useEffect(() => { sessionStorage.setItem('@sira:searchFilters', JSON.stringify(searchFilters)); }, [searchFilters]);
 
   // Restaura posição de scroll ao voltar para os resultados
   useEffect(() => {
@@ -146,6 +152,7 @@ export default function App() {
         hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
       setIsProfileLoading(false);
+      setIsProfileLoaded(false);
       // Estado de busca pertence à sessão do usuário — limpa ao deslogar
       setSearchQuery('');
       setResults([]);
@@ -155,6 +162,7 @@ export default function App() {
       setSelectedItem(null);
       setLastSearchScreen('home');
       setPreviousScreen('home');
+      setSearchFilters({ types: [], area: null, openAccessOnly: false, yearFrom: null });
     }
   }, [isAuthenticated, user?.id, user?.hasCompletedOnboarding]);
 
@@ -200,7 +208,7 @@ export default function App() {
         hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,
         onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
-      // Sincroniza avatarUrl com o AuthContext para a Navbar refletir após reload
+      setIsProfileLoaded(true);
       if (data.avatarUrl !== undefined) updateUser({ avatarUrl: data.avatarUrl });
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
@@ -223,7 +231,7 @@ export default function App() {
     setCurrentScreen('results');
     setSearchPage(0);
     try {
-      const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery);
+      const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery, searchFilters);
       setResults(items);
       setAiMessage(msg);
       setSearchTotal(items.length);
@@ -240,7 +248,7 @@ export default function App() {
     setIsLoading(true);
     setSearchPage(page);
     try {
-      const { items, total } = await searchAcademicContent(searchQuery, page);
+      const { items, total } = await searchAcademicContent(searchQuery, page, searchFilters);
       setResults(items);
       setSearchTotal(total);
     } catch {
@@ -366,7 +374,7 @@ export default function App() {
           )}
 
           {currentScreen === 'home' && (
-            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} user={user} />
+            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} filters={searchFilters} setFilters={setSearchFilters} user={user} />
           )}
           {currentScreen === 'results' && (
             <Recommendations
@@ -393,7 +401,7 @@ export default function App() {
             <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'profile' && (
-            <Profile profileData={profileData} setProfileData={setProfileData} />
+            <Profile profileData={profileData} setProfileData={setProfileData} isLoading={isProfileLoading || !isProfileLoaded} />
           )}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}

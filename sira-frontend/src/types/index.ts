@@ -69,6 +69,13 @@ export type ProfileData = {
   onboardingCompletedAt: string | null;
 };
 
+export type SearchFilters = {
+  types: ('book' | 'article')[];
+  area: string | null;
+  openAccessOnly: boolean;
+  yearFrom: number | null;
+};
+
 export type CatalogItem = {
   id: string;
   type: 'book' | 'article';

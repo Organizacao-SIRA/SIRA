@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { MaterialsService } from './materials.service';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { MaterialsService, SearchFilters } from './materials.service';
 import { MaterialDto } from './dto/material.dto';
 import { ChatSearchResponseDto } from './dto/chat-search-response.dto';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -16,13 +16,27 @@ export class MaterialsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Busca unificada em APIs acadêmicas externas' })
   @ApiResponse({ status: 200, type: [MaterialDto] })
+  @ApiQuery({ name: 'types', required: false, enum: ['book', 'article'] })
+  @ApiQuery({ name: 'area', required: false })
+  @ApiQuery({ name: 'openAccessOnly', required: false })
+  @ApiQuery({ name: 'yearFrom', required: false })
   async search(
     @Query('q') query: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('types') types?: string,
+    @Query('area') area?: string,
+    @Query('openAccessOnly') openAccessOnly?: string,
+    @Query('yearFrom') yearFrom?: string,
     @CurrentUser() user?: JwtPayload,
   ): Promise<{ items: MaterialDto[]; total: number }> {
-    return this.materialsService.search(query, user?.sub, Number(page) || 0, Number(limit) || 4);
+    const filters: SearchFilters = {
+      types: types ? ([types] as ('book' | 'article')[]) : [],
+      area: area || null,
+      openAccessOnly: openAccessOnly === 'true',
+      yearFrom: yearFrom ? Number(yearFrom) : null,
+    };
+    return this.materialsService.search(query, user?.sub, Number(page) || 0, Number(limit) || 4, filters);
   }
 
   @Get('chat')
@@ -30,10 +44,24 @@ export class MaterialsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Busca conversacional (Chat IA)' })
   @ApiResponse({ status: 200, type: ChatSearchResponseDto })
+  @ApiQuery({ name: 'types', required: false, enum: ['book', 'article'] })
+  @ApiQuery({ name: 'area', required: false })
+  @ApiQuery({ name: 'openAccessOnly', required: false })
+  @ApiQuery({ name: 'yearFrom', required: false })
   async chat(
     @Query('prompt') prompt: string,
+    @Query('types') types?: string,
+    @Query('area') area?: string,
+    @Query('openAccessOnly') openAccessOnly?: string,
+    @Query('yearFrom') yearFrom?: string,
     @CurrentUser() user?: JwtPayload,
   ): Promise<ChatSearchResponseDto> {
-    return this.materialsService.chatSearch(prompt, user?.sub);
+    const filters: SearchFilters = {
+      types: types ? ([types] as ('book' | 'article')[]) : [],
+      area: area || null,
+      openAccessOnly: openAccessOnly === 'true',
+      yearFrom: yearFrom ? Number(yearFrom) : null,
+    };
+    return this.materialsService.chatSearch(prompt, user?.sub, filters);
   }
 }

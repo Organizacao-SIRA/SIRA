@@ -1,4 +1,47 @@
 import { Injectable, Logger } from '@nestjs/common';
+
+export interface SearchFilters {
+  types: ('book' | 'article')[];
+  area: string | null;
+  openAccessOnly: boolean;
+  yearFrom: number | null;
+}
+
+const AREA_GB_SUBJECT: Record<string, string> = {
+  ia: 'artificial intelligence',
+  cd: 'data science',
+  edu: 'education',
+  sau: 'medicine',
+  dir: 'law',
+  eco: 'economics',
+  soc: 'sociology',
+  amb: 'environment',
+  gp: 'public administration',
+};
+
+const AREA_SS_FIELDS: Record<string, string> = {
+  ia: 'Computer Science',
+  cd: 'Computer Science',
+  edu: 'Education',
+  sau: 'Medicine',
+  dir: 'Law',
+  eco: 'Economics',
+  soc: 'Sociology',
+  amb: 'Environmental Science',
+  gp: 'Political Science',
+};
+
+const AREA_OA_CONCEPT: Record<string, string> = {
+  ia: 'artificial intelligence',
+  cd: 'data science',
+  edu: 'education',
+  sau: 'medicine',
+  dir: 'law',
+  eco: 'economics',
+  soc: 'sociology',
+  amb: 'environmental science',
+  gp: 'political science',
+};
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { MaterialDto, MaterialType } from './dto/material.dto';
@@ -11,6 +54,7 @@ export class MaterialsService {
   private readonly logger = new Logger(MaterialsService.name);
   private readonly GOOGLE_BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes';
   private readonly SEMANTIC_SCHOLAR_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
+  private readonly OPENALEX_URL = 'https://api.openalex.org/works';
 
   private cache = new Map<string, { data: MaterialDto[], timestamp: number }>();
   private readonly CACHE_TTL = 3600 * 1000;
@@ -49,13 +93,13 @@ export class MaterialsService {
     });
   }
 
-  async search(query: string, userId?: string, page = 0, pageSize = 4): Promise<{ items: MaterialDto[]; total: number }> {
+  async search(query: string, userId?: string, page = 0, pageSize = 4, filters?: SearchFilters): Promise<{ items: MaterialDto[]; total: number }> {
     const MAX_RESULTS = 40;
     const PAGE_SIZE = Math.min(Math.max(1, pageSize), MAX_RESULTS);
 
     if (!query || query.trim().length < 2) return { items: [], total: 0 };
 
-    const cacheKey = query.toLowerCase().trim();
+    const cacheKey = `${query.toLowerCase().trim()}|${JSON.stringify(filters ?? {})}`;
 
     if (userId) {
       this.saveSearchHistory(userId, query.trim()).catch(() => {});
@@ -70,11 +114,15 @@ export class MaterialsService {
     } else {
       try {
         this.logger.log(`Buscando nas APIs para: "${query}"`);
-        const [googleData, semanticData] = await Promise.all([
-          this.fetchGoogleBooks(query),
-          this.fetchSemanticScholar(query),
-        ]);
-        rawResults = [...googleData, ...semanticData];
+        const promises: Promise<MaterialDto[]>[] = [];
+        if (!filters?.types?.length || filters.types.includes('book')) {
+          promises.push(this.fetchGoogleBooks(query, filters));
+        }
+        if (!filters?.types?.length || filters.types.includes('article')) {
+          promises.push(this.fetchSemanticScholar(query, filters));
+        }
+        promises.push(this.fetchOpenAlex(query, filters));
+        rawResults = (await Promise.all(promises)).flat();
         if (rawResults.length > 0) {
           this.cache.set(cacheKey, { data: rawResults, timestamp: Date.now() });
         }
@@ -91,7 +139,7 @@ export class MaterialsService {
     return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
   }
 
-  async chatSearch(prompt: string, userId?: string): Promise<ChatSearchResponseDto> {
+  async chatSearch(prompt: string, userId?: string, filters?: SearchFilters): Promise<ChatSearchResponseDto> {
     this.logger.log(`Iniciando chatSearch para: "${prompt}"`);
 
     const user = userId ? await this.prisma.user.findUnique({
@@ -146,9 +194,17 @@ export class MaterialsService {
     this.logger.log(`Queries extraídas: ${queries.join(', ')}`);
 
     // Fase 2: Coleta de Dados
-    const searchPromises = queries.map(query =>
-      Promise.all([this.fetchGoogleBooks(query), this.fetchSemanticScholar(query)])
-    );
+    const searchPromises = queries.map(query => {
+      const apiCalls: Promise<MaterialDto[]>[] = [];
+      if (!filters?.types?.length || filters.types.includes('book')) {
+        apiCalls.push(this.fetchGoogleBooks(query, filters));
+      }
+      if (!filters?.types?.length || filters.types.includes('article')) {
+        apiCalls.push(this.fetchSemanticScholar(query, filters));
+      }
+      apiCalls.push(this.fetchOpenAlex(query, filters));
+      return Promise.all(apiCalls);
+    });
     const resultsArrays = await Promise.all(searchPromises);
 
     const seen = new Set<string>();
@@ -172,8 +228,27 @@ export class MaterialsService {
     }
 
     // Fase 3: Análise e Ponderação
-    const candidatesText = candidates.slice(0, 15)
-      .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 150)}`)
+    // Intercala candidatos por fonte (gb / ss / oa) em round-robin para garantir
+    // que a IA veja resultados de todas as APIs e não apenas do Google Books.
+    const bySource = new Map<string, MaterialDto[]>();
+    for (const c of candidates) {
+      const prefix = c.id.split('-')[0];
+      if (!bySource.has(prefix)) bySource.set(prefix, []);
+      bySource.get(prefix)!.push(c);
+    }
+    const sources = [...bySource.values()];
+    const balanced: MaterialDto[] = [];
+    let round = 0;
+    while (balanced.length < 24 && sources.some(s => round < s.length)) {
+      for (const s of sources) {
+        if (round < s.length) balanced.push(s[round]);
+        if (balanced.length >= 24) break;
+      }
+      round++;
+    }
+
+    const candidatesText = balanced
+      .map(c => `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year} | ${(c.abstract || '').substring(0, 300)}`)
       .join('\n');
 
     try {
@@ -184,20 +259,30 @@ export class MaterialsService {
 
             Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
             Retorne um JSON com:
-            - "aiMessage": Uma síntese técnica e amigável em português explicando por que esses materiais são ideais para este usuário específico.
-            - "selectedIds": IDs dos top materiais (máximo 8).`,
-        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "selectedIds": ["id1", "id2"]}`,
-        maxTokens: 1024,
+            - "aiMessage": Uma síntese geral em português (2-3 frases) explicando o conjunto de materiais selecionados.
+            - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
+              - "id": o ID exato do candidato
+              - "explanation": UMA frase curta em português explicando por que este material específico é relevante para o pedido e o perfil do usuário.`,
+        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}`,
+        maxTokens: 1500,
       });
       const text = rawSynthesis.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const { aiMessage, selectedIds } = JSON.parse(text);
+      const { aiMessage, recommendations: selected } = JSON.parse(text);
+
+      const explanationMap = new Map<string, string>(
+        selected.map((r: { id: string; explanation: string }) => [r.id, r.explanation]),
+      );
 
       const finalResults = candidates
-        .filter(c => selectedIds.includes(c.id))
-        .map(c => ({
+        .filter(c => explanationMap.has(c.id))
+        .sort((a, b) => {
+          const ids = selected.map((r: { id: string }) => r.id);
+          return ids.indexOf(a.id) - ids.indexOf(b.id);
+        })
+        .map((c, idx) => ({
           ...c,
-          relevance: 100 - selectedIds.indexOf(c.id),
-          aiExplanation: 'Selecionado via Chat inteligente.',
+          relevance: Math.max(100 - idx * 5, 60),
+          aiExplanation: explanationMap.get(c.id) ?? null,
         }));
 
       return { aiMessage, results: finalResults };
@@ -304,14 +389,29 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     }
   }
 
-  private async fetchGoogleBooks(query: string): Promise<MaterialDto[]> {
+  private async fetchGoogleBooks(query: string, filters?: SearchFilters): Promise<MaterialDto[]> {
     const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
-    const url = `${this.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=20${apiKey ? `&key=${apiKey}` : ''}`;
+    let q = query;
+    if (filters?.area && AREA_GB_SUBJECT[filters.area]) {
+      q += `+subject:${AREA_GB_SUBJECT[filters.area]}`;
+    }
+    const params = new URLSearchParams({ q, maxResults: '20' });
+    if (apiKey) params.set('key', apiKey);
+    if (filters?.openAccessOnly) params.set('filter', 'free-ebooks');
+    const url = `${this.GOOGLE_BOOKS_URL}?${params.toString()}`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
 
-      return (response.data.items || []).map((item: any) => ({
+      const items: any[] = (response.data.items || []);
+      const filtered = filters?.yearFrom
+        ? items.filter(item => {
+            const year = parseInt(item.volumeInfo?.publishedDate?.split('-')[0] || '0', 10);
+            return year >= filters.yearFrom!;
+          })
+        : items;
+
+      return filtered.map((item: any) => ({
         id: `gb-${item.id}`,
         type: MaterialType.BOOK,
         title: item.volumeInfo?.title || 'Título Indisponível',
@@ -332,15 +432,30 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     }
   }
 
-  private async fetchSemanticScholar(query: string): Promise<MaterialDto[]> {
+  private async fetchSemanticScholar(query: string, filters?: SearchFilters): Promise<MaterialDto[]> {
     const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
     const headers = apiKey ? { 'x-api-key': apiKey } : {};
-    const url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf`;
+
+    // Vírgulas no parâmetro fields devem ficar literais — URLSearchParams as codifica como %2C,
+    // o que faz a API ignorar o parâmetro. Por isso concatenamos a URL manualmente.
+    let url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf,isOpenAccess`;
+
+    if (filters?.area && AREA_SS_FIELDS[filters.area]) {
+      url += `&fieldsOfStudy=${encodeURIComponent(AREA_SS_FIELDS[filters.area])}`;
+    }
+    if (filters?.yearFrom) {
+      url += `&year=${filters.yearFrom}-`;
+    }
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url, { headers })));
 
-      return (response.data.data || []).map((item: any) => ({
+      let data: any[] = response.data.data || [];
+      if (filters?.openAccessOnly) {
+        data = data.filter(item => item.isOpenAccess || item.openAccessPdf?.url);
+      }
+
+      return data.map((item: any) => ({
         id: `ss-${item.paperId}`,
         type: MaterialType.ARTICLE,
         title: item.title || 'Título Indisponível',
@@ -356,6 +471,72 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
       if (error.response?.status === 429) {
         this.logger.warn('Semantic Scholar API: Limite de requisições excedido mesmo após retentativas. Configure SEMANTIC_SCHOLAR_API_KEY no .env.');
       }
+      return [];
+    }
+  }
+
+  private reconstructAbstract(invertedIndex: Record<string, number[]> | null): string {
+    if (!invertedIndex || Object.keys(invertedIndex).length === 0) return 'Resumo não disponível.';
+    const entries: [number, string][] = [];
+    for (const [word, positions] of Object.entries(invertedIndex)) {
+      for (const pos of positions) entries.push([pos, word]);
+    }
+    return entries.sort((a, b) => a[0] - b[0]).map(([, w]) => w).join(' ');
+  }
+
+  private async fetchOpenAlex(query: string, filters?: SearchFilters): Promise<MaterialDto[]> {
+    const apiKey = process.env.OPENALEX_API_KEY;
+
+    let url = `${this.OPENALEX_URL}?search=${encodeURIComponent(query)}&per-page=20&select=id,title,authorships,publication_year,abstract_inverted_index,primary_location,doi,open_access,type`;
+
+    const filterParts: string[] = [];
+    if (filters?.openAccessOnly) filterParts.push('open_access.is_oa:true');
+    if (filters?.yearFrom) filterParts.push(`publication_year:>${filters.yearFrom - 1}`);
+    if (filters?.types?.length === 1) {
+      filterParts.push(filters.types[0] === 'book' ? 'type:book' : 'type:article');
+    }
+    if (filters?.area && AREA_OA_CONCEPT[filters.area]) {
+      filterParts.push(`concepts.display_name.search:${encodeURIComponent(AREA_OA_CONCEPT[filters.area])}`);
+    }
+    if (filterParts.length > 0) url += `&filter=${filterParts.join(',')}`;
+
+    if (apiKey) url += `&api_key=${apiKey}`;
+
+    try {
+      const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
+      const results: any[] = response.data.results || [];
+
+      return results
+        .filter(item => item.title)
+        .map((item: any) => {
+          const isBook = item.type === 'book' || item.type === 'book-chapter';
+          const authors = (item.authorships || [])
+            .slice(0, 5)
+            .map((a: any) => a.author?.display_name)
+            .filter(Boolean)
+            .join(', ') || 'Autores não informados';
+          const openAccessUrl = item.open_access?.oa_url;
+          const landingUrl = item.primary_location?.landing_page_url;
+          const doiUrl = item.doi ? `https://doi.org/${item.doi.replace('https://doi.org/', '')}` : null;
+          const url = openAccessUrl || landingUrl || doiUrl || `https://openalex.org/${item.id}`;
+          const oaId = item.id?.replace('https://openalex.org/', '') || item.id;
+
+          return {
+            id: `oa-${oaId}`,
+            type: isBook ? MaterialType.BOOK : MaterialType.ARTICLE,
+            title: item.title,
+            authors,
+            year: item.publication_year?.toString() || 'N/A',
+            source: item.primary_location?.source?.display_name || 'OpenAlex',
+            relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
+            abstract: this.reconstructAbstract(item.abstract_inverted_index),
+            image: null,
+            url,
+            doi: item.doi || null,
+          };
+        });
+    } catch (error) {
+      this.logger.error(`Erro ao buscar no OpenAlex: ${error.message}`);
       return [];
     }
   }

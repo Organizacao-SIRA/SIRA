@@ -1,4 +1,4 @@
-import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload, CatalogItem } from '../types';
+import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload, CatalogItem, SearchFilters } from '../types';
 
 // Em desenvolvimento, usa o proxy do Vite (/api → localhost:3000).
 // Em produção, VITE_API_URL aponta para o backend real.
@@ -67,11 +67,22 @@ export const registerUser = async (data: any) => {
 
 // --- Materials ---
 
-export const searchAcademicContent = async (query: string, page = 0): Promise<{ items: any[]; total: number }> => {
+function buildFilterParams(filters?: SearchFilters): string {
+  if (!filters) return '';
+  const params = new URLSearchParams();
+  if (filters.types.length === 1) params.set('types', filters.types[0]);
+  if (filters.area) params.set('area', filters.area);
+  if (filters.openAccessOnly) params.set('openAccessOnly', 'true');
+  if (filters.yearFrom !== null) params.set('yearFrom', String(filters.yearFrom));
+  const str = params.toString();
+  return str ? `&${str}` : '';
+}
+
+export const searchAcademicContent = async (query: string, page = 0, filters?: SearchFilters): Promise<{ items: any[]; total: number }> => {
   if (!query || query.length < 2) return { items: [], total: 0 };
   try {
     const response = await fetchWithAuth(
-      `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}&page=${page}`,
+      `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query)}&page=${page}${buildFilterParams(filters)}`,
     );
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();
@@ -81,11 +92,11 @@ export const searchAcademicContent = async (query: string, page = 0): Promise<{ 
   }
 };
 
-export const chatSearchMaterials = async (prompt: string): Promise<{ aiMessage: string; results: any[] }> => {
+export const chatSearchMaterials = async (prompt: string, filters?: SearchFilters): Promise<{ aiMessage: string; results: any[] }> => {
   if (!prompt || prompt.trim().length < 2) return { aiMessage: '', results: [] };
   try {
     const response = await fetchWithAuth(
-      `${API_BASE_URL}/materials/chat?prompt=${encodeURIComponent(prompt)}`,
+      `${API_BASE_URL}/materials/chat?prompt=${encodeURIComponent(prompt)}${buildFilterParams(filters)}`,
     );
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();

@@ -17,6 +17,7 @@ import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
 interface ProfileProps {
   profileData: ProfileData;
   setProfileData: Dispatch<SetStateAction<ProfileData>>;
+  isLoading?: boolean;
 }
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
@@ -31,7 +32,7 @@ const DEFAULT_TOPICS: PreferenceTopic[] = [
   { id: 'soc', label: 'Sociologia' },
 ];
 
-export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
+export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps) => {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(profileData || {});
@@ -50,10 +51,11 @@ export const Profile = ({ profileData, setProfileData }: ProfileProps) => {
     }
   }, [isEditing, preferenceOptions]);
 
-  if (!profileData) {
+  if (isLoading) {
     return (
-      <div className="p-12 sm:p-20 text-center font-bold text-primary-dark dark:text-text">
-        Carregando perfil...
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        <p className="text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
       </div>
     );
   }
