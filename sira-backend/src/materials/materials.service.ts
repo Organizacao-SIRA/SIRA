@@ -485,7 +485,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
   }
 
   private async fetchOpenAlex(query: string, filters?: SearchFilters): Promise<MaterialDto[]> {
-    const apiKey = process.env.OPENALEX_API_KEY;
+    const mailto = process.env.OPENALEX_MAILTO;
 
     let url = `${this.OPENALEX_URL}?search=${encodeURIComponent(query)}&per-page=20&select=id,title,authorships,publication_year,abstract_inverted_index,primary_location,doi,open_access,type`;
 
@@ -500,7 +500,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     }
     if (filterParts.length > 0) url += `&filter=${filterParts.join(',')}`;
 
-    if (apiKey) url += `&api_key=${apiKey}`;
+    if (mailto) url += `&mailto=${encodeURIComponent(mailto)}`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
