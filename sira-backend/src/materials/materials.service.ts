@@ -58,6 +58,7 @@ export class MaterialsService {
 
   private cache = new Map<string, { data: MaterialDto[], timestamp: number }>();
   private readonly CACHE_TTL = 3600 * 1000;
+  private readonly SEARCH_INVALIDATION_THRESHOLD = 5;
 
   constructor(
     private readonly httpService: HttpService,
@@ -370,6 +371,23 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
   private async saveSearchHistory(userId: string, query: string): Promise<void> {
     await this.prisma.searchHistory.create({ data: { userId, query } });
+    await this.maybeInvalidateRecommendationCache(userId);
+  }
+
+  private async maybeInvalidateRecommendationCache(userId: string): Promise<void> {
+    const cache = await this.prisma.recommendationCache.findUnique({
+      where: { userId },
+      select: { generatedAt: true },
+    });
+    if (!cache) return;
+
+    const searchesSince = await this.prisma.searchHistory.count({
+      where: { userId, createdAt: { gt: cache.generatedAt } },
+    });
+
+    if (searchesSince >= this.SEARCH_INVALIDATION_THRESHOLD) {
+      await this.prisma.recommendationCache.deleteMany({ where: { userId } });
+    }
   }
 
   private async fetchWithRetry<T>(
@@ -467,7 +485,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
         type: MaterialType.ARTICLE,
         title: item.title || 'Título Indisponível',
         authors: item.authors?.map((a: any) => a.name).join(', ') || 'Vários autores',
-        year: item.year || 'N/A',
+        year: item.year != null ? String(item.year) : 'N/A',
         source: item.venue || 'Semantic Scholar',
         relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
         abstract: item.abstract || 'Resumo acadêmico indisponível.',

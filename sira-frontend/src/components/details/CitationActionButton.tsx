@@ -8,7 +8,7 @@ interface CitationActionButtonProps {
 
 const buildCitation = (item: CatalogItem): string => {
   const authors = item.authors?.trim() || 'Autor desconhecido';
-  const year = item.year?.trim() || 's.d.';
+  const year = String(item.year ?? '').trim() || 's.d.';
   const title = item.title?.trim() || 'Sem título';
   const source = item.source?.trim() || '';
 
@@ -19,7 +19,7 @@ const buildCitation = (item: CatalogItem): string => {
 };
 
 const hasEnoughData = (item: CatalogItem) =>
-  Boolean(item.authors?.trim() && item.title?.trim() && item.year?.trim());
+  Boolean(item.authors?.trim() && item.title?.trim() && String(item.year ?? '').trim());
 
 export const CitationActionButton = ({ item }: CitationActionButtonProps) => {
   const { copied, copy } = useClipboard();
