@@ -3,7 +3,7 @@ import { RelevanceScore } from './RelevanceScore';
 
 interface SiraAnalysisCardProps {
   explanation?: string | null;
-  relevance: number;
+  relevance?: number | null;
 }
 
 const DEFAULT_EXPLANATION = 'Recomendado com base na aderência ao seu perfil acadêmico.';

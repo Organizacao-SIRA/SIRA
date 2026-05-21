@@ -17,24 +17,24 @@ export const ContentHero = ({ type, title, authors, year, source }: ContentHeroP
       {title}
     </h1>
 
-    <dl className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text-muted">
-      <div className="flex items-center gap-2 min-w-0">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text-muted">
+      <span className="flex items-center gap-2 min-w-0">
         <UserCircle className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
-        <dt className="sr-only">Autores</dt>
-        <dd className="font-medium text-text break-words">{authors}</dd>
-      </div>
+        <span className="sr-only">Autores:</span>
+        <span className="font-medium text-text break-words">{authors}</span>
+      </span>
       <span className="text-text-subtle" aria-hidden="true">·</span>
-      <div className="flex items-center gap-2">
+      <span className="flex items-center gap-2">
         <Calendar className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
-        <dt className="sr-only">Ano</dt>
-        <dd className="font-medium text-text">{year}</dd>
-      </div>
+        <span className="sr-only">Ano:</span>
+        <span className="font-medium text-text">{year}</span>
+      </span>
       <span className="text-text-subtle" aria-hidden="true">·</span>
-      <div className="flex items-center gap-2 min-w-0">
+      <span className="flex items-center gap-2 min-w-0">
         <Globe className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
-        <dt className="sr-only">Fonte</dt>
-        <dd className="font-medium text-text break-words">{source}</dd>
-      </div>
-    </dl>
+        <span className="sr-only">Fonte:</span>
+        <span className="font-medium text-text break-words">{source}</span>
+      </span>
+    </div>
   </header>
 );

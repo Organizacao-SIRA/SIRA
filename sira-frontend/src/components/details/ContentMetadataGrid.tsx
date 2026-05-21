@@ -22,7 +22,7 @@ export const ContentMetadataGrid = ({ doi, isbn, thematicArea }: ContentMetadata
       >
         Identificação
       </h2>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
         {doi && (
           <MetadataItem icon={LinkIcon} label="DOI">
             <a
@@ -47,7 +47,7 @@ export const ContentMetadataGrid = ({ doi, isbn, thematicArea }: ContentMetadata
             </span>
           </MetadataItem>
         )}
-      </dl>
+      </div>
     </section>
   );
 };

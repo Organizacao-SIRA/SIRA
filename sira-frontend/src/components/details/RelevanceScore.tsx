@@ -1,5 +1,5 @@
 interface RelevanceScoreProps {
-  value: number;
+  value?: number | null;
   label?: string;
 }
 
@@ -10,7 +10,8 @@ const getTone = (value: number) => {
 };
 
 export const RelevanceScore = ({ value, label = 'Relevância Semântica' }: RelevanceScoreProps) => {
-  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const safeValue = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  const clamped = Math.max(0, Math.min(100, Math.round(safeValue)));
   const tone = getTone(clamped);
 
   return (

@@ -14,12 +14,12 @@ export const MetadataItem = ({ icon: Icon, label, children, className = '' }: Me
       <Icon className="w-4 h-4" aria-hidden="true" />
     </div>
     <div className="min-w-0 flex-1">
-      <dt className="text-[11px] font-bold uppercase tracking-wider text-text-subtle mb-1">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-text-subtle mb-1">
         {label}
-      </dt>
-      <dd className="text-sm text-text break-words font-medium">
+      </p>
+      <div className="text-sm text-text break-words font-medium">
         {children}
-      </dd>
+      </div>
     </div>
   </div>
 );

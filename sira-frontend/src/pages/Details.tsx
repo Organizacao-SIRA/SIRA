@@ -31,10 +31,7 @@ export const Details = ({
   const favorited = isFavorite(item.id);
 
   return (
-    <main
-      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn"
-      aria-labelledby="content-title"
-    >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
       <ContentBreadcrumb
         previousScreen={previousScreen}
         title={item.title}
@@ -43,15 +40,13 @@ export const Details = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <article className="lg:col-span-8 space-y-6 sm:space-y-8 min-w-0">
-          <div id="content-title">
-            <ContentHero
-              type={item.type}
-              title={item.title}
-              authors={item.authors}
-              year={item.year}
-              source={item.source}
-            />
-          </div>
+          <ContentHero
+            type={item.type}
+            title={item.title}
+            authors={item.authors}
+            year={item.year}
+            source={item.source}
+          />
 
           <ContentMetadataGrid
             doi={item.doi}
@@ -77,6 +72,6 @@ export const Details = ({
           />
         </aside>
       </div>
-    </main>
+    </div>
   );
 };
