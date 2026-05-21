@@ -395,9 +395,13 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     if (filters?.area && AREA_GB_SUBJECT[filters.area]) {
       q += `+subject:${AREA_GB_SUBJECT[filters.area]}`;
     }
-    const params = new URLSearchParams({ q, maxResults: '20' });
+    // A API do Google Books não tem filtro nativo de ano — aplicamos client-side após o fetch.
+    // Para compensar, aumentamos maxResults e priorizamos publicações recentes quando yearFrom está definido.
+    const maxResults = filters?.yearFrom ? '40' : '20';
+    const params = new URLSearchParams({ q, maxResults });
     if (apiKey) params.set('key', apiKey);
     if (filters?.openAccessOnly) params.set('filter', 'free-ebooks');
+    if (filters?.yearFrom) params.set('orderBy', 'newest');
     const url = `${this.GOOGLE_BOOKS_URL}?${params.toString()}`;
 
     try {
@@ -445,6 +449,9 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     }
     if (filters?.yearFrom) {
       url += `&year=${filters.yearFrom}-`;
+    }
+    if (filters?.types?.length === 1 && filters.types[0] === 'article') {
+      url += '&publicationTypes=JournalArticle,Review,Conference,ClinicalTrial,Editorial,Letter,Study';
     }
 
     try {
@@ -496,7 +503,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
       filterParts.push(filters.types[0] === 'book' ? 'type:book' : 'type:article');
     }
     if (filters?.area && AREA_OA_CONCEPT[filters.area]) {
-      filterParts.push(`concepts.display_name.search:${encodeURIComponent(AREA_OA_CONCEPT[filters.area])}`);
+      filterParts.push(`topics.display_name.search:${encodeURIComponent(AREA_OA_CONCEPT[filters.area])}`);
     }
     if (filterParts.length > 0) url += `&filter=${filterParts.join(',')}`;
 
