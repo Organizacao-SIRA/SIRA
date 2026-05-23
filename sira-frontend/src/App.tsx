@@ -16,6 +16,7 @@ import { Catalog } from './pages/Catalog';
 import { Details } from './pages/Details';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import { Spinner } from './components/ui/Spinner';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Onboarding } from './pages/Onboarding';
@@ -63,7 +64,9 @@ export default function App() {
     return saved ? JSON.parse(saved) : { types: [], area: null, openAccessOnly: false, yearFrom: null };
   });
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+    window.matchMedia('(min-width: 768px)').matches
+  );
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
@@ -376,7 +379,7 @@ export default function App() {
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+            <Spinner size="lg" className="mx-auto" />
             <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
           </div>
         </div>
@@ -386,10 +389,23 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        Pular para o conteúdo principal
+      </a>
       {favoriteError && (
         <div className="fixed top-4 right-4 z-50 bg-danger-soft border border-danger-border text-danger-strong px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
-          <span>⭐ Erro ao favoritar: {favoriteError}</span>
-          <button onClick={() => setFavoriteError(null)} className="text-danger-strong hover:opacity-70 font-bold">×</button>
+          <span>Erro ao favoritar: {favoriteError}</span>
+          <button
+            type="button"
+            onClick={() => setFavoriteError(null)}
+            aria-label="Fechar alerta de erro"
+            className="text-danger-strong hover:opacity-70 font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-strong/40 rounded px-1"
+          >
+            ×
+          </button>
         </div>
       )}
       <Navbar
@@ -412,10 +428,15 @@ export default function App() {
           />
         )}
 
-        <main ref={mainRef} className="flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable]">
+        <main
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable] focus:outline-none"
+        >
           {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              <Spinner size="lg" />
               <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Buscando...</p>
             </div>
           )}

@@ -15,6 +15,7 @@ import { ContentPreferencesStep } from '../components/onboarding/steps/ContentPr
 import { AcademicGoalStep } from '../components/onboarding/steps/AcademicGoalStep';
 import { ReviewStep } from '../components/onboarding/steps/ReviewStep';
 import { Button } from '../components/ui/Button';
+import { Spinner } from '../components/ui/Spinner';
 
 interface OnboardingProps {
   setCurrentScreen: (screen: string) => void;
@@ -81,7 +82,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     return (
       <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto" />
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">
             Carregando opções...
           </p>

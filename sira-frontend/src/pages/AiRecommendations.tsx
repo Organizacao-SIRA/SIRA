@@ -123,7 +123,7 @@ export const AiRecommendations = ({
           <button
             type="button"
             onClick={() => setCurrentScreen('onboarding')}
-            className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider"
+            className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 py-0.5"
           >
             Configurar preferências
           </button>
@@ -185,7 +185,8 @@ export const AiRecommendations = ({
               <button
                 type="button"
                 onClick={() => setChatExpanded(v => !v)}
-                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider py-1"
+                aria-expanded={chatExpanded}
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider py-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md"
               >
                 {chatExpanded ? (
                   <><ChevronUp className="w-3 h-3" /> Ver menos</>
@@ -200,9 +201,10 @@ export const AiRecommendations = ({
                 {generatedAt && <span className="text-[9px] font-medium text-text-subtle flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {formatDate(generatedAt)}</span>}
               </div>
               <button
+                type="button"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors duration-150 flex items-center gap-1 uppercase tracking-wider cursor-pointer focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
+                className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors duration-150 flex items-center gap-1 uppercase tracking-wider cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 py-0.5 disabled:opacity-50 disabled:pointer-events-none"
               >
                 <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Atualizando...' : 'Novas Sugestões'}

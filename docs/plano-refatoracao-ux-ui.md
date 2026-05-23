@@ -51,6 +51,27 @@ Substituir o HTML bruto pelos novos componentes (Atoms) nos seguintes arquivos:
 - [x] Garantir que ações de formulário bloqueiem múltiplos cliques (estado `isLoading` = `disabled`) nos botões de submissão (Profile, Onboarding, Login).
 
 ### Fase 5: Verificação e Teste
-- [ ] Validar a navegação completa usando apenas a tecla `TAB` (Keyboard Navigation).
-- [ ] Testar o sistema com leitores de tela em pontos críticos (formulários e cards de recomendação).
-- [ ] Realizar teste de consistência visual entre as telas para garantir uniformidade.
+- [x] Validar a navegação completa usando apenas a tecla `TAB` (Keyboard Navigation).
+- [x] Testar o sistema com leitores de tela em pontos críticos (formulários e cards de recomendação).
+- [x] Realizar teste de consistência visual entre as telas para garantir uniformidade.
+
+---
+
+## 4. Auditoria de Execução - 2026-05-23
+
+### Status dos itens já marcados
+- **Fase 1:** Confirmada. O projeto usa Tailwind v4 com tokens CSS em `src/index.css` (`@theme`) e classes semânticas (`bg-primary`, `text-text`, `border-border`, etc.). O `tailwind.config.js` ainda mantém tokens legados de marca, mas a fonte moderna dos tokens está no CSS-first config do Tailwind v4.
+- **Fase 2:** Confirmada. Os atoms existem em `src/components/ui/` e cobrem `Button`, `Input`, `Select`, `Checkbox`, `Spinner`, `EmptyState` e `ErrorState`.
+- **Fase 3:** Confirmada com ajuste de contexto. `Interests.tsx` não existe mais como página isolada; o fluxo foi incorporado ao `Onboarding.tsx` e componentes em `src/components/onboarding/`. `Profile.tsx` já foi quebrado em cards especializados.
+- **Fase 4:** Confirmada parcialmente e reforçada nesta rodada. Foram adicionados estados/focus rings/ARIA em controles de catálogo, paginação, favoritos, recomendações e busca; loaders manuais foram substituídos por `Spinner`; o submit final do onboarding passou a usar `Button isLoading`.
+
+### Ajustes aplicados nesta rodada
+- Padronização de loaders em `App.tsx`, `Profile.tsx` e `Onboarding.tsx` usando `<Spinner />`.
+- Melhoria de acessibilidade em cards clicáveis (`aria-label`, teclado com `Enter`/`Space` e `preventDefault`).
+- Melhoria de navegação por teclado em filtros, paginação, tabs da biblioteca e botões textuais.
+- Inclusão de `aria-pressed`, `aria-current`, `aria-expanded`, `role="tablist"` e `type="button"` onde aplicável.
+- Remoção de símbolo decorativo no alerta de erro de favorito e inclusão de `aria-label` no botão de fechar.
+
+### Verificação executada
+- `npm run build`: **passou**.
+- `npm run lint`: **falhou por dívida pré-existente**. Foram reportados erros amplos de `no-explicit-any`, regras de hooks do React 19 e variáveis não usadas em arquivos como `App.tsx`, `AiRecommendations.tsx`, `Favorites.tsx`, `Profile.tsx`, `Recommendations.tsx`, `services/api.ts` e hooks. Esses erros não foram todos introduzidos nesta rodada e devem virar uma etapa própria de saneamento técnico antes de considerar o lint global saudável.

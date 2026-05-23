@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 interface OnboardingActionsProps {
@@ -45,14 +45,11 @@ export const OnboardingActions = ({
         <Button
           type="button"
           onClick={onSubmit}
-          disabled={isSaving}
+          isLoading={isSaving}
           className="w-full sm:w-auto"
         >
           {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Salvando...
-            </>
+            'Salvando...'
           ) : (
             <>
               <Check className="w-4 h-4" />

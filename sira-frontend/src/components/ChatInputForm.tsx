@@ -20,6 +20,7 @@ export const ChatInputForm = ({ value, onChange, onSubmit, placeholder, autoFocu
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || 'O que você deseja investigar hoje?...'}
+        aria-label="Busca inteligente"
         required
         autoFocus={autoFocus}
         className="pr-2"

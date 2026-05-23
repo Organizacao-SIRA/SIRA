@@ -13,9 +13,10 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 gap-y-3 mt-6 sm:mt-8">
       <button
+        type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={page === 0}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98]"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         aria-label="Página anterior"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -25,8 +26,11 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
         {Array.from({ length: totalPages }, (_, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => onPageChange(i)}
-            className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] ${
+            aria-label={`Ir para a página ${i + 1}`}
+            aria-current={i === page ? 'page' : undefined}
+            className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               i === page
                 ? 'bg-primary text-white shadow-sm'
                 : 'border border-border-strong text-text-muted hover:border-primary hover:text-primary hover:bg-primary-soft'
@@ -38,9 +42,10 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
       </div>
 
       <button
+        type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages - 1}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98]"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         aria-label="Próxima página"
       >
         <ChevronRight className="w-4 h-4" />

@@ -36,8 +36,9 @@ export const Recommendations = ({
 
       <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3 border-b border-border pb-4">
         <button
+          type="button"
           onClick={handleClearSearch}
-          className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group"
+          className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md px-1 py-1"
         >
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
           <span className="text-sm">Nova pesquisa</span>
