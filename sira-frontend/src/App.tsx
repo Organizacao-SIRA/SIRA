@@ -19,13 +19,23 @@ import { Sidebar } from './components/Sidebar';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Onboarding } from './pages/Onboarding';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
   const { isAuthenticated, user, logout, updateUser } = useAuth();
   
   // Estados persistidos via sessionStorage para sobreviver a reloads (F5)
-  const [currentScreen, setCurrentScreen] = useState(() => sessionStorage.getItem('@sira:currentScreen') || 'home');
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlScreen = params.get('screen');
+    const urlToken = params.get('token');
+    if (urlScreen === 'reset-password' && urlToken) {
+      return 'reset-password';
+    }
+    return sessionStorage.getItem('@sira:currentScreen') || 'home';
+  });
   const [previousScreen, setPreviousScreen] = useState(() => sessionStorage.getItem('@sira:previousScreen') || 'home');
   const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('@sira:searchQuery') || '');
   const [results, setResults] = useState<any[]>(() => {
@@ -59,6 +69,15 @@ export default function App() {
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const [resetToken, setResetToken] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlScreen = params.get('screen');
+    const urlToken = params.get('token');
+    if (urlScreen === 'reset-password' && urlToken) {
+      return urlToken;
+    }
+    return sessionStorage.getItem('@sira:resetToken') || '';
+  });
   const mainRef = useRef<HTMLElement>(null);
 
   // Sincroniza as mudanças de estado com o sessionStorage
@@ -75,6 +94,21 @@ export default function App() {
   }, [selectedItem]);
   useEffect(() => { sessionStorage.setItem('@sira:lastSearchScreen', lastSearchScreen); }, [lastSearchScreen]);
   useEffect(() => { sessionStorage.setItem('@sira:searchFilters', JSON.stringify(searchFilters)); }, [searchFilters]);
+  useEffect(() => {
+    if (resetToken) sessionStorage.setItem('@sira:resetToken', resetToken);
+    else sessionStorage.removeItem('@sira:resetToken');
+  }, [resetToken]);
+
+  // Limpa os parâmetros de recuperação de senha da URL após a montagem do componente
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    const urlScreen = params.get('screen');
+
+    if (urlScreen === 'reset-password' && urlToken) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   // Restaura posição de scroll ao voltar para os resultados
   useEffect(() => {
@@ -89,7 +123,7 @@ export default function App() {
   }, [currentScreen]);
 
   // Integração com History API do browser (habilita o botão voltar do navegador)
-  const AUTH_SCREENS = ['login', 'register', 'onboarding'];
+  const AUTH_SCREENS = ['login', 'register', 'onboarding', 'forgot-password', 'reset-password'];
   useEffect(() => {
     if (AUTH_SCREENS.includes(currentScreen)) return;
     if (!window.history.state?.screen) {
@@ -168,7 +202,8 @@ export default function App() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      if (currentScreen !== 'register') setCurrentScreen('login');
+      const publicScreens = ['register', 'forgot-password', 'reset-password'];
+      if (!publicScreens.includes(currentScreen)) setCurrentScreen('login');
       return;
     }
 
@@ -326,7 +361,7 @@ export default function App() {
     }
   };
 
-  const showSidebar = !['login', 'register', 'onboarding'].includes(currentScreen);
+  const showSidebar = !['login', 'register', 'onboarding', 'forgot-password', 'reset-password'].includes(currentScreen);
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
     return (
@@ -417,6 +452,8 @@ export default function App() {
           )}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
+          {currentScreen === 'forgot-password' && <ForgotPassword setCurrentScreen={setCurrentScreen} />}
+          {currentScreen === 'reset-password' && <ResetPassword token={resetToken} setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'onboarding' && (
             <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
           )}

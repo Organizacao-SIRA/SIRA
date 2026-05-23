@@ -7,7 +7,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN npm ci
+RUN npm install
 
 # Estágio 2: Desenvolvimento (Com Hot Reload)
 FROM base AS development
