@@ -1,6 +1,5 @@
 import { RecommendationCard } from './RecommendationCard';
 import { Button } from './ui/Button';
-import { StatusBadge } from './ui/StatusBadge';
 
 interface MaterialsSectionProps {
   results: any[];
@@ -21,7 +20,6 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
           </span>
         )}
       </div>
-      <StatusBadge variant="success" className="rounded-full border-0">IA Verified</StatusBadge>
     </div>
 
     {results.map((item: any) => (

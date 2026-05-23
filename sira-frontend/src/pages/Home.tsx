@@ -35,6 +35,6 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, filters, setFi
       </div>
     </div>
 
-    <PageFooter text="Sistema Inteligente de Recomendações Acadêmicas" />
+    <PageFooter text="Resultados gerados por IA. Podem ocorrer erros, use o seu julgamento acadêmico ao selecionar os materiais." />
   </div>
 );
