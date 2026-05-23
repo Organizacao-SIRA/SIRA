@@ -3,7 +3,7 @@ import type { ProfileData, SearchFilters } from './types';
 import { 
   searchAcademicContent, 
   chatSearchMaterials, 
-  fetchFavorites, 
+  fetchFavoriteIds, 
   addFavorite, 
   removeFavoriteApi, 
   getProfile 
@@ -54,7 +54,7 @@ export default function App() {
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
@@ -138,12 +138,12 @@ export default function App() {
 
       // Busca dados completos do perfil
       setIsProfileLoading(true);
-      Promise.all([loadFavorites(), loadProfile()])
+      Promise.all([loadFavoriteIds(), loadProfile()])
         .finally(() => {
           setIsProfileLoading(false);
         });
     } else if (!isAuthenticated) {
-      setFavorites([]);
+      setFavoriteIds(new Set());
       setProfileData({
         name: '', email: '', course: '', educationLevel: 'Graduação',
         mainArea: '', subAreas: '', languages: ['Português'],
@@ -215,10 +215,10 @@ export default function App() {
     }
   };
 
-  const loadFavorites = async () => {
+  const loadFavoriteIds = async () => {
     try {
-      const data = await fetchFavorites();
-      setFavorites(data);
+      const data = await fetchFavoriteIds();
+      setFavoriteIds(new Set(data));
     } catch (error) {
       console.error('Erro ao carregar favoritos:', error);
     }
@@ -268,10 +268,15 @@ export default function App() {
   };
 
   const toggleFavorite = async (item: any) => {
-    const isFav = favorites.some(f => f.id === item.id);
+    const isFav = favoriteIds.has(item.id);
 
     // Optimistic update — feedback imediato antes da resposta da API
-    setFavorites(prev => isFav ? prev.filter(f => f.id !== item.id) : [...prev, item]);
+    setFavoriteIds(prev => {
+      const next = new Set(prev);
+      if (isFav) next.delete(item.id);
+      else next.add(item.id);
+      return next;
+    });
 
     try {
       if (isFav) {
@@ -280,16 +285,23 @@ export default function App() {
         await addFavorite(item);
       }
       setFavoriteError(null);
+      return true;
     } catch (error: any) {
       console.error('Erro ao alternar favorito:', error);
       setFavoriteError(error?.message || 'Erro desconhecido ao favoritar');
       setTimeout(() => setFavoriteError(null), 5000);
       // Rollback em caso de falha
-      setFavorites(prev => isFav ? [...prev, item] : prev.filter(f => f.id !== item.id));
+      setFavoriteIds(prev => {
+        const next = new Set(prev);
+        if (isFav) next.add(item.id);
+        else next.delete(item.id);
+        return next;
+      });
+      return false;
     }
   };
 
-  const isFavorite = (id: any) => favorites.some(f => f.id === id);
+  const isFavorite = (id: any) => favoriteIds.has(id);
 
   const handleSidebarNavigation = (screen: string) => {
     if (screen === 'home') {
@@ -398,7 +410,7 @@ export default function App() {
             <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
           {currentScreen === 'favorites' && (
-            <Favorites favorites={favorites} toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
+            <Favorites toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'profile' && (
             <Profile profileData={profileData} setProfileData={setProfileData} isLoading={isProfileLoading || !isProfileLoaded} />

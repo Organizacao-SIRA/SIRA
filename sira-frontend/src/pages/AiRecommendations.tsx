@@ -5,6 +5,9 @@ import type { AuthUser } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { Button } from '../components/ui/Button';
+import { ViewModeToggle } from '../components/ui/ViewModeToggle';
+import { useViewMode } from '../hooks/useViewMode';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface AiRecommendationsProps {
   user: AuthUser | null;
@@ -27,6 +30,15 @@ export const AiRecommendations = ({
   const [coldStart, setColdStart] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(false);
   const CHAT_PREVIEW_COUNT = 2;
+
+  const { mode: viewMode, setMode: setViewMode } = useViewMode('horizontal');
+  const isMobile = useIsMobile();
+
+  const effectiveVariant: 'horizontal' | 'vertical' = isChatMode
+    ? 'horizontal'
+    : isMobile
+      ? 'vertical'
+      : viewMode;
 
   useEffect(() => {
     if (user) loadRecommendations();
@@ -166,6 +178,7 @@ export const AiRecommendations = ({
                 viewDetails={viewDetails}
                 toggleFavorite={toggleFavorite}
                 isFavorite={isFavorite(item.id)}
+                variant="horizontal"
               />
             ))}
             {recommendations.length > CHAT_PREVIEW_COUNT && (
@@ -202,17 +215,28 @@ export const AiRecommendations = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
-      <div className="flex justify-between items-center mb-8 gap-4">
+    <div className="max-w-6xl mx-auto px-4 py-8 animate-fadeIn">
+      <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
         <h1 className="text-2xl font-bold text-primary-dark dark:text-text flex items-center gap-2">
           <Brain className="w-6 h-6 text-primary" /> Recomendações
         </h1>
-        <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm">
-          <RefreshCw className="w-4 h-4" /> Atualizar
-        </Button>
+        <div className="flex items-center gap-3">
+          {!isMobile && (
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+          )}
+          <Button onClick={handleRefresh} isLoading={isRefreshing} size="sm">
+            <RefreshCw className="w-4 h-4" /> Atualizar
+          </Button>
+        </div>
       </div>
 
-      <div className="space-y-4">
+      <div
+        className={
+          effectiveVariant === 'vertical'
+            ? 'grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4 sm:gap-5'
+            : 'space-y-4'
+        }
+      >
         {recommendations.map((item: any) => (
           <RecommendationCard
             key={item.id}
@@ -220,6 +244,7 @@ export const AiRecommendations = ({
             viewDetails={viewDetails}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite(item.id)}
+            variant={effectiveVariant}
           />
         ))}
       </div>

@@ -31,10 +31,15 @@ export class MaterialDto {
   @IsNotEmpty()
   year: string;
 
-  @ApiProperty({ example: 'Google Books', description: 'Fonte original do dado' })
+  @ApiProperty({ example: 'Nature', description: 'Periódico, editora ou venue do material' })
   @IsString()
   @IsNotEmpty()
   source: string;
+
+  @ApiProperty({ example: 'Semantic Scholar', description: 'API de origem do material', required: false })
+  @IsString()
+  @IsOptional()
+  provider?: string;
 
   @ApiProperty({ example: 95, description: 'Relevância calculada pela IA (Score 0-100)' })
   @IsNumber()

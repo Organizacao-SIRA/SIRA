@@ -83,6 +83,7 @@ export type CatalogItem = {
   authors: string;
   year: string;
   source: string;
+  provider?: string;
   relevance: number;
   abstract?: string;
   image?: string | null;

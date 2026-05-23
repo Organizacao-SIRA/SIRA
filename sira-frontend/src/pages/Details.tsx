@@ -1,7 +1,6 @@
 import type { CatalogItem } from '../types';
 import { ContentBreadcrumb } from '../components/details/ContentBreadcrumb';
 import { ContentHero } from '../components/details/ContentHero';
-import { ContentMetadataGrid } from '../components/details/ContentMetadataGrid';
 import { AcademicSummarySection } from '../components/details/AcademicSummarySection';
 import { SiraAnalysisCard } from '../components/details/SiraAnalysisCard';
 import { ContentActionPanel } from '../components/details/ContentActionPanel';
@@ -38,21 +37,20 @@ export const Details = ({
         onBack={handleBack}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-        <article className="lg:col-span-8 space-y-6 sm:space-y-8 min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+        <article className="lg:col-span-8 space-y-8 sm:space-y-10 min-w-0">
           <ContentHero
             type={item.type}
             title={item.title}
             authors={item.authors}
             year={item.year}
             source={item.source}
+            provider={item.provider}
           />
 
-          <ContentMetadataGrid
-            doi={item.doi}
-            isbn={item.isbn}
-            thematicArea={item.thematicArea}
-          />
+          {item.aiExplanation && (
+            <SiraAnalysisCard explanation={item.aiExplanation} />
+          )}
 
           <AcademicSummarySection
             abstract={item.abstract}
@@ -60,11 +58,7 @@ export const Details = ({
           />
         </article>
 
-        <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-6 lg:self-start">
-          <SiraAnalysisCard
-            explanation={item.aiExplanation}
-            relevance={item.relevance}
-          />
+        <aside className="lg:col-span-4 lg:sticky lg:top-6 lg:self-start">
           <ContentActionPanel
             item={item}
             isFavorite={favorited}
