@@ -1,6 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
+import { join } from 'path';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -24,7 +26,7 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
         transport: {
           host: process.env.MAIL_HOST || 'smtp.gmail.com',
           port: Number(process.env.MAIL_PORT) || 587,
-          secure: process.env.MAIL_SECURE === 'true', // true para 465, false para 587
+          secure: process.env.MAIL_SECURE === 'true',
           auth: {
             user: process.env.MAIL_USER || '',
             pass: process.env.MAIL_PASS || '',
@@ -32,6 +34,11 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
         },
         defaults: {
           from: `"SIRA+" <${process.env.MAIL_FROM || 'projetosiramais@gmail.com'}>`,
+        },
+        template: {
+          dir: join(__dirname, 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: { strict: true },
         },
       }),
     }),
