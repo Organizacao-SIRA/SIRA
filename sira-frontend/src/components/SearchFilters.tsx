@@ -1,5 +1,5 @@
 import { Filter, X, BookOpen, FileText, Unlock } from 'lucide-react';
-import type { SearchFilters } from '../types';
+import type { SearchFilters as SearchFiltersState } from '../types';
 
 const AREAS = [
   { value: 'ia', label: 'Inteligência Artificial' },
@@ -14,8 +14,8 @@ const AREAS = [
 ];
 
 interface SearchFiltersProps {
-  filters: SearchFilters;
-  onChange: (filters: SearchFilters) => void;
+  filters: SearchFiltersState;
+  onChange: (filters: SearchFiltersState) => void;
 }
 
 type TypeOption = { value: 'book' | 'article' | null; label: string; icon: React.ReactNode };
@@ -36,7 +36,7 @@ function getPeriodOptions() {
   ];
 }
 
-const hasActiveFilters = (f: SearchFilters) =>
+const hasActiveFilters = (f: SearchFiltersState) =>
   f.types.length > 0 || f.area !== null || f.openAccessOnly || f.yearFrom !== null;
 
 export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
