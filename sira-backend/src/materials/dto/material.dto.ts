@@ -85,6 +85,11 @@ export class MaterialDto {
   @IsOptional()
   aiExplanation?: string | null;
 
+  @ApiProperty({ example: 'pt', description: 'Código ISO 639-1 do idioma', required: false })
+  @IsString()
+  @IsOptional()
+  language?: string;
+
   @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   keywords?: string[];

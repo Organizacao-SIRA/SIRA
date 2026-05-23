@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MaterialsService } from '../materials/materials.service';
 import { MaterialDto, MaterialType } from '../materials/dto/material.dto';
@@ -13,6 +13,7 @@ export interface RecommendationResult {
   recommendations: RecommendationItem[];
   basedOn: { favorites: number; searches: number; preferences: boolean };
   generatedAt: Date;
+  coldStart?: true;
 }
 
 type RecommendationUser = {
@@ -32,6 +33,8 @@ type RecommendationUser = {
 @Injectable()
 export class RecommendationsService {
   private readonly logger = new Logger(RecommendationsService.name);
+  private readonly CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+  private readonly inflightGenerations = new Map<string, Promise<RecommendationResult>>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -39,9 +42,13 @@ export class RecommendationsService {
     private readonly ai: AiProvider,
   ) {}
 
+  async trackEvent(userId: string, materialId: string, eventType: 'impression' | 'click' | 'favorite'): Promise<void> {
+    await this.prisma.recommendationEvent.create({ data: { userId, materialId, eventType } });
+  }
+
   async getRecommendations(userId: string): Promise<RecommendationResult> {
     const cached = await this.prisma.recommendationCache.findUnique({ where: { userId } });
-    if (cached) {
+    if (cached && Date.now() - cached.generatedAt.getTime() < this.CACHE_TTL_MS) {
       const basedOn = cached.basedOn as { favorites: number; searches: number; preferences?: boolean };
       return {
         recommendations: cached.items as unknown as RecommendationItem[],
@@ -60,7 +67,19 @@ export class RecommendationsService {
     return this.generateAndCache(userId);
   }
 
-  private async generateAndCache(userId: string): Promise<RecommendationResult> {
+  private generateAndCache(userId: string): Promise<RecommendationResult> {
+    const inflight = this.inflightGenerations.get(userId);
+    if (inflight) return inflight;
+
+    const promise = this.doGenerateAndCache(userId).finally(() => {
+      this.inflightGenerations.delete(userId);
+    });
+
+    this.inflightGenerations.set(userId, promise);
+    return promise;
+  }
+
+  private async doGenerateAndCache(userId: string): Promise<RecommendationResult> {
     const [user, favorites, recentSearches] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
@@ -97,44 +116,54 @@ export class RecommendationsService {
     const hasCompletedOnboarding = Boolean(user.onboardingCompletedAt);
 
     if (!hasBehaviorSignals && !hasCompletedOnboarding) {
-      throw new BadRequestException(
-        'Conclua suas preferências acadêmicas ou realize buscas para receber recomendações personalizadas.',
-      );
+      return {
+        recommendations: [],
+        basedOn: { favorites: 0, searches: 0, preferences: false },
+        generatedAt: new Date(),
+        coldStart: true,
+      };
     }
 
     const queries = this.buildRecommendationQueries(user, favorites, recentSearches, hasBehaviorSignals);
 
     const uniqueQueries = [...new Set(queries)].slice(0, 4);
 
-    const candidatesArrays: MaterialDto[][] = [];
-    for (let i = 0; i < uniqueQueries.length; i++) {
-      const { items } = await this.materialsService.search(uniqueQueries[i]);
-      candidatesArrays.push(items);
-      if (i < uniqueQueries.length - 1) await new Promise(r => setTimeout(r, 300));
-    }
+    const searchFilters = user.languages?.length
+      ? { types: [], area: null, openAccessOnly: false, yearFrom: null, languages: user.languages }
+      : undefined;
+
+    const candidatesArrays = await Promise.all(
+      uniqueQueries.map(query => this.materialsService.search(query, undefined, 0, 4, searchFilters).then(r => r.items)),
+    );
 
     const favoriteIds = new Set(favorites.map(f => f.materialId));
-    const seen = new Set<string>();
-    const candidates: MaterialDto[] = [];
-
-    for (const results of candidatesArrays) {
-      for (const item of results) {
-        if (!seen.has(item.id) && !favoriteIds.has(item.id)) {
-          seen.add(item.id);
-          candidates.push(item);
-        }
-      }
-    }
+    const allItems = candidatesArrays.flat().filter(item => !favoriteIds.has(item.id));
+    const candidates = this.deduplicateByContent(allItems);
 
     const filteredCandidates = this.filterByPreferredFormats(user, candidates);
 
     if (filteredCandidates.length === 0) {
-      throw new BadRequestException(
-        'Não foi possível encontrar candidatos para recomendação. Tente novamente mais tarde.',
-      );
+      return {
+        recommendations: [],
+        basedOn: { favorites: favorites.length, searches: recentSearches.length, preferences: hasCompletedOnboarding },
+        generatedAt: new Date(),
+        coldStart: true,
+      };
     }
 
-    const recommendations = await this.rankWithClaude(user, favorites, recentSearches, filteredCandidates);
+    const enrichedCandidates = await this.enrichWithStoredLevels(filteredCandidates);
+    const ranked = await this.rankWithClaude(user, favorites, recentSearches, enrichedCandidates);
+    const recommendations = this.filterByPreferredLevels(user, ranked);
+
+    await Promise.all(
+      recommendations.map(item =>
+        this.materialsService.ensureMaterialExists({
+          ...item,
+          aiJustification: item.aiExplanation ?? undefined,
+        }),
+      ),
+    );
+
     const basedOn = {
       favorites: favorites.length,
       searches: recentSearches.length,
@@ -148,6 +177,48 @@ export class RecommendationsService {
     });
 
     return { recommendations, basedOn, generatedAt: cached.generatedAt };
+  }
+
+  private async enrichWithStoredLevels(candidates: MaterialDto[]): Promise<MaterialDto[]> {
+    const stored = await this.prisma.material.findMany({
+      where: { id: { in: candidates.map(c => c.id) }, level: { not: null } },
+      select: { id: true, level: true },
+    });
+    if (stored.length === 0) return candidates;
+    const levelMap = new Map(stored.map(m => [m.id, m.level!]));
+    return candidates.map(c => (levelMap.has(c.id) ? { ...c, level: levelMap.get(c.id) } : c));
+  }
+
+  private contentFingerprints(item: MaterialDto): string[] {
+    const fps: string[] = [];
+    if (item.doi) {
+      fps.push(`doi:${item.doi.replace(/^https?:\/\/doi\.org\//i, '').toLowerCase().trim()}`);
+    }
+    const title = item.title.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+    const firstAuthor = item.authors.split(',')[0].toLowerCase().trim().split(' ')[0];
+    fps.push(`title:${title}|author:${firstAuthor}`);
+    return fps;
+  }
+
+  private deduplicateByContent(items: MaterialDto[]): MaterialDto[] {
+    const best = new Map<string, MaterialDto>();
+
+    for (const item of items) {
+      const fps = this.contentFingerprints(item);
+      const matchedFp = fps.find(fp => best.has(fp));
+
+      if (matchedFp) {
+        const existing = best.get(matchedFp)!;
+        if (item.relevance > existing.relevance) {
+          this.contentFingerprints(existing).forEach(fp => best.delete(fp));
+          fps.forEach(fp => best.set(fp, item));
+        }
+      } else {
+        fps.forEach(fp => best.set(fp, item));
+      }
+    }
+
+    return [...new Set(best.values())];
   }
 
   private buildRecommendationQueries(
@@ -192,6 +263,13 @@ export class RecommendationsService {
     });
   }
 
+  private filterByPreferredLevels(user: RecommendationUser, items: RecommendationItem[]): RecommendationItem[] {
+    if (!user.materialLevels?.length) return items;
+    const preferred = new Set(user.materialLevels);
+    const filtered = items.filter(item => !item.level || preferred.has(item.level));
+    return filtered.length >= 2 ? filtered : items;
+  }
+
   private async rankWithClaude(
     user: RecommendationUser,
     favorites: Array<{ material: { title: string; authors: string; year: string; type: string; abstract: string | null } }>,
@@ -206,20 +284,22 @@ export class RecommendationsService {
       .map(s => `- "${s.query}"`)
       .join('\n') || 'Nenhuma busca recente';
 
-    const preferencesText = this.buildPreferencesText(user);
-
     const candidatesText = candidates
       .map(c =>
-        `ID:${c.id} | ${c.type} | "${c.title}" | ${c.authors} | ${c.year || 'N/A'} | ${(c.abstract || '').substring(0, 250)}`,
+        `ID:${c.id} | ${c.type} | nivel:${c.level || '?'} | "${c.title}" | ${c.authors} | ${c.year || 'N/A'} | ${(c.abstract || '').substring(0, 250)}`,
       )
       .join('\n');
 
     const topN = Math.min(8, candidates.length);
 
+    // Perfil no system: muda só quando o usuário edita o onboarding — cacheado pela Anthropic entre gerações.
+    // Favoritos/buscas/candidatos no user: mudam a cada geração — não cacheáveis.
+    const systemPrompt = `Você é um sistema de recomendação acadêmica. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.\n\nPERFIL DO USUÁRIO:\n${this.buildPreferencesText(user)}`;
+
     try {
       const raw = await this.ai.complete({
-        system: 'Você é um sistema de recomendação acadêmica. Analise o perfil do usuário e selecione os materiais mais relevantes da lista de candidatos. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.',
-        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nPREFERÊNCIAS DECLARADAS:\n${preferencesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Determine o nível do material: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
+        system: systemPrompt,
+        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Para o campo "level": se o candidato já tem nivel diferente de "?", use exatamente esse valor. Caso seja "?", determine: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
         maxTokens: 1024,
       });
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();

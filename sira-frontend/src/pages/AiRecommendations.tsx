@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen } from 'lucide-react';
+import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen, ChevronDown, ChevronUp, Sparkles, Search } from 'lucide-react';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
@@ -24,6 +24,9 @@ export const AiRecommendations = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [coldStart, setColdStart] = useState(false);
+  const [chatExpanded, setChatExpanded] = useState(false);
+  const CHAT_PREVIEW_COUNT = 2;
 
   useEffect(() => {
     if (user) loadRecommendations();
@@ -32,9 +35,11 @@ export const AiRecommendations = ({
   const loadRecommendations = async () => {
     setIsLoading(true);
     setError('');
+    setColdStart(false);
     try {
       const data = await getAiRecommendations();
-      setRecommendations(data.recommendations.slice(0, 2));
+      if (data.coldStart) { setColdStart(true); return; }
+      setRecommendations(data.recommendations);
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
     } catch (err: any) {
@@ -47,9 +52,11 @@ export const AiRecommendations = ({
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setError('');
+    setColdStart(false);
     try {
       const data = await refreshAiRecommendations();
-      setRecommendations(data.recommendations.slice(0, 2));
+      if (data.coldStart) { setColdStart(true); setIsRefreshing(false); return; }
+      setRecommendations(data.recommendations);
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
     } catch (err: any) {
@@ -95,6 +102,41 @@ export const AiRecommendations = ({
     );
   }
 
+  if (coldStart) {
+    if (isChatMode) {
+      return (
+        <div className="bg-surface-muted rounded-2xl border border-dashed border-border-strong p-6 text-center space-y-3">
+          <Sparkles className="h-6 w-6 text-primary opacity-40 mx-auto" />
+          <p className="text-text-subtle text-xs">Configure suas preferências ou explore o catálogo para receber sugestões personalizadas.</p>
+          <button
+            type="button"
+            onClick={() => setCurrentScreen('onboarding')}
+            className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider"
+          >
+            Configurar preferências
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div className="bg-surface rounded-2xl border border-border p-8 text-center space-y-4">
+        <Sparkles className="h-10 w-10 text-primary opacity-40 mx-auto" />
+        <div>
+          <p className="font-semibold text-text mb-1">Suas recomendações estão esperando</p>
+          <p className="text-text-muted text-sm">Configure seu perfil ou explore o catálogo para que a IA possa personalizar sugestões para você.</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <Button onClick={() => setCurrentScreen('onboarding')} size="sm">
+            <Sparkles className="w-4 h-4" /> Configurar preferências
+          </Button>
+          <Button onClick={() => setCurrentScreen('home')} size="sm" variant="secondary">
+            <Search className="w-4 h-4" /> Explorar catálogo
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="bg-surface rounded-2xl border border-danger-border p-8 text-center">
@@ -117,7 +159,7 @@ export const AiRecommendations = ({
           </div>
         ) : (
           <>
-            {recommendations.map((item: any) => (
+            {(chatExpanded ? recommendations : recommendations.slice(0, CHAT_PREVIEW_COUNT)).map((item: any) => (
               <RecommendationCard
                 key={item.id}
                 item={item}
@@ -126,6 +168,19 @@ export const AiRecommendations = ({
                 isFavorite={isFavorite(item.id)}
               />
             ))}
+            {recommendations.length > CHAT_PREVIEW_COUNT && (
+              <button
+                type="button"
+                onClick={() => setChatExpanded(v => !v)}
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider py-1"
+              >
+                {chatExpanded ? (
+                  <><ChevronUp className="w-3 h-3" /> Ver menos</>
+                ) : (
+                  <><ChevronDown className="w-3 h-3" /> Ver mais ({recommendations.length - CHAT_PREVIEW_COUNT})</>
+                )}
+              </button>
+            )}
             <div className="flex items-center justify-between pt-2 px-1">
               <div className="flex items-center gap-3">
                 {basedOnMessage && <span className="text-[9px] font-bold text-text-subtle uppercase tracking-tighter">{basedOnMessage}</span>}

@@ -17,18 +17,24 @@ export class FavoritesService {
         authors: dto.authors,
         year: dto.year || 'N/A',
         source: dto.source,
-        abstract: dto.abstract,
-        url: dto.url,
-        image: dto.image,
         relevance: dto.relevance ?? 0,
+        abstract: dto.abstract ?? null,
+        url: dto.url ?? null,
+        image: dto.image ?? null,
+        doi: dto.doi ?? null,
+        isbn: dto.isbn ?? null,
+        level: dto.level ?? null,
+        thematicArea: dto.thematicArea ?? null,
       },
     });
 
     try {
-      return await this.prisma.favorite.create({
+      const favorite = await this.prisma.favorite.create({
         data: { userId, materialId: dto.id },
         include: { material: true },
       });
+      await this.invalidateRecommendationCache(userId);
+      return favorite;
     } catch {
       throw new ConflictException('Material já está nos favoritos');
     }
@@ -60,6 +66,12 @@ export class FavoritesService {
       where: { userId_materialId: { userId, materialId } },
     });
 
+    await this.invalidateRecommendationCache(userId);
+
     return { message: 'Removido dos favoritos' };
+  }
+
+  private async invalidateRecommendationCache(userId: string) {
+    await this.prisma.recommendationCache.deleteMany({ where: { userId } });
   }
 }
