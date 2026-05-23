@@ -220,50 +220,65 @@ export class AuthService {
     return `
       <!DOCTYPE html>
       <html lang="pt-BR">
-      <head><meta charset="UTF-8" /></head>
-      <body style="margin:0;padding:0;background:#f9fafb;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
+      </head>
+      <body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+        <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,0.10);">
+
           <!-- Header -->
-          <div style="background:linear-gradient(135deg,#1351B4,#003157);padding:32px 40px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">SIRA+</h1>
-            <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Sistema Inteligente de Recomendações Acadêmicas</p>
+          <div style="background:linear-gradient(135deg,#1351B4 0%,#003157 100%);padding:36px 40px;text-align:center;">
+            <div style="width:40px;height:4px;background:#FFCD07;border-radius:2px;margin:0 auto 16px;"></div>
+            <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;letter-spacing:-0.5px;">SIRA+</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,0.80);font-size:13px;letter-spacing:0.2px;">Sistema Inteligente de Recomendações Acadêmicas</p>
           </div>
 
           <!-- Body -->
-          <div style="padding:36px 40px;">
-            <h2 style="margin:0 0 8px;color:#003157;font-size:20px;font-weight:700;">Recuperação de senha</h2>
-            <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6;">
-              Olá, <strong>${name}</strong>. Recebemos uma solicitação para redefinir a senha da sua conta.
+          <div style="padding:40px 40px 32px;background:#ffffff;">
+            <div style="display:inline-block;background:#F2F5FD;color:#1351B4;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:16px;">
+              Recuperação de senha
+            </div>
+
+            <h2 style="margin:0 0 12px;color:#003157;font-size:22px;font-weight:700;line-height:1.3;">Redefina sua senha de acesso</h2>
+            <p style="margin:0 0 28px;color:#6b7280;font-size:14px;line-height:1.7;">
+              Olá, <strong style="color:#1f2937;">${name}</strong>. Recebemos uma solicitação para redefinir a senha da sua conta no SIRA+. Clique no botão abaixo para criar uma nova senha.
             </p>
 
             <div style="text-align:center;margin:32px 0;">
               <a href="${resetLink}"
-                 style="display:inline-block;background:#1351B4;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:999px;font-size:15px;font-weight:700;letter-spacing:0.2px;">
+                 style="display:inline-block;background:#1351B4;color:#ffffff;text-decoration:none;padding:15px 40px;border-radius:999px;font-size:15px;font-weight:700;letter-spacing:0.3px;box-shadow:0 4px 12px rgba(19,81,180,0.30);">
                 Redefinir minha senha
               </a>
             </div>
 
-            <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">
-              Este link expira em <strong>30 minutos</strong> e só pode ser utilizado uma vez.
-            </p>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:0 0 20px;">
+              <p style="margin:0;color:#b45309;font-size:13px;line-height:1.5;">
+                &#9888; Este link expira em <strong>30 minutos</strong> e só pode ser utilizado uma vez.
+              </p>
+            </div>
+
             <p style="margin:0 0 24px;color:#6b7280;font-size:13px;line-height:1.6;">
               Se você não solicitou esta recuperação, ignore este e-mail — sua conta permanece segura.
             </p>
 
-            <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0;" />
+            <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0 20px;" />
 
-            <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.5;">
+            <p style="margin:0 0 6px;color:#9ca3af;font-size:11px;line-height:1.5;">
               Se o botão acima não funcionar, copie e cole o link abaixo no seu navegador:
             </p>
-            <p style="margin:8px 0 0;color:#1351B4;font-size:11px;word-break:break-all;">
+            <p style="margin:0;color:#1351B4;font-size:11px;word-break:break-all;line-height:1.5;">
               ${resetLink}
             </p>
           </div>
 
           <!-- Footer -->
           <div style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
-            <p style="margin:0;color:#9ca3af;font-size:11px;">
-              © ${new Date().getFullYear()} SIRA+ — Universidade Federal do Ceará
+            <div style="width:24px;height:3px;background:#FFCD07;border-radius:2px;margin:0 auto 12px;"></div>
+            <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.5;">
+              &copy; ${new Date().getFullYear()} SIRA+ &mdash; Universidade Federal do Ceará
             </p>
           </div>
         </div>
