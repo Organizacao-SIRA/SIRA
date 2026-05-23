@@ -31,6 +31,7 @@ model User {
   favorites             Favorite[]
   searchHistory         SearchHistory[]
   recommendationCache   RecommendationCache?
+  passwordResetTokens   PasswordResetToken[]
 }
 
 model RecommendationCache {
@@ -89,4 +90,16 @@ model RecommendationEvent {
 
   @@index([userId, eventType])
   @@index([materialId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -1,10 +1,23 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Res, Req, UnauthorizedException } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
@@ -85,5 +98,42 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     this.clearAuthCookies(res);
     return { ok: true };
+  }
+
+  // ── Password Recovery ───────────────────────────────────────────
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Throttle({ default: { ttl: 900_000, limit: 3 } }) // 3 requests per 15 minutes
+  @ApiOperation({ summary: 'Solicita recuperação de senha' })
+  @ApiResponse({
+    status: 202,
+    description: 'Resposta uniforme — sempre retorna sucesso (anti-enumeração)',
+  })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email);
+    return {
+      message: 'Se este e-mail estiver em nossa base, um link de recuperação será enviado.',
+    };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 900_000, limit: 5 } }) // 5 requests per 15 minutes
+  @ApiOperation({ summary: 'Redefine a senha usando token de recuperação' })
+  @ApiResponse({ status: 200, description: 'Senha redefinida com sucesso' })
+  @ApiResponse({ status: 400, description: 'Token inválido ou expirado' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Senha redefinida com sucesso. Faça login com a nova senha.' };
+  }
+
+  @Get('validate-reset-token')
+  @Throttle({ default: { ttl: 900_000, limit: 10 } }) // 10 requests per 15 minutes
+  @ApiOperation({ summary: 'Verifica se um token de reset é válido' })
+  @ApiResponse({ status: 200, description: 'Retorna { valid: boolean }' })
+  async validateResetToken(@Query('token') token: string) {
+    if (!token) return { valid: false };
+    return this.authService.validateResetToken(token);
   }
 }

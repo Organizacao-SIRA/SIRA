@@ -60,8 +60,42 @@ export const registerUser = async (data: any) => {
   });
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Erro ao realizar cadastro');
+    throw new Error(Array.isArray(error.message) ? error.message.join('. ') : error.message || 'Erro ao realizar cadastro');
   }
+  return response.json();
+};
+
+// --- Password Recovery ---
+
+export const forgotPassword = async (email: string) => {
+  const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || 'Erro ao processar solicitação');
+  }
+  return response.json();
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(Array.isArray(error.message) ? error.message.join('. ') : error.message || 'Erro ao redefinir senha');
+  }
+  return response.json();
+};
+
+export const validateResetToken = async (token: string): Promise<{ valid: boolean }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/validate-reset-token?token=${encodeURIComponent(token)}`);
+  if (!response.ok) return { valid: false };
   return response.json();
 };
 
