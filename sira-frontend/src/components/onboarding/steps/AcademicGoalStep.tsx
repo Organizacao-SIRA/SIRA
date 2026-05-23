@@ -76,7 +76,7 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
       <button
         type="button"
         onClick={() => onSelect('')}
-        className="text-xs font-bold text-text-muted hover:text-danger-strong inline-flex items-center gap-1 transition-colors cursor-pointer"
+        className="text-xs font-bold text-text-muted hover:text-danger-strong inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-strong/40 rounded px-1 py-0.5"
       >
         <X className="w-3.5 h-3.5" />
         Limpar seleção

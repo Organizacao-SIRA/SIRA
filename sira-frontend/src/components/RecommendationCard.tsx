@@ -133,8 +133,13 @@ export const RecommendationCard = ({
       ref={cardRef}
       role="button"
       tabIndex={0}
+      aria-label={`Ver detalhes de ${item.title}`}
       onClick={handleCardClick}
-      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleCardClick()}
+      onKeyDown={e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        handleCardClick();
+      }}
       className={`bg-surface rounded-2xl border border-border hover:border-primary/40 hover:shadow-md hover:scale-[1.015] active:scale-[0.99] transition-all duration-200 animate-fadeIn cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary overflow-hidden min-w-0 ${
         isVertical ? `flex flex-col ${stretch ? 'h-full' : ''}` : 'p-3.5 sm:p-5'
       }`}

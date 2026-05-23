@@ -125,10 +125,15 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
 
       {/* Tabs + contador — empilha em mobile */}
       <div className="border-b border-border-strong mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex space-x-6 sm:space-x-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          role="tablist"
+          aria-label="Filtro da biblioteca"
+          className="flex space-x-6 sm:space-x-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
         {TABS.map(({ id, label }) => (
           <button
             key={id}
+            type="button"
             onClick={() => setActiveTab(id)}
             aria-selected={activeTab === id}
             role="tab"

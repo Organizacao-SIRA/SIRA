@@ -20,6 +20,7 @@ export const CatalogSearchBar = ({ value, onChange, onSubmit, onClear }: Catalog
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder="Pesquisar por título ou autor..."
+        aria-label="Pesquisar no catálogo"
         className="w-full pl-4 pr-9 py-2.5 bg-surface-muted text-text border border-border-strong rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-sm"
       />
       {value && (

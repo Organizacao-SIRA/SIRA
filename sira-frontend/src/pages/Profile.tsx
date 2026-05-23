@@ -5,6 +5,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
+import { Spinner } from '../components/ui/Spinner';
 import { PageHeader } from '../components/ui/PageHeader';
 import { ProfileHeaderCard } from '../components/profile/ProfileHeaderCard';
 import { PersonalInfoCard } from '../components/profile/PersonalInfoCard';
@@ -54,7 +55,7 @@ export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        <Spinner size="lg" />
         <p className="text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
       </div>
     );

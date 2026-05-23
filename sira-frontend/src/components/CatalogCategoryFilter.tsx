@@ -16,8 +16,10 @@ interface PillProps {
 
 const CategoryPill = ({ id, label, selected, onSelect }: PillProps) => (
   <button
+    type="button"
     onClick={() => onSelect(id)}
-    className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap ${
+    aria-pressed={selected}
+    className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
       selected
         ? 'bg-primary text-white border-primary shadow-sm'
         : 'bg-surface border-border-strong text-text-muted hover:border-primary hover:text-primary'
@@ -32,7 +34,10 @@ export const CatalogCategoryFilter = ({
   selected,
   onSelect,
 }: CatalogCategoryFilterProps) => (
-  <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+  <div
+    aria-label="Categorias do catálogo"
+    className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+  >
     <CategoryPill id="all" label="Todas" selected={selected === 'all'} onSelect={onSelect} />
     {categories.map(cat => (
       <CategoryPill
