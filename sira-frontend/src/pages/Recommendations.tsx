@@ -69,7 +69,7 @@ export const Recommendations = ({
       </div>
 
       <PageFooter
-        text="SIRA AI • Análise Baseada em Claude 3.5, Google Books e Semantic Scholar."
+        text="Resultados gerados por IA. Podem ocorrer erros, use o seu julgamento acadêmico ao selecionar os materiais."
         variant="sticky"
       />
     </div>

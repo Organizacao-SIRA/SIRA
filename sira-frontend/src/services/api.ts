@@ -258,6 +258,7 @@ type RecommendationsResponse = {
   recommendations: Array<any & { aiExplanation: string | null }>;
   basedOn: { favorites: number; searches: number; preferences: boolean };
   generatedAt: string;
+  coldStart?: boolean;
 };
 
 export const getAiRecommendations = async (): Promise<RecommendationsResponse> => {
@@ -277,4 +278,12 @@ export const refreshAiRecommendations = async (): Promise<RecommendationsRespons
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Erro ao atualizar recomendações');
   return data;
+};
+
+export const trackRecommendationEvent = (materialId: string, eventType: 'impression' | 'click' | 'favorite'): void => {
+  void fetchWithAuth(`${API_BASE_URL}/recommendations/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ materialId, eventType }),
+  });
 };

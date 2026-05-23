@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Sparkles, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Brain, ChevronDown, ChevronUp } from 'lucide-react';
 import { StatusBadge } from './ui/StatusBadge';
 import { MaterialTypeBadge } from './ui/MaterialTypeBadge';
 import { FavoriteButton } from './ui/FavoriteButton';
+import { trackRecommendationEvent } from '../services/api';
 
 interface RecommendationCardProps {
   item: any;
@@ -13,21 +14,48 @@ interface RecommendationCardProps {
 
 export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavorite }: RecommendationCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const impressionFired = useRef(false);
   const abstractIsLong = (item.abstract?.length ?? 0) > 160;
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || impressionFired.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !impressionFired.current) {
+          impressionFired.current = true;
+          trackRecommendationEvent(item.id, 'impression');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [item.id]);
+
+  const handleCardClick = () => {
+    trackRecommendationEvent(item.id, 'click');
+    viewDetails(item);
+  };
+
+  const handleFavoriteToggle = () => {
+    if (!isFavorite) trackRecommendationEvent(item.id, 'favorite');
+    toggleFavorite(item);
+  };
 
   return (
     <div
+      ref={cardRef}
       className="bg-surface p-6 rounded-2xl shadow-sm border border-border hover:shadow-md hover:scale-[1.015] transition-all animate-fadeIn cursor-pointer group"
-      onClick={() => viewDetails(item)}
+      onClick={handleCardClick}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex gap-2">
-          <MaterialTypeBadge type={item.type} />
-          <StatusBadge variant="neutral">{item.source}</StatusBadge>
-        </div>
-        <StatusBadge variant="success" icon={<Sparkles className="w-3 h-3" />}>
-          {item.relevance}% Relevância
-        </StatusBadge>
+      <div className="flex items-center gap-2 mb-3">
+        <MaterialTypeBadge type={item.type} />
+        <StatusBadge variant="neutral">{item.source}</StatusBadge>
       </div>
 
       <h3 className="text-xl font-bold text-primary-dark dark:text-text mb-2 leading-tight group-hover:text-primary transition-colors">
@@ -60,7 +88,7 @@ export const RecommendationCard = ({ item, viewDetails, toggleFavorite, isFavori
       </div>
 
       <div className="flex justify-end pt-4 border-t border-border">
-        <FavoriteButton isFavorite={isFavorite} onToggle={() => toggleFavorite(item)} />
+        <FavoriteButton isFavorite={isFavorite} onToggle={handleFavoriteToggle} />
       </div>
     </div>
   );

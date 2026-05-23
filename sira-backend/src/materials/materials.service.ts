@@ -5,6 +5,7 @@ export interface SearchFilters {
   area: string | null;
   openAccessOnly: boolean;
   yearFrom: number | null;
+  languages?: string[];
 }
 
 const AREA_GB_SUBJECT: Record<string, string> = {
@@ -29,6 +30,12 @@ const AREA_SS_FIELDS: Record<string, string> = {
   soc: 'Sociology',
   amb: 'Environmental Science',
   gp: 'Political Science',
+};
+
+const LANGUAGE_ISO: Record<string, string> = {
+  'Português': 'pt',
+  'Inglês': 'en',
+  'Espanhol': 'es',
 };
 
 const AREA_OA_CONCEPT: Record<string, string> = {
@@ -58,6 +65,15 @@ export class MaterialsService {
 
   private cache = new Map<string, { data: MaterialDto[], timestamp: number }>();
   private readonly CACHE_TTL = 3600 * 1000;
+  private readonly SEARCH_INVALIDATION_THRESHOLD = 5;
+
+  private positionScore(index: number, total: number): number {
+    return Math.round(97 - (index / Math.max(total - 1, 1)) * 27);
+  }
+
+  private citationBoost(count: number): number {
+    return Math.min(5, Math.round(Math.log10(count + 1) * 2));
+  }
 
   constructor(
     private readonly httpService: HttpService,
@@ -66,30 +82,27 @@ export class MaterialsService {
   ) {}
 
   async ensureMaterialExists(data: MaterialDto) {
-    const existing = await this.prisma.material.findUnique({
+    const payload = {
+      id: data.id,
+      type: data.type,
+      title: data.title,
+      authors: data.authors,
+      year: data.year.toString(),
+      source: data.source,
+      relevance: data.relevance,
+      abstract: data.abstract ?? null,
+      image: data.image ?? null,
+      url: data.url ?? null,
+      thematicArea: data.thematicArea ?? null,
+      doi: data.doi ?? null,
+      isbn: data.isbn ?? null,
+      level: data.level ?? null,
+      aiJustification: data.aiJustification ?? null,
+    };
+    return this.prisma.material.upsert({
       where: { id: data.id },
-    });
-
-    if (existing) return existing;
-
-    return this.prisma.material.create({
-      data: {
-        id: data.id,
-        type: data.type,
-        title: data.title,
-        authors: data.authors,
-        year: data.year.toString(),
-        source: data.source,
-        relevance: data.relevance,
-        abstract: data.abstract,
-        image: data.image,
-        url: data.url,
-        thematicArea: data.thematicArea,
-        doi: data.doi,
-        isbn: data.isbn,
-        level: data.level,
-        aiJustification: data.aiJustification,
-      },
+      create: payload,
+      update: { level: payload.level ?? undefined },
     });
   }
 
@@ -370,6 +383,23 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
   private async saveSearchHistory(userId: string, query: string): Promise<void> {
     await this.prisma.searchHistory.create({ data: { userId, query } });
+    await this.maybeInvalidateRecommendationCache(userId);
+  }
+
+  private async maybeInvalidateRecommendationCache(userId: string): Promise<void> {
+    const cache = await this.prisma.recommendationCache.findUnique({
+      where: { userId },
+      select: { generatedAt: true },
+    });
+    if (!cache) return;
+
+    const searchesSince = await this.prisma.searchHistory.count({
+      where: { userId, createdAt: { gt: cache.generatedAt } },
+    });
+
+    if (searchesSince >= this.SEARCH_INVALIDATION_THRESHOLD) {
+      await this.prisma.recommendationCache.deleteMany({ where: { userId } });
+    }
   }
 
   private async fetchWithRetry<T>(
@@ -402,30 +432,43 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     if (apiKey) params.set('key', apiKey);
     if (filters?.openAccessOnly) params.set('filter', 'free-ebooks');
     if (filters?.yearFrom) params.set('orderBy', 'newest');
+
+    const isoCodes = (filters?.languages ?? []).map(l => LANGUAGE_ISO[l]).filter(Boolean);
+    if (isoCodes.length === 1) params.set('langRestrict', isoCodes[0]);
+
     const url = `${this.GOOGLE_BOOKS_URL}?${params.toString()}`;
 
     try {
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
 
-      const items: any[] = (response.data.items || []);
-      const filtered = filters?.yearFrom
-        ? items.filter(item => {
-            const year = parseInt(item.volumeInfo?.publishedDate?.split('-')[0] || '0', 10);
-            return year >= filters.yearFrom!;
-          })
-        : items;
+      let items: any[] = (response.data.items || []);
 
-      return filtered.map((item: any) => ({
+      if (filters?.yearFrom) {
+        items = items.filter(item => {
+          const year = parseInt(item.volumeInfo?.publishedDate?.split('-')[0] || '0', 10);
+          return year >= filters.yearFrom!;
+        });
+      }
+
+      if (isoCodes.length > 0) {
+        items = items.filter(item => {
+          const lang = item.volumeInfo?.language;
+          return !lang || isoCodes.some(code => lang.startsWith(code));
+        });
+      }
+
+      return items.map((item: any, index: number) => ({
         id: `gb-${item.id}`,
         type: MaterialType.BOOK,
         title: item.volumeInfo?.title || 'Título Indisponível',
         authors: item.volumeInfo?.authors?.join(', ') || 'Autor desconhecido',
         year: (item.volumeInfo?.publishedDate?.split('-')[0] || 'N/A').toString(),
         source: 'Google Books',
-        relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
+        relevance: this.positionScore(index, items.length),
         abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
         image: item.volumeInfo?.imageLinks?.thumbnail || null,
         url: `https://books.google.com/books?id=${item.id}`,
+        language: item.volumeInfo?.language ?? undefined,
       }));
     } catch (error) {
       this.logger.error(`Erro ao buscar no Google Books: ${error.message}`);
@@ -442,7 +485,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
     // Vírgulas no parâmetro fields devem ficar literais — URLSearchParams as codifica como %2C,
     // o que faz a API ignorar o parâmetro. Por isso concatenamos a URL manualmente.
-    let url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf,isOpenAccess`;
+    let url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf,isOpenAccess,citationCount`;
 
     if (filters?.area && AREA_SS_FIELDS[filters.area]) {
       url += `&fieldsOfStudy=${encodeURIComponent(AREA_SS_FIELDS[filters.area])}`;
@@ -462,14 +505,14 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
         data = data.filter(item => item.isOpenAccess || item.openAccessPdf?.url);
       }
 
-      return data.map((item: any) => ({
+      return data.map((item: any, index: number) => ({
         id: `ss-${item.paperId}`,
         type: MaterialType.ARTICLE,
         title: item.title || 'Título Indisponível',
         authors: item.authors?.map((a: any) => a.name).join(', ') || 'Vários autores',
-        year: item.year || 'N/A',
+        year: item.year != null ? String(item.year) : 'N/A',
         source: item.venue || 'Semantic Scholar',
-        relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
+        relevance: this.positionScore(index, data.length) + this.citationBoost(item.citationCount ?? 0),
         abstract: item.abstract || 'Resumo acadêmico indisponível.',
         url: item.openAccessPdf?.url || item.url || `https://www.semanticscholar.org/paper/${item.paperId}`,
       }));
@@ -494,7 +537,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
   private async fetchOpenAlex(query: string, filters?: SearchFilters): Promise<MaterialDto[]> {
     const mailto = process.env.OPENALEX_MAILTO;
 
-    let url = `${this.OPENALEX_URL}?search=${encodeURIComponent(query)}&per-page=20&select=id,title,authorships,publication_year,abstract_inverted_index,primary_location,doi,open_access,type`;
+    let url = `${this.OPENALEX_URL}?search=${encodeURIComponent(query)}&per-page=20&select=id,title,authorships,publication_year,abstract_inverted_index,primary_location,doi,open_access,type,cited_by_count,language`;
 
     const filterParts: string[] = [];
     if (filters?.openAccessOnly) filterParts.push('open_access.is_oa:true');
@@ -505,6 +548,8 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
     if (filters?.area && AREA_OA_CONCEPT[filters.area]) {
       filterParts.push(`topics.display_name.search:${encodeURIComponent(AREA_OA_CONCEPT[filters.area])}`);
     }
+    const oaIsoCodes = (filters?.languages ?? []).map(l => LANGUAGE_ISO[l]).filter(Boolean);
+    if (oaIsoCodes.length > 0) filterParts.push(`language:${oaIsoCodes.join('|')}`);
     if (filterParts.length > 0) url += `&filter=${filterParts.join(',')}`;
 
     if (mailto) url += `&mailto=${encodeURIComponent(mailto)}`;
@@ -513,9 +558,8 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
       const response = await this.fetchWithRetry(() => firstValueFrom(this.httpService.get(url)));
       const results: any[] = response.data.results || [];
 
-      return results
-        .filter(item => item.title)
-        .map((item: any) => {
+      const filtered = results.filter(item => item.title);
+      return filtered.map((item: any, index: number) => {
           const isBook = item.type === 'book' || item.type === 'book-chapter';
           const authors = (item.authorships || [])
             .slice(0, 5)
@@ -535,11 +579,12 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
             authors,
             year: item.publication_year?.toString() || 'N/A',
             source: item.primary_location?.source?.display_name || 'OpenAlex',
-            relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85,
+            relevance: this.positionScore(index, filtered.length) + this.citationBoost(item.cited_by_count ?? 0),
             abstract: this.reconstructAbstract(item.abstract_inverted_index),
             image: null,
             url,
             doi: item.doi || null,
+            language: item.language ?? undefined,
           };
         });
     } catch (error) {

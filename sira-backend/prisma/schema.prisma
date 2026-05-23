@@ -79,3 +79,14 @@ model Favorite {
 
   @@unique([userId, materialId])
 }
+
+model RecommendationEvent {
+  id         String   @id @default(uuid())
+  userId     String
+  materialId String
+  eventType  String   // 'impression' | 'click' | 'favorite'
+  createdAt  DateTime @default(now())
+
+  @@index([userId, eventType])
+  @@index([materialId])
+}

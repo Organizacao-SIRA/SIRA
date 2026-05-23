@@ -46,4 +46,24 @@ export class AddFavoriteDto {
   @IsNumber()
   @IsOptional()
   relevance?: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  doi?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  isbn?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  level?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  thematicArea?: string;
 }
