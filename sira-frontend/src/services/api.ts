@@ -140,8 +140,42 @@ export const searchCatalogItems = async (
 
 // --- Favorites ---
 
-export const fetchFavorites = async () => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/favorites`);
+export type FavoriteTypeFilter = 'all' | 'book' | 'article';
+
+export interface FavoritesPage {
+  items: CatalogItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+  counts: Record<FavoriteTypeFilter, number>;
+}
+
+interface FetchFavoritesOptions {
+  page?: number;
+  limit?: number;
+  type?: FavoriteTypeFilter;
+  signal?: AbortSignal;
+}
+
+export const fetchFavoriteIds = async (): Promise<string[]> => {
+  const response = await fetchWithAuth(`${API_BASE_URL}/favorites/ids`);
+  if (!response.ok) throw new Error('Erro ao buscar favoritos');
+  return response.json();
+};
+
+export const fetchFavorites = async ({
+  page = 0,
+  limit = 20,
+  type = 'all',
+  signal,
+}: FetchFavoritesOptions = {}): Promise<FavoritesPage> => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (type !== 'all') params.set('type', type);
+
+  const response = await fetchWithAuth(`${API_BASE_URL}/favorites?${params.toString()}`, { signal });
   if (!response.ok) throw new Error('Erro ao buscar favoritos');
   return response.json();
 };
@@ -161,6 +195,8 @@ export const addFavorite = async (material: any) => {
       url: material.url ?? undefined,
       image: material.image ?? undefined,
       relevance: material.relevance || 0,
+      provider: material.provider ?? undefined,
+      aiExplanation: material.aiExplanation ?? material.aiJustification ?? undefined,
     }),
   });
   if (!response.ok) {

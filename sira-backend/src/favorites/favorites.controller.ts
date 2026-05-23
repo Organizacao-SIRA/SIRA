@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { FavoritesService } from './favorites.service';
 import { AddFavoriteDto } from './dto/add-favorite.dto';
@@ -18,10 +18,21 @@ export class FavoritesController {
     return this.favoritesService.add(user.sub, dto);
   }
 
+  @Get('ids')
+  @ApiOperation({ summary: 'Listar IDs dos materiais favoritos do usuário' })
+  findIds(@CurrentUser() user: JwtPayload) {
+    return this.favoritesService.findIds(user.sub);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Listar favoritos do usuário' })
-  findAll(@CurrentUser() user: JwtPayload) {
-    return this.favoritesService.findAll(user.sub);
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query('page') page = '0',
+    @Query('limit') limit = '20',
+    @Query('type') type?: string,
+  ) {
+    return this.favoritesService.findAll(user.sub, Number(page), Number(limit), type);
   }
 
   @Delete(':materialId')

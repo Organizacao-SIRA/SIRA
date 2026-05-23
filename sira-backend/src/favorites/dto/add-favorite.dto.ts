@@ -66,4 +66,19 @@ export class AddFavoriteDto {
   @IsString()
   @IsOptional()
   thematicArea?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  provider?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  aiExplanation?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  aiJustification?: string;
 }

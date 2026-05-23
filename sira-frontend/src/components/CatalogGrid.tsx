@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
-import { CatalogCard } from './CatalogCard';
+import { RecommendationCard } from './RecommendationCard';
 import { CatalogCardSkeleton } from './CatalogCardSkeleton';
 import { CatalogPagination } from './CatalogPagination';
 import { EmptyState } from './ui/EmptyState';
@@ -87,9 +87,11 @@ export const CatalogGrid = ({
     <>
       <Grid>
         {items.map(item => (
-          <CatalogCard
+          <RecommendationCard
             key={item.id}
-            book={item}
+            item={item}
+            variant="vertical"
+            trackEvents={false}
             viewDetails={viewDetails}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite(item.id)}

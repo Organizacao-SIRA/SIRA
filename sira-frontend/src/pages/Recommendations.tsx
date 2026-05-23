@@ -32,7 +32,7 @@ export const Recommendations = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn flex flex-col min-h-[calc(100vh-68px)] relative">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn flex flex-col min-h-[calc(100vh-68px)] relative">
 
       <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3 border-b border-border pb-4">
         <button
