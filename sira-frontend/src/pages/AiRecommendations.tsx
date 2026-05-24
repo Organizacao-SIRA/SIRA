@@ -31,7 +31,7 @@ export const AiRecommendations = ({
   const [chatExpanded, setChatExpanded] = useState(false);
   const CHAT_PREVIEW_COUNT = 2;
 
-  const { mode: viewMode, setMode: setViewMode } = useViewMode('horizontal');
+  const { mode: viewMode, setMode: setViewMode } = useViewMode('ai-recommendations', 'horizontal');
   const isMobile = useIsMobile();
 
   const effectiveVariant: 'horizontal' | 'vertical' = isChatMode

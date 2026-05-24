@@ -40,7 +40,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  const { mode: viewMode, setMode: setViewMode } = useViewMode('vertical');
+  const { mode: viewMode, setMode: setViewMode } = useViewMode('favorites', 'vertical');
 
   const effectiveVariant = isMobile ? 'vertical' : viewMode;
   const containerClasses = effectiveVariant === 'vertical'

@@ -14,7 +14,7 @@ interface MaterialsSectionProps {
 
 export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite, isFavorite }: MaterialsSectionProps) => {
   const isMobile = useIsMobile();
-  const { mode, setMode } = useViewMode('horizontal');
+  const { mode, setMode } = useViewMode('search-results', 'horizontal');
   const variant: 'horizontal' | 'vertical' = isMobile ? 'vertical' : mode;
 
   const containerClasses = variant === 'vertical'

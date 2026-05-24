@@ -2,10 +2,12 @@ import React from 'react';
 import { BookOpen } from 'lucide-react';
 import { RecommendationCard } from './RecommendationCard';
 import { CatalogCardSkeleton } from './CatalogCardSkeleton';
+import { RecommendationCardSkeleton } from './RecommendationCardSkeleton';
 import { CatalogPagination } from './CatalogPagination';
 import { EmptyState } from './ui/EmptyState';
 import { ErrorState } from './ui/ErrorState';
 import type { CatalogItem } from '../types';
+import type { ViewMode } from '../hooks/useViewMode';
 
 interface CatalogGridProps {
   items: CatalogItem[];
@@ -21,38 +23,30 @@ interface CatalogGridProps {
   viewDetails: (item: CatalogItem) => void;
   toggleFavorite: (item: CatalogItem) => void;
   isFavorite: (id: string) => boolean;
+  viewMode?: ViewMode;
 }
 
 const SKELETON_COUNT = 4;
 
-const Grid = ({ children }: { children: React.ReactNode }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {children}
-  </div>
-);
-
 export const CatalogGrid = ({
-  items,
-  loading,
-  error,
-  page,
-  totalPages,
-  total,
-  isSearchMode,
-  searchQuery,
-  onPageChange,
-  onRetry,
-  viewDetails,
-  toggleFavorite,
-  isFavorite,
+  items, loading, error, page, totalPages, total,
+  isSearchMode, searchQuery, onPageChange, onRetry,
+  viewDetails, toggleFavorite, isFavorite,
+  viewMode = 'vertical',
 }: CatalogGridProps) => {
   if (loading) {
-    return (
-      <Grid>
+    return viewMode === 'horizontal' ? (
+      <div className="space-y-4">
+        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+          <RecommendationCardSkeleton key={i} />
+        ))}
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
           <CatalogCardSkeleton key={i} />
         ))}
-      </Grid>
+      </div>
     );
   }
 
@@ -83,21 +77,25 @@ export const CatalogGrid = ({
     );
   }
 
+  const containerClasses = viewMode === 'horizontal'
+    ? 'space-y-4'
+    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
+
   return (
     <>
-      <Grid>
+      <div className={containerClasses}>
         {items.map(item => (
           <RecommendationCard
             key={item.id}
             item={item}
-            variant="vertical"
+            variant={viewMode}
             trackEvents={false}
             viewDetails={viewDetails}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite(item.id)}
           />
         ))}
-      </Grid>
+      </div>
       <CatalogPagination
         page={page}
         totalPages={totalPages}
