@@ -53,7 +53,8 @@ export const RecommendationCard = ({
     return () => observer.disconnect();
   }, [item.id, trackEvents]);
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if ((e.target as HTMLElement).closest('button, a, input, select, textarea')) return;
     if (trackEvents) trackRecommendationEvent(item.id, 'click');
     viewDetails(item);
   };
@@ -137,10 +138,11 @@ export const RecommendationCard = ({
       onClick={handleCardClick}
       onKeyDown={e => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.target !== e.currentTarget) return;
         e.preventDefault();
-        handleCardClick();
+        handleCardClick(e);
       }}
-      className={`bg-surface rounded-2xl border border-border hover:border-primary/40 hover:shadow-md hover:scale-[1.015] active:scale-[0.99] transition-all duration-200 animate-fadeIn cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary overflow-hidden min-w-0 ${
+      className={`bg-surface rounded-2xl border border-border hover:border-primary/40 hover:shadow-md hover:scale-[1.015] transition-[border-color,box-shadow,transform] duration-200 animate-fadeIn cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary overflow-hidden min-w-0 ${
         isVertical ? `flex flex-col ${stretch ? 'h-full' : ''}` : 'p-3.5 sm:p-5'
       }`}
     >
