@@ -270,8 +270,10 @@ export const updateProfile = async (data: Record<string, any>) => {
   return response.json();
 };
 
-export const resolveAvatarUrl = (path: string | null | undefined): string | null =>
-  path ? `${BACKEND_BASE_URL}${path}` : null;
+export const resolveAvatarUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  return path.startsWith('http') ? path : `${BACKEND_BASE_URL}${path}`;
+};
 
 export const uploadAvatar = async (file: File): Promise<UserProfile> => {
   const formData = new FormData();

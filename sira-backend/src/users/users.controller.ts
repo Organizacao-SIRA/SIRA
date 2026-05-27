@@ -11,23 +11,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, JwtPayload } from '../auth/decorators/current-user.decorator';
-
-interface MulterFile {
-  fieldname: string;
-  originalname: string;
-  mimetype: string;
-  size: number;
-  destination: string;
-  filename: string;
-  path: string;
-}
 
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -60,13 +49,7 @@ export class UsersController {
   @Post('profile/avatar')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (_req, file, cb) => {
-          const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          cb(null, `${unique}${extname(file.originalname).toLowerCase()}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: MAX_AVATAR_BYTES },
       fileFilter: (_req, file, cb) => {
         if (!ALLOWED_MIMES.includes(file.mimetype)) {
@@ -76,9 +59,9 @@ export class UsersController {
       },
     }),
   )
-  uploadAvatar(@CurrentUser() user: JwtPayload, @UploadedFile() file: MulterFile) {
+  uploadAvatar(@CurrentUser() user: JwtPayload, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Nenhum arquivo enviado');
-    return this.usersService.updateAvatar(user.sub, file.filename);
+    return this.usersService.updateAvatar(user.sub, file.buffer, file.mimetype);
   }
 
   @Delete('profile/avatar')

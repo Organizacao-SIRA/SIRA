@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
@@ -12,8 +11,11 @@ import {
   PREFERENCE_TOPICS,
 } from './preferences-options';
 
-const AVATAR_PUBLIC_PREFIX = '/uploads/avatars/';
-const AVATAR_DISK_DIR = join(process.cwd(), 'uploads', 'avatars');
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 @Injectable()
 export class UsersService {
@@ -87,13 +89,13 @@ export class UsersService {
     return this.safeUser(user);
   }
 
-  async updateAvatar(userId: string, filename: string) {
+  async updateAvatar(userId: string, buffer: Buffer, mimetype: string) {
     const current = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!current) throw new NotFoundException('Usuário não encontrado');
 
-    this.deleteAvatarFile(current.avatarUrl);
+    await this.deleteCloudinaryAvatar(current.avatarUrl);
 
-    const avatarUrl = `${AVATAR_PUBLIC_PREFIX}${filename}`;
+    const avatarUrl = await this.uploadToCloudinary(buffer, mimetype, userId);
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: { avatarUrl },
@@ -106,7 +108,7 @@ export class UsersService {
     const current = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!current) throw new NotFoundException('Usuário não encontrado');
 
-    this.deleteAvatarFile(current.avatarUrl);
+    await this.deleteCloudinaryAvatar(current.avatarUrl);
 
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -116,14 +118,24 @@ export class UsersService {
     return this.safeUser(user);
   }
 
-  private deleteAvatarFile(avatarUrl: string | null) {
-    if (!avatarUrl?.startsWith(AVATAR_PUBLIC_PREFIX)) return;
-    const filename = avatarUrl.slice(AVATAR_PUBLIC_PREFIX.length);
-    if (!filename || filename.includes('/') || filename.includes('\\')) return;
-    const fullPath = join(AVATAR_DISK_DIR, filename);
-    if (existsSync(fullPath)) {
-      try { unlinkSync(fullPath); } catch { /* ignora falha de I/O */ }
-    }
+  private uploadToCloudinary(buffer: Buffer, mimetype: string, userId: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const ext = mimetype.split('/')[1];
+      cloudinary.uploader.upload_stream(
+        { folder: 'sira/avatars', public_id: userId, overwrite: true, format: ext },
+        (error, result) => {
+          if (error || !result) return reject(new BadRequestException('Erro ao enviar imagem para o Cloudinary'));
+          resolve(result.secure_url);
+        },
+      ).end(buffer);
+    });
+  }
+
+  private async deleteCloudinaryAvatar(avatarUrl: string | null) {
+    if (!avatarUrl?.includes('cloudinary.com')) return;
+    try {
+      await cloudinary.uploader.destroy('sira/avatars/' + avatarUrl.split('/').pop()?.split('.')[0]);
+    } catch { /* ignora falha ao deletar imagem anterior */ }
   }
 
   private hasRecommendationRelevantChanges(dto: UpdateProfileDto) {
