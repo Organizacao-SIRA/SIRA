@@ -18,6 +18,13 @@ import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, JwtPayload } from '../auth/decorators/current-user.decorator';
 
+interface MulterMemoryFile {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+  size: number;
+}
+
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
@@ -59,7 +66,7 @@ export class UsersController {
       },
     }),
   )
-  uploadAvatar(@CurrentUser() user: JwtPayload, @UploadedFile() file: Express.Multer.File) {
+  uploadAvatar(@CurrentUser() user: JwtPayload, @UploadedFile() file: MulterMemoryFile) {
     if (!file) throw new BadRequestException('Nenhum arquivo enviado');
     return this.usersService.updateAvatar(user.sub, file.buffer, file.mimetype);
   }
