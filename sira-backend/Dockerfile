@@ -31,7 +31,7 @@ ARG DATABASE_URL=postgresql://sira_user:sira_password@postgres:5432/sira_db?sche
 ENV DATABASE_URL=${DATABASE_URL}
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci --omit=dev && npx prisma generate
+RUN npm install --omit=dev && npx prisma generate
 
 # Estágio 5: Runner de Produção (Imagem final otimizada e leve)
 FROM node:22-alpine AS runner
