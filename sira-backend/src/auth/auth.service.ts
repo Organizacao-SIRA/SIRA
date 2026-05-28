@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Resend } from 'resend';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   scrypt as _scrypt,
@@ -15,6 +15,9 @@ import {
   createHash,
 } from 'node:crypto';
 import { promisify } from 'node:util';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import * as Handlebars from 'handlebars';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -24,10 +27,11 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
+  private readonly resend = new Resend(process.env.RESEND_API_KEY);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService,
   ) {}
 
   // ── Hashing helpers ─────────────────────────────────────────────
@@ -151,23 +155,25 @@ export class AuthService {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendUrl}?screen=reset-password&token=${rawToken}`;
 
-    // Envia e-mail de recuperação
+    // Envia e-mail de recuperação via Resend
     try {
-      await this.mailerService.sendMail({
+      const templatePath = join(__dirname, 'templates', 'reset-password.hbs');
+      const templateSource = readFileSync(templatePath, 'utf8');
+      const html = Handlebars.compile(templateSource)({
+        name: user.name || 'Usuário',
+        resetLink,
+        year: new Date().getFullYear(),
+      });
+
+      await this.resend.emails.send({
+        from: process.env.MAIL_FROM || 'SIRA+ <onboarding@resend.dev>',
         to: user.email,
         subject: 'SIRA+ — Recuperação de senha',
-        template: 'reset-password',
-        context: {
-          name: user.name || 'Usuário',
-          resetLink,
-          year: new Date().getFullYear(),
-        },
+        html,
       });
       this.logger.log(`[MAIL] Password reset email sent to ${user.email}`);
     } catch (mailError) {
-      // Loga o erro mas não expõe para o usuário (anti-enumeração)
       this.logger.error(`[MAIL] Failed to send reset email: ${mailError}`);
-      // Fallback: loga o link no console para ambiente de desenvolvimento
       this.logger.warn(`[MAIL-FALLBACK] Reset link for ${user.email}: ${resetLink}`);
     }
   }
