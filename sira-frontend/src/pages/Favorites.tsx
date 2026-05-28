@@ -44,7 +44,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
 
   const effectiveVariant = isMobile ? 'vertical' : viewMode;
   const containerClasses = effectiveVariant === 'vertical'
-    ? 'grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),20rem))] justify-center items-start gap-4 sm:gap-6'
+    ? 'grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),20rem))] justify-center items-stretch gap-4 sm:gap-6'
     : 'space-y-4';
 
   const isEmpty = !isInitialLoading && counts.all === 0;
@@ -233,7 +233,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
                 key={item.id}
                 item={item}
                 variant={effectiveVariant}
-                stretch={false}
+                analysisSlot="reserved"
                 trackEvents={false}
                 viewDetails={viewDetails}
                 toggleFavorite={handleFavoriteToggle}

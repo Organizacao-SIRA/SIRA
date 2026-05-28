@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Lock, Unlock } from 'lucide-react';
+import { BookOpenCheck, Lock, Unlock } from 'lucide-react';
 import { StatusBadge } from './ui/StatusBadge';
 import { MaterialTypeBadge } from './ui/MaterialTypeBadge';
 import { FavoriteButton } from './ui/FavoriteButton';
@@ -81,6 +81,7 @@ const AccessStrip = ({
 // -------------------------------------------------------------------------
 
 type Variant = 'horizontal' | 'vertical';
+type AnalysisSlot = 'auto' | 'reserved';
 
 interface RecommendationCardProps {
   item: any;
@@ -90,6 +91,7 @@ interface RecommendationCardProps {
   variant?: Variant;
   trackEvents?: boolean;
   stretch?: boolean;
+  analysisSlot?: AnalysisSlot;
 }
 
 export const RecommendationCard = ({
@@ -100,6 +102,7 @@ export const RecommendationCard = ({
   variant = 'horizontal',
   trackEvents = true,
   stretch = true,
+  analysisSlot = 'auto',
 }: RecommendationCardProps) => {
   const [imageError, setImageError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -107,6 +110,7 @@ export const RecommendationCard = ({
   const showImage = Boolean(item.image) && !imageError;
   const isVertical = variant === 'vertical';
   const hasAccessInfo = item.isOpenAccess !== undefined;
+  const shouldShowAnalysisSlot = Boolean(item.aiExplanation) || analysisSlot === 'reserved';
 
   useEffect(() => {
     if (!trackEvents) return;
@@ -190,6 +194,23 @@ export const RecommendationCard = ({
 
       {item.aiExplanation && (
         <SiraAnalysisCard explanation={item.aiExplanation} size="compact" />
+      )}
+
+      {!item.aiExplanation && shouldShowAnalysisSlot && (
+        <aside
+          aria-label="Origem do material"
+          className="bg-surface-subtle border-l-4 border-border-strong rounded-r-md px-2.5 py-1.5 sm:px-3 sm:py-2 min-h-[4.75rem] min-w-0"
+        >
+          <div className="flex items-center gap-1.5 mb-1">
+            <BookOpenCheck className="w-3.5 h-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
+            <span className="font-bold uppercase tracking-wider text-text-subtle text-[10px]">
+              Catálogo acadêmico
+            </span>
+          </div>
+          <p className="text-xs leading-snug text-text-muted line-clamp-2 break-words min-w-0">
+            Material salvo diretamente do catálogo, sem análise personalizada da IA.
+          </p>
+        </aside>
       )}
 
       {item.abstract && (
