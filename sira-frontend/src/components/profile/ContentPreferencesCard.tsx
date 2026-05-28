@@ -2,6 +2,8 @@ import { Settings } from 'lucide-react';
 import { Checkbox } from '../ui/Checkbox';
 import { SectionCard } from './SectionCard';
 
+type BoolPreferenceField = 'wantsBooks' | 'wantsArticles' | 'wantsOpenAccessOnly';
+
 interface ContentPreferencesCardProps {
   isEditing: boolean;
   data: {
@@ -9,15 +11,17 @@ interface ContentPreferencesCardProps {
     materialLevels: string[];
     wantsBooks: boolean;
     wantsArticles: boolean;
+    wantsOpenAccessOnly: boolean;
   };
   editData: {
     languages: string[];
     materialLevels: string[];
     wantsBooks: boolean;
     wantsArticles: boolean;
+    wantsOpenAccessOnly: boolean;
   };
   onArrayChange: (field: 'languages' | 'materialLevels', value: string, checked: boolean) => void;
-  onBoolChange: (field: 'wantsBooks' | 'wantsArticles', value: boolean) => void;
+  onBoolChange: (field: BoolPreferenceField, value: boolean) => void;
   languagesList: string[];
   materialLevelsList: string[];
 }
@@ -87,6 +91,21 @@ export const ContentPreferencesCard = ({
               onChange={(e) => isEditing && onBoolChange('wantsArticles', e.target.checked)}
               disabled={!isEditing}
             />
+          </div>
+
+          <GroupTitle>Acesso</GroupTitle>
+          <div className="space-y-2">
+            <Checkbox
+              label="Apenas acesso aberto"
+              checked={source.wantsOpenAccessOnly}
+              onChange={(e) => isEditing && onBoolChange('wantsOpenAccessOnly', e.target.checked)}
+              disabled={!isEditing}
+            />
+            {source.wantsOpenAccessOnly && (
+              <p className="text-[11px] text-text-subtle leading-snug pl-5">
+                Recomendações incluirão apenas materiais gratuitos.
+              </p>
+            )}
           </div>
         </div>
       </div>

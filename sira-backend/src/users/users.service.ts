@@ -73,7 +73,7 @@ export class UsersService {
 
     const wantsBooks = dto.wantsBooks ?? current.wantsBooks;
     const wantsArticles = dto.wantsArticles ?? current.wantsArticles;
-    if (!wantsBooks && !wantsArticles) {
+    if (wantsBooks === false && wantsArticles === false) {
       throw new BadRequestException('Selecione pelo menos um formato de material');
     }
 
@@ -148,6 +148,7 @@ export class UsersService {
       'materialLevels',
       'wantsBooks',
       'wantsArticles',
+      'wantsOpenAccessOnly',
       'interests',
       'academicGoal',
     ].some(field => Object.prototype.hasOwnProperty.call(dto, field));
@@ -170,6 +171,7 @@ export class UsersService {
       materialLevels: user.materialLevels,
       wantsBooks: user.wantsBooks,
       wantsArticles: user.wantsArticles,
+      wantsOpenAccessOnly: user.wantsOpenAccessOnly,
       interests: user.interests,
       academicGoal: user.academicGoal,
       avatarUrl: user.avatarUrl,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Lock, Star } from 'lucide-react';
+import { ExternalLink, Star, Unlock } from 'lucide-react';
 import type { CatalogItem } from '../../types';
 import { MaterialPlaceholder } from '../ui/MaterialPlaceholder';
 import { CitationActionButton } from './CitationActionButton';
@@ -23,7 +23,7 @@ const ContentCoverPreview = ({ item }: { item: CatalogItem }) => {
           alt={`Capa de ${item.title}`}
           loading="lazy"
           onError={() => setImageError(true)}
-          className="max-h-56 w-auto rounded-lg shadow-md border border-border bg-surface-subtle"
+          className="w-32 aspect-[2/3] object-contain rounded-lg shadow-md border border-border bg-surface-subtle"
         />
       ) : (
         <MaterialPlaceholder
@@ -36,28 +36,48 @@ const ContentCoverPreview = ({ item }: { item: CatalogItem }) => {
   );
 };
 
-const AccessMaterialAction = ({ item }: { item: CatalogItem }) => (
-  item.url ? (
+const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
+  if (!item.url) {
+    return (
+      <div
+        role="status"
+        aria-label="Link de acesso indisponível"
+        className="w-full py-3.5 px-4 rounded-xl border border-dashed border-border-strong bg-surface-subtle text-text-muted text-sm font-medium flex items-center justify-center gap-2"
+      >
+        <Lock className="w-4 h-4" aria-hidden="true" />
+        <span>Link de acesso indisponível</span>
+      </div>
+    );
+  }
+
+  if (item.isOpenAccess) {
+    return (
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Acessar material gratuitamente: ${item.title} (abre em nova aba)`}
+        className="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-primary-dark dark:hover:bg-primary text-white font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
+      >
+        <Unlock className="w-5 h-5" aria-hidden="true" />
+        <span>Acessar Material</span>
+      </a>
+    );
+  }
+
+  return (
     <a
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Acessar material: ${item.title} (abre em nova aba)`}
-      className="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-primary-dark dark:hover:bg-primary text-white font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
+      aria-label={`Ver material: ${item.title} — pode exigir assinatura (abre em nova aba)`}
+      className="w-full py-3.5 px-4 rounded-xl bg-warning-soft border border-warning-border text-warning-strong font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-border focus-visible:ring-offset-2 active:scale-[0.98]"
     >
-      <ExternalLink className="w-5 h-5" aria-hidden="true" />
-      <span>Acessar Material</span>
+      <ExternalLink className="w-5 h-5 shrink-0" aria-hidden="true" />
+      <span>Ver Material</span>
     </a>
-  ) : (
-    <div
-      role="status"
-      className="w-full py-3.5 px-4 rounded-xl border border-dashed border-border-strong bg-surface-subtle text-text-muted text-sm font-medium flex items-center justify-center gap-2"
-    >
-      <Lock className="w-4 h-4" aria-hidden="true" />
-      <span>Link de acesso indisponível</span>
-    </div>
-  )
-);
+  );
+};
 
 const FavoriteDetailsButton = ({
   isFavorite,
@@ -103,7 +123,7 @@ export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: Conte
     >
       <ContentCoverPreview item={item} />
 
-      <div className="space-y-3">
+<div className="space-y-3">
         <AccessMaterialAction item={item} />
         <FavoriteDetailsButton isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
       </div>

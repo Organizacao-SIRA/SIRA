@@ -92,6 +92,7 @@ export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps
         materialLevels: editData.materialLevels,
         wantsBooks: editData.wantsBooks,
         wantsArticles: editData.wantsArticles,
+        wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
         interests: editData.interests,
         academicGoal: editData.academicGoal || undefined,
       };
@@ -108,6 +109,7 @@ export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps
         materialLevels: saved.materialLevels?.length ? saved.materialLevels : prev.materialLevels,
         wantsBooks: saved.wantsBooks,
         wantsArticles: saved.wantsArticles,
+        wantsOpenAccessOnly: saved.wantsOpenAccessOnly,
         interests: saved.interests?.length ? saved.interests : prev.interests,
         academicGoal: saved.academicGoal || '',
         avatarUrl: saved.avatarUrl ?? prev.avatarUrl,

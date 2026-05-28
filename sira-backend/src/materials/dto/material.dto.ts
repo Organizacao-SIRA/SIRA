@@ -60,6 +60,10 @@ export class MaterialDto {
   @IsOptional()
   url?: string;
 
+  @ApiProperty({ example: true, description: 'Indica se o material é de acesso aberto/gratuito', required: false })
+  @IsOptional()
+  isOpenAccess?: boolean;
+
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()

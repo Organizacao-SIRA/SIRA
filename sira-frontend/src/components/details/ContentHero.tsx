@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Lock, Unlock } from 'lucide-react';
 import { MaterialTypeBadge } from '../ui/MaterialTypeBadge';
 import { StatusBadge } from '../ui/StatusBadge';
 
@@ -9,11 +10,12 @@ interface ContentHeroProps {
   year: string;
   source: string;
   provider?: string;
+  isOpenAccess?: boolean;
 }
 
 const AUTHOR_CHAR_THRESHOLD = 50;
 
-export const ContentHero = ({ type, title, authors, year, source, provider }: ContentHeroProps) => {
+export const ContentHero = ({ type, title, authors, year, source, provider, isOpenAccess }: ContentHeroProps) => {
   const isLong = authors.length > AUTHOR_CHAR_THRESHOLD;
   const [expanded, setExpanded] = useState(false);
 
@@ -23,6 +25,16 @@ export const ContentHero = ({ type, title, authors, year, source, provider }: Co
         <MaterialTypeBadge type={type} />
         {provider && <StatusBadge variant="info">{provider}</StatusBadge>}
         {source && source !== provider && <StatusBadge variant="neutral">{source}</StatusBadge>}
+        {isOpenAccess === true && (
+          <StatusBadge variant="success" icon={<Unlock className="w-3 h-3" />}>
+            Acesso Aberto
+          </StatusBadge>
+        )}
+        {isOpenAccess === false && (
+          <StatusBadge variant="warning" icon={<Lock className="w-3 h-3" />}>
+            Acesso Restrito
+          </StatusBadge>
+        )}
       </div>
 
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-dark dark:text-text leading-[1.15] tracking-tight break-words">
