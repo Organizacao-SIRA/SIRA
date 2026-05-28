@@ -156,6 +156,7 @@ export default function App() {
     materialLevels: ['Intermediário'],
     wantsBooks: true,
     wantsArticles: true,
+    wantsOpenAccessOnly: false,
     interests: [],
     academicGoal: '',
     avatarUrl: user?.avatarUrl ?? null,
@@ -184,7 +185,7 @@ export default function App() {
       setProfileData({
         name: '', email: '', course: '', educationLevel: 'Graduação',
         mainArea: '', subAreas: '', languages: ['Português'],
-        materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true,
+        materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true, wantsOpenAccessOnly: false,
         interests: [], academicGoal: '', avatarUrl: null,
         hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
@@ -240,6 +241,7 @@ export default function App() {
         materialLevels: data.materialLevels?.length ? data.materialLevels : ['Intermediário'],
         wantsBooks: data.wantsBooks ?? true,
         wantsArticles: data.wantsArticles ?? true,
+        wantsOpenAccessOnly: data.wantsOpenAccessOnly ?? false,
         interests: data.interests || [],
         academicGoal: data.academicGoal || '',
         avatarUrl: data.avatarUrl ?? null,

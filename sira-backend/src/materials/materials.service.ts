@@ -94,6 +94,7 @@ export class MaterialsService {
       abstract: data.abstract ?? null,
       image: data.image ?? null,
       url: data.url ?? null,
+      isOpenAccess: data.isOpenAccess ?? false,
       thematicArea: data.thematicArea ?? null,
       doi: data.doi ?? null,
       isbn: data.isbn ?? null,
@@ -103,7 +104,11 @@ export class MaterialsService {
     return this.prisma.material.upsert({
       where: { id: data.id },
       create: payload,
-      update: { level: payload.level ?? undefined },
+      update: {
+        level: payload.level ?? undefined,
+        isOpenAccess: payload.isOpenAccess,
+        url: payload.url ?? undefined,
+      },
     });
   }
 
@@ -458,20 +463,32 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
         });
       }
 
-      return items.map((item: any, index: number) => ({
-        id: `gb-${item.id}`,
-        type: MaterialType.BOOK,
-        title: item.volumeInfo?.title || 'Título Indisponível',
-        authors: item.volumeInfo?.authors?.join(', ') || 'Autor desconhecido',
-        year: (item.volumeInfo?.publishedDate?.split('-')[0] || 'N/A').toString(),
-        source: item.volumeInfo?.publisher || 'Google Books',
-        provider: 'Google Books',
-        relevance: this.positionScore(index, items.length),
-        abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
-        image: item.volumeInfo?.imageLinks?.thumbnail || null,
-        url: `https://books.google.com/books?id=${item.id}`,
-        language: item.volumeInfo?.language ?? undefined,
-      }));
+      return items.map((item: any, index: number) => {
+        const isOpenAccess =
+          item.accessInfo?.publicDomain === true ||
+          item.saleInfo?.saleability === 'FREE' ||
+          item.accessInfo?.accessViewStatus === 'FULL_PUBLIC_DOMAIN';
+
+        const url = isOpenAccess && item.accessInfo?.webReaderLink
+          ? item.accessInfo.webReaderLink
+          : `https://books.google.com/books?id=${item.id}`;
+
+        return {
+          id: `gb-${item.id}`,
+          type: MaterialType.BOOK,
+          title: item.volumeInfo?.title || 'Título Indisponível',
+          authors: item.volumeInfo?.authors?.join(', ') || 'Autor desconhecido',
+          year: (item.volumeInfo?.publishedDate?.split('-')[0] || 'N/A').toString(),
+          source: item.volumeInfo?.publisher || 'Google Books',
+          provider: 'Google Books',
+          relevance: this.positionScore(index, items.length),
+          abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
+          image: item.volumeInfo?.imageLinks?.thumbnail || null,
+          url,
+          isOpenAccess,
+          language: item.volumeInfo?.language ?? undefined,
+        };
+      });
     } catch (error) {
       this.logger.error(`Erro ao buscar no Google Books: ${error.message}`);
       if (error.response?.status === 429) {
@@ -487,7 +504,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
     // Vírgulas no parâmetro fields devem ficar literais — URLSearchParams as codifica como %2C,
     // o que faz a API ignorar o parâmetro. Por isso concatenamos a URL manualmente.
-    let url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf,isOpenAccess,citationCount`;
+    let url = `${this.SEMANTIC_SCHOLAR_URL}?query=${encodeURIComponent(query)}&limit=20&fields=title,authors,year,abstract,venue,url,openAccessPdf,isOpenAccess,citationCount,externalIds`;
 
     if (filters?.area && AREA_SS_FIELDS[filters.area]) {
       url += `&fieldsOfStudy=${encodeURIComponent(AREA_SS_FIELDS[filters.area])}`;
@@ -504,21 +521,26 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
 
       let data: any[] = response.data.data || [];
       if (filters?.openAccessOnly) {
-        data = data.filter(item => item.isOpenAccess || item.openAccessPdf?.url);
+        data = data.filter(item => item.isOpenAccess || item.openAccessPdf?.url || item.externalIds?.ArXiv);
       }
 
-      return data.map((item: any, index: number) => ({
-        id: `ss-${item.paperId}`,
-        type: MaterialType.ARTICLE,
-        title: item.title || 'Título Indisponível',
-        authors: item.authors?.map((a: any) => a.name).join(', ') || 'Vários autores',
-        year: item.year != null ? String(item.year) : 'N/A',
-        source: item.venue || 'Semantic Scholar',
-        provider: 'Semantic Scholar',
-        relevance: this.positionScore(index, data.length) + this.citationBoost(item.citationCount ?? 0),
-        abstract: item.abstract || 'Resumo acadêmico indisponível.',
-        url: item.openAccessPdf?.url || item.url || `https://www.semanticscholar.org/paper/${item.paperId}`,
-      }));
+      return data.map((item: any, index: number) => {
+        const arxivId = item.externalIds?.ArXiv;
+        const arxivPdfUrl = arxivId ? `https://arxiv.org/pdf/${arxivId}` : null;
+        return {
+          id: `ss-${item.paperId}`,
+          type: MaterialType.ARTICLE,
+          title: item.title || 'Título Indisponível',
+          authors: item.authors?.map((a: any) => a.name).join(', ') || 'Vários autores',
+          year: item.year != null ? String(item.year) : 'N/A',
+          source: item.venue || 'Semantic Scholar',
+          provider: 'Semantic Scholar',
+          relevance: this.positionScore(index, data.length) + this.citationBoost(item.citationCount ?? 0),
+          abstract: item.abstract || 'Resumo acadêmico indisponível.',
+          url: item.openAccessPdf?.url || arxivPdfUrl || item.url || `https://www.semanticscholar.org/paper/${item.paperId}`,
+          isOpenAccess: item.isOpenAccess === true || !!item.openAccessPdf?.url || !!arxivId,
+        };
+      });
     } catch (error) {
       this.logger.error(`Erro ao buscar no Semantic Scholar: ${error.message}`);
       if (error.response?.status === 429) {
@@ -587,6 +609,7 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
             abstract: this.reconstructAbstract(item.abstract_inverted_index),
             image: null,
             url,
+            isOpenAccess: item.open_access?.is_oa === true || !!item.open_access?.oa_url,
             doi: item.doi || null,
             language: item.language ?? undefined,
           };

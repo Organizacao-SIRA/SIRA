@@ -1,10 +1,84 @@
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Lock, Unlock } from 'lucide-react';
 import { StatusBadge } from './ui/StatusBadge';
 import { MaterialTypeBadge } from './ui/MaterialTypeBadge';
 import { FavoriteButton } from './ui/FavoriteButton';
 import { MaterialPlaceholder } from './ui/MaterialPlaceholder';
+import { SiraAnalysisCard } from './ui/SiraAnalysisCard';
 import { trackRecommendationEvent } from '../services/api';
+
+// -------------------------------------------------------------------------
+// Access indicator — derives all visual config from a single source of truth
+// -------------------------------------------------------------------------
+
+type AccessConfig = {
+  Icon: LucideIcon;
+  label: string;
+  classes: string;
+  short: string;
+  full: string;
+};
+
+const ACCESS_STYLES = {
+  open:       'bg-success-soft text-success-strong border-success-border',
+  restricted: 'bg-warning-soft text-warning-strong border-warning-border',
+} as const;
+
+const getAccessConfig = (isOpenAccess?: boolean): AccessConfig | null => {
+  if (isOpenAccess === undefined) return null;
+  return {
+    Icon:    isOpenAccess ? Unlock : Lock,
+    label:   isOpenAccess ? 'Acesso aberto' : 'Acesso restrito',
+    classes: isOpenAccess ? ACCESS_STYLES.open : ACCESS_STYLES.restricted,
+    short:   isOpenAccess ? 'Aberto' : 'Restrito',
+    full:    isOpenAccess ? 'Acesso Aberto' : 'Acesso Restrito',
+  };
+};
+
+/**
+ * Full-width strip — structural row that lives at the bottom of a thumbnail
+ * frame. Never absolutely positioned, so its background sits on the parent's
+ * surface (no image bleeding through, no "floating" feel).
+ *
+ * - `position`: 'middle' adds a bottom border (separator before sibling content);
+ *               'bottom' sits at the frame edge where the parent's border closes
+ *               the visual.
+ * - `compact`:  short label + tighter spacing, for narrow thumbnails (~64-96px).
+ */
+const AccessStrip = ({
+  isOpenAccess,
+  position,
+  compact = false,
+}: {
+  isOpenAccess?: boolean;
+  position: 'middle' | 'bottom';
+  compact?: boolean;
+}) => {
+  const cfg = getAccessConfig(isOpenAccess);
+  if (!cfg) return null;
+
+  const sizing = compact
+    ? 'gap-1 py-0.5 px-1 text-[9px]'
+    : 'gap-1.5 py-1.5 px-2 text-[10px]';
+  const iconSize  = compact ? 'w-2.5 h-2.5' : 'w-3 h-3';
+  const borderCls = position === 'middle' ? 'border-b' : '';
+
+  return (
+    <div
+      role="status"
+      aria-label={cfg.label}
+      className={`flex items-center justify-center font-bold uppercase ${sizing} ${borderCls} ${cfg.classes}`}
+    >
+      <cfg.Icon className={`${iconSize} shrink-0`} aria-hidden="true" />
+      <span className="whitespace-nowrap">{compact ? cfg.short : cfg.full}</span>
+    </div>
+  );
+};
+
+// -------------------------------------------------------------------------
+// Card
+// -------------------------------------------------------------------------
 
 type Variant = 'horizontal' | 'vertical';
 
@@ -32,6 +106,7 @@ export const RecommendationCard = ({
   const impressionFired = useRef(false);
   const showImage = Boolean(item.image) && !imageError;
   const isVertical = variant === 'vertical';
+  const hasAccessInfo = item.isOpenAccess !== undefined;
 
   useEffect(() => {
     if (!trackEvents) return;
@@ -64,6 +139,9 @@ export const RecommendationCard = ({
     toggleFavorite(item);
   };
 
+  // Cover keeps no visual chrome of its own — the parent thumbnail wrapper
+  // (vertical: the fixed-height frame; horizontal: the rounded container)
+  // owns rounded corners, border and shadow so the access strip can sit flush.
   const cover = showImage ? (
     <img
       src={item.image}
@@ -73,7 +151,7 @@ export const RecommendationCard = ({
       className={
         isVertical
           ? 'w-full h-full object-contain bg-surface-subtle'
-          : 'w-full h-auto rounded-lg shadow-sm border border-border bg-surface-subtle'
+          : 'w-full aspect-[2/3] object-contain bg-surface-subtle'
       }
     />
   ) : (
@@ -82,9 +160,9 @@ export const RecommendationCard = ({
       className={
         isVertical
           ? 'w-full h-full rounded-none border-0'
-          : 'w-full aspect-[2/3] shadow-sm'
+          : 'w-full aspect-[2/3] rounded-none border-0'
       }
-      iconClassName={isVertical ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-7 h-7 sm:w-9 sm:h-9'}
+      iconClassName="w-14 h-14 sm:w-16 sm:h-16"
     />
   );
 
@@ -102,17 +180,16 @@ export const RecommendationCard = ({
         <FavoriteButton isFavorite={isFavorite} onToggle={handleFavoriteToggle} size="sm" />
       </div>
 
-      <h3 className="text-[15px] sm:text-lg font-bold text-primary-dark dark:text-text leading-snug line-clamp-2 break-words">
+      <h3 className={`font-bold text-primary-dark dark:text-text leading-snug line-clamp-2 break-words ${
+        isVertical
+          ? 'text-[15px] sm:text-lg min-h-[2.6rem] sm:min-h-[3.1rem]'
+          : 'text-base sm:text-xl min-h-[2.75rem] sm:min-h-[3.5rem]'
+      }`}>
         {item.title}
       </h3>
 
       {item.aiExplanation && (
-        <div className="flex items-start gap-1.5 bg-accent-light/60 dark:bg-accent/10 rounded-lg px-2 py-1.5 sm:px-2.5 sm:py-2 border-l-2 border-accent min-w-0">
-          <Sparkles className="w-3.5 h-3.5 text-accent-dark dark:text-accent shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-xs sm:text-sm text-text leading-snug line-clamp-3 break-words min-w-0">
-            {item.aiExplanation}
-          </p>
-        </div>
+        <SiraAnalysisCard explanation={item.aiExplanation} size="compact" />
       )}
 
       {item.abstract && (
@@ -126,6 +203,38 @@ export const RecommendationCard = ({
         <span aria-hidden="true" className="shrink-0">·</span>
         <span className="shrink-0">{item.year}</span>
       </div>
+    </div>
+  );
+
+  // Vertical: cover -> [optional access strip] -> content
+  // The strip is a STRUCTURAL row (not absolute), so its background sits on
+  // bg-surface — translucent dark-mode tokens stay readable, no image bleeding
+  // through, no "floating" feel. Cover only carries its own border when the
+  // strip is absent (otherwise the strip provides the separator).
+  const verticalLayout = (
+    <>
+      <div
+        className={`h-40 sm:h-44 overflow-hidden bg-surface-subtle flex items-center justify-center ${
+          hasAccessInfo ? '' : 'border-b border-border'
+        }`}
+      >
+        {cover}
+      </div>
+      <AccessStrip isOpenAccess={item.isOpenAccess} position="middle" />
+      <div className="p-3.5 sm:p-4 flex-1 flex flex-col min-w-0">{content}</div>
+    </>
+  );
+
+  // Horizontal: thumbnail + content row. The thumbnail is a self-contained
+  // rounded frame that owns its border/shadow and clips the strip flush to
+  // its bottom edge — the strip belongs to the thumbnail, not to the card.
+  const horizontalLayout = (
+    <div className="flex gap-3 sm:gap-4 min-w-0">
+      <div className="shrink-0 self-start w-28 sm:w-40 rounded-lg overflow-hidden border border-border shadow-sm bg-surface-subtle">
+        {cover}
+        <AccessStrip isOpenAccess={item.isOpenAccess} position="bottom" />
+      </div>
+      {content}
     </div>
   );
 
@@ -146,19 +255,7 @@ export const RecommendationCard = ({
         isVertical ? `flex flex-col ${stretch ? 'h-full' : ''}` : 'p-3.5 sm:p-5'
       }`}
     >
-      {isVertical ? (
-        <>
-          <div className="h-40 sm:h-44 overflow-hidden border-b border-border bg-surface-subtle flex items-center justify-center">
-            {cover}
-          </div>
-          <div className="p-3.5 sm:p-4 flex-1 flex flex-col min-w-0">{content}</div>
-        </>
-      ) : (
-        <div className="flex gap-3 sm:gap-4 min-w-0">
-          <div className="shrink-0 self-start w-16 sm:w-24">{cover}</div>
-          {content}
-        </div>
-      )}
+      {isVertical ? verticalLayout : horizontalLayout}
     </div>
   );
 };

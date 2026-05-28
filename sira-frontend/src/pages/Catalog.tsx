@@ -2,6 +2,7 @@ import { Library } from 'lucide-react';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
 import { CatalogCategoryFilter } from '../components/CatalogCategoryFilter';
+import { SearchFilters as SearchFiltersBar } from '../components/SearchFilters';
 import { CatalogGrid } from '../components/CatalogGrid';
 import { PageHeader } from '../components/ui/PageHeader';
 import { ViewModeToggle } from '../components/ui/ViewModeToggle';
@@ -19,6 +20,7 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProp
   const {
     searchQuery, setSearchQuery, submitSearch, clearSearch,
     category, setCategory,
+    filters, setFilters,
     page, setPage,
     items, loading, error,
     total, totalPages,
@@ -47,6 +49,9 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProp
           onClear={clearSearch}
         />
         <CatalogCategoryFilter categories={topics} selected={category} onSelect={setCategory} />
+        <div className="border-t border-border pt-3">
+          <SearchFiltersBar filters={filters} onChange={setFilters} />
+        </div>
       </div>
 
       {!loading && (isSearchMode || total > 0) && (

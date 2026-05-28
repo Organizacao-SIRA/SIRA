@@ -158,11 +158,12 @@ const CATALOG_PAGE_SIZE = 10;
 export const searchCatalogItems = async (
   query: string,
   page = 0,
+  filters?: SearchFilters,
   signal?: AbortSignal,
 ): Promise<{ items: CatalogItem[]; total: number }> => {
   if (!query || query.trim().length < 2) return { items: [], total: 0 };
   const response = await fetchWithAuth(
-    `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query.trim())}&page=${page}&limit=${CATALOG_PAGE_SIZE}`,
+    `${API_BASE_URL}/materials/search?q=${encodeURIComponent(query.trim())}&page=${page}&limit=${CATALOG_PAGE_SIZE}${buildFilterParams(filters)}`,
     { signal },
   );
   if (!response.ok) {

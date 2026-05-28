@@ -22,6 +22,7 @@ model User {
   materialLevels        String[]
   wantsBooks            Boolean              @default(true)
   wantsArticles         Boolean              @default(true)
+  wantsOpenAccessOnly   Boolean              @default(false)
   interests             String[]
   academicGoal          String?
   avatarUrl             String?
@@ -62,6 +63,7 @@ model Material {
   abstract        String?
   image           String?
   url             String?
+  isOpenAccess    Boolean    @default(false)
   thematicArea    String?
   doi             String?
   isbn            String?

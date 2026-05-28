@@ -25,6 +25,7 @@ type RecommendationUser = {
   materialLevels: string[];
   wantsBooks: boolean;
   wantsArticles: boolean;
+  wantsOpenAccessOnly: boolean;
   interests: string[];
   academicGoal: string | null;
   onboardingCompletedAt: Date | null;
@@ -92,6 +93,7 @@ export class RecommendationsService {
           materialLevels: true,
           wantsBooks: true,
           wantsArticles: true,
+          wantsOpenAccessOnly: true,
           interests: true,
           academicGoal: true,
           onboardingCompletedAt: true,
@@ -128,9 +130,13 @@ export class RecommendationsService {
 
     const uniqueQueries = [...new Set(queries)].slice(0, 4);
 
-    const searchFilters = user.languages?.length
-      ? { types: [], area: null, openAccessOnly: false, yearFrom: null, languages: user.languages }
-      : undefined;
+    const searchFilters = {
+      types: [],
+      area: null,
+      openAccessOnly: user.wantsOpenAccessOnly,
+      yearFrom: null,
+      languages: user.languages?.length ? user.languages : [],
+    };
 
     const candidatesArrays = await Promise.all(
       uniqueQueries.map(query => this.materialsService.search(query, undefined, 0, 4, searchFilters).then(r => r.items)),
