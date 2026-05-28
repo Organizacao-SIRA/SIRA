@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Star, Unlock } from 'lucide-react';
+import { ExternalLink, Lock, Star, Unlock } from 'lucide-react';
 import type { CatalogItem } from '../../types';
 import { MaterialPlaceholder } from '../ui/MaterialPlaceholder';
 import { CitationActionButton } from './CitationActionButton';

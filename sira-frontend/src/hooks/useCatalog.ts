@@ -1,12 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchCatalogItems, TOPIC_SEARCH_QUERIES, getPreferenceOptions } from '../services/api';
-import type { CatalogItem, PreferenceTopic } from '../types';
+import type { CatalogItem, PreferenceTopic, SearchFilters } from '../types';
 
 const PAGE_SIZE = 10;
+const DEFAULT_FILTERS: SearchFilters = { types: [], area: null, openAccessOnly: false, yearFrom: null };
 
 const CACHE_VERSION = 'v4';
-const buildCacheKey = (categoryId: string, page: number) =>
-  `@sira:catalog:${CACHE_VERSION}:${categoryId}:p${page}`;
+const buildFilterKey = (filters: SearchFilters) =>
+  [
+    filters.types.join(',') || 'all-types',
+    filters.area ?? 'all-areas',
+    filters.openAccessOnly ? 'oa' : 'all-access',
+    filters.yearFrom ?? 'all-years',
+  ].join(':');
+
+const buildCacheKey = (categoryId: string, page: number, filters: SearchFilters = DEFAULT_FILTERS) =>
+  `@sira:catalog:${CACHE_VERSION}:${categoryId}:p${page}:${buildFilterKey(filters)}`;
 
 const readInitialCache = (): { items: CatalogItem[]; total: number; loading: boolean } => {
   try {
@@ -22,6 +31,7 @@ const readInitialCache = (): { items: CatalogItem[]; total: number; loading: boo
 export const useCatalog = () => {
   const [searchQuery, setSearchQueryState] = useState('');
   const [category, setCategoryState] = useState('all');
+  const [filters, setFiltersState] = useState<SearchFilters>(DEFAULT_FILTERS);
   const [page, setPageState] = useState(0);
   const [{ items: initialItems, total: initialTotal, loading: initialLoading }] = useState(readInitialCache);
   const [items, setItems] = useState<CatalogItem[]>(initialItems);
@@ -36,11 +46,15 @@ export const useCatalog = () => {
   const abortRef = useRef<AbortController | null>(null);
   // Refs to avoid stale closures in imperative handlers
   const searchRef = useRef(searchQuery);
+  const submittedQueryRef = useRef(submittedQuery);
   const categoryRef = useRef(category);
+  const filtersRef = useRef(filters);
   searchRef.current = searchQuery;
+  submittedQueryRef.current = submittedQuery;
   categoryRef.current = category;
+  filtersRef.current = filters;
 
-  const doFetch = useCallback(async (query: string, catId: string, pg: number) => {
+  const doFetch = useCallback(async (query: string, catId: string, pg: number, activeFilters: SearchFilters) => {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
@@ -50,7 +64,7 @@ export const useCatalog = () => {
       : (TOPIC_SEARCH_QUERIES[catId] ?? 'science research');
 
     if (!isSearch) {
-      const cacheKey = buildCacheKey(catId, pg);
+      const cacheKey = buildCacheKey(catId, pg, activeFilters);
       const hit = sessionStorage.getItem(cacheKey);
       if (hit) {
         try {
@@ -68,11 +82,11 @@ export const useCatalog = () => {
     setError(null);
 
     try {
-      const result = await searchCatalogItems(effectiveQuery, pg, abortRef.current.signal);
+      const result = await searchCatalogItems(effectiveQuery, pg, activeFilters, abortRef.current.signal);
       setItems(result.items);
       setTotal(result.total);
       if (!isSearch) {
-        sessionStorage.setItem(buildCacheKey(catId, pg), JSON.stringify(result));
+        sessionStorage.setItem(buildCacheKey(catId, pg, activeFilters), JSON.stringify(result));
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return;
@@ -90,7 +104,7 @@ export const useCatalog = () => {
       .catch(() => {});
     // Se o cache já populou o estado inicial, não busca novamente
     if (!initialLoading) return;
-    doFetch('', 'all', 0);
+    doFetch('', 'all', 0, DEFAULT_FILTERS);
   }, [doFetch]);
 
   // Apenas atualiza o texto — não dispara busca
@@ -103,7 +117,7 @@ export const useCatalog = () => {
     const q = searchRef.current.trim();
     setPageState(0);
     setSubmittedQuery(q);
-    doFetch(q, categoryRef.current, 0);
+    doFetch(q, categoryRef.current, 0, filtersRef.current);
   };
 
   // Limpa a busca e volta ao modo browse da categoria atual
@@ -111,7 +125,7 @@ export const useCatalog = () => {
     setSearchQueryState('');
     setSubmittedQuery('');
     setPageState(0);
-    doFetch('', categoryRef.current, 0);
+    doFetch('', categoryRef.current, 0, filtersRef.current);
   };
 
   const setCategory = (catId: string) => {
@@ -119,15 +133,21 @@ export const useCatalog = () => {
     setPageState(0);
     setSearchQueryState('');
     setSubmittedQuery('');
-    doFetch('', catId, 0);
+    doFetch('', catId, 0, filtersRef.current);
+  };
+
+  const setFilters = (nextFilters: SearchFilters) => {
+    setFiltersState(nextFilters);
+    setPageState(0);
+    doFetch(submittedQueryRef.current, categoryRef.current, 0, nextFilters);
   };
 
   const setPage = (pg: number) => {
     setPageState(pg);
-    doFetch(searchRef.current, categoryRef.current, pg);
+    doFetch(submittedQueryRef.current, categoryRef.current, pg, filtersRef.current);
   };
 
-  const refetch = () => doFetch(searchRef.current, categoryRef.current, page);
+  const refetch = () => doFetch(submittedQueryRef.current, categoryRef.current, page, filtersRef.current);
 
   return {
     searchQuery,
@@ -136,6 +156,8 @@ export const useCatalog = () => {
     clearSearch,
     category,
     setCategory,
+    filters,
+    setFilters,
     page,
     setPage,
     items,
