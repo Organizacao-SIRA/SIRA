@@ -31,6 +31,7 @@ export type UserProfile = {
   materialLevels: string[];
   wantsBooks: boolean;
   wantsArticles: boolean;
+  wantsOpenAccessOnly: boolean;
   interests: string[];
   academicGoal: string | null;
   avatarUrl: string | null;
@@ -62,6 +63,7 @@ export type ProfileData = {
   materialLevels: string[];
   wantsBooks: boolean;
   wantsArticles: boolean;
+  wantsOpenAccessOnly: boolean;
   interests: string[];
   academicGoal: string;
   avatarUrl: string | null;
@@ -88,6 +90,7 @@ export type CatalogItem = {
   abstract?: string;
   image?: string | null;
   url?: string;
+  isOpenAccess?: boolean;
   thematicArea?: string;
   doi?: string;
   isbn?: string;

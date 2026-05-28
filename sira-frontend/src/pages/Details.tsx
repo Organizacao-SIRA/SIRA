@@ -2,7 +2,7 @@ import type { CatalogItem } from '../types';
 import { ContentBreadcrumb } from '../components/details/ContentBreadcrumb';
 import { ContentHero } from '../components/details/ContentHero';
 import { AcademicSummarySection } from '../components/details/AcademicSummarySection';
-import { SiraAnalysisCard } from '../components/details/SiraAnalysisCard';
+import { SiraAnalysisCard } from '../components/ui/SiraAnalysisCard';
 import { ContentActionPanel } from '../components/details/ContentActionPanel';
 import { ContentNotFoundState } from '../components/details/ContentNotFoundState';
 
@@ -46,6 +46,7 @@ export const Details = ({
             year={item.year}
             source={item.source}
             provider={item.provider}
+            isOpenAccess={item.isOpenAccess}
           />
 
           {item.aiExplanation && (

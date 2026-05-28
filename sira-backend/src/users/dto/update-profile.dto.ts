@@ -47,6 +47,10 @@ export class UpdateProfileDto {
   wantsArticles?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  wantsOpenAccessOnly?: boolean;
+
+  @IsOptional()
   @IsArray()
   @IsIn(PREFERENCE_TOPIC_IDS, { each: true })
   interests?: string[];

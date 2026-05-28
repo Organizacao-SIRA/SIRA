@@ -20,7 +20,7 @@ export const MaterialPlaceholder = ({
       aria-label={isBook ? 'Capa indisponível' : 'Imagem indisponível'}
       className={`flex items-center justify-center rounded-lg border ${
         isBook
-          ? 'bg-primary-soft border-primary/30 text-primary'
+          ? 'bg-primary-soft border-primary/30 text-primary dark:text-info-strong'
           : 'bg-info-soft border-info-border text-info-strong'
       } ${className}`}
     >
