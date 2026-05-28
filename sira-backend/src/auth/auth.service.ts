@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Resend } from 'resend';
+import * as Brevo from '@getbrevo/brevo';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   scrypt as _scrypt,
@@ -27,12 +27,18 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  private readonly resend = new Resend(process.env.RESEND_API_KEY);
+  private readonly brevoClient: Brevo.TransactionalEmailsApi;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    this.brevoClient = new Brevo.TransactionalEmailsApi();
+    this.brevoClient.setApiKey(
+      Brevo.TransactionalEmailsApiApiKeys.apiKey,
+      process.env.BREVO_API_KEY || '',
+    );
+  }
 
   // ── Hashing helpers ─────────────────────────────────────────────
 
@@ -165,12 +171,16 @@ export class AuthService {
         year: new Date().getFullYear(),
       });
 
-      await this.resend.emails.send({
-        from: process.env.MAIL_FROM || 'SIRA+ <onboarding@resend.dev>',
-        to: user.email,
-        subject: 'SIRA+ — Recuperação de senha',
-        html,
-      });
+      const sendEmail = new Brevo.SendSmtpEmail();
+      sendEmail.subject = 'SIRA+ — Recuperação de senha';
+      sendEmail.htmlContent = html;
+      sendEmail.sender = {
+        name: 'SIRA+',
+        email: process.env.BREVO_SENDER_EMAIL || 'noreply@example.com',
+      };
+      sendEmail.to = [{ email: user.email, name: user.name || 'Usuário' }];
+
+      await this.brevoClient.sendTransacEmail(sendEmail);
       this.logger.log(`[MAIL] Password reset email sent to ${user.email}`);
     } catch (mailError) {
       this.logger.error(`[MAIL] Failed to send reset email: ${mailError}`);
