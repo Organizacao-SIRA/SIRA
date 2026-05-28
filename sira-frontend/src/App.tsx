@@ -71,6 +71,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const [resetToken, setResetToken] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -174,12 +175,7 @@ export default function App() {
         hasCompletedOnboarding: user.hasCompletedOnboarding ?? prev.hasCompletedOnboarding,
       }));
 
-      // Busca dados completos do perfil
-      setIsProfileLoading(true);
-      Promise.all([loadFavoriteIds(), loadProfile()])
-        .finally(() => {
-          setIsProfileLoading(false);
-        });
+      loadSessionData();
     } else if (!isAuthenticated) {
       setFavoriteIds(new Set());
       setProfileData({
@@ -191,6 +187,7 @@ export default function App() {
       });
       setIsProfileLoading(false);
       setIsProfileLoaded(false);
+      setProfileError(null);
       // Estado de busca pertence à sessão do usuário — limpa ao deslogar
       setSearchQuery('');
       setResults([]);
@@ -249,9 +246,13 @@ export default function App() {
         onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
       setIsProfileLoaded(true);
+      setProfileError(null);
       if (data.avatarUrl !== undefined) updateUser({ avatarUrl: data.avatarUrl });
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
+      const message = error instanceof Error ? error.message : 'Erro ao carregar perfil';
+      setIsProfileLoaded(false);
+      setProfileError(message);
     }
   };
 
@@ -262,6 +263,15 @@ export default function App() {
     } catch (error) {
       console.error('Erro ao carregar favoritos:', error);
     }
+  };
+
+  const loadSessionData = () => {
+    setIsProfileLoading(true);
+    setProfileError(null);
+    Promise.all([loadFavoriteIds(), loadProfile()])
+      .finally(() => {
+        setIsProfileLoading(false);
+      });
   };
 
   const handleSearch = async (e: any) => {
@@ -471,7 +481,13 @@ export default function App() {
             <Favorites toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
           )}
           {currentScreen === 'profile' && (
-            <Profile profileData={profileData} setProfileData={setProfileData} isLoading={isProfileLoading || !isProfileLoaded} />
+            <Profile
+              profileData={profileData}
+              setProfileData={setProfileData}
+              isLoading={isProfileLoading}
+              loadError={profileError}
+              onRetryLoad={loadSessionData}
+            />
           )}
           {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
           {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}

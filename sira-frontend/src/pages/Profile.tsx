@@ -5,8 +5,9 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { Spinner } from '../components/ui/Spinner';
+import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Skeleton } from '../components/ui/Skeleton';
 import { ProfileHeaderCard } from '../components/profile/ProfileHeaderCard';
 import { PersonalInfoCard } from '../components/profile/PersonalInfoCard';
 import { AcademicProfileCard } from '../components/profile/AcademicProfileCard';
@@ -19,6 +20,8 @@ interface ProfileProps {
   profileData: ProfileData;
   setProfileData: Dispatch<SetStateAction<ProfileData>>;
   isLoading?: boolean;
+  loadError?: string | null;
+  onRetryLoad?: () => void;
 }
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
@@ -33,7 +36,64 @@ const DEFAULT_TOPICS: PreferenceTopic[] = [
   { id: 'soc', label: 'Sociologia' },
 ];
 
-export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps) => {
+const ProfileSkeleton = () => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
+    <PageHeader
+      icon={Settings}
+      title="Meu Perfil"
+      subtitle="Gerencie suas informações e preferências."
+    />
+
+    <div className="space-y-6">
+      <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+        <Skeleton className="w-24 h-24 rounded-full shrink-0" />
+        <div className="flex-1 min-w-0 w-full space-y-3">
+          <Skeleton className="h-7 w-56 max-w-full mx-auto sm:mx-0" />
+          <Skeleton className="h-4 w-72 max-w-full mx-auto sm:mx-0" />
+        </div>
+        <Skeleton className="h-9 w-44 rounded-full shrink-0" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div key={index} className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-surface-muted/30 flex items-center gap-2.5">
+              <Skeleton className="w-9 h-9 rounded-md" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <div className="p-6 space-y-4">
+              {Array.from({ length: index === 0 ? 2 : 4 }).map((__, row) => (
+                <div key={row} className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 sm:gap-3 sm:items-center border-b border-border pb-3 last:border-b-0 last:pb-0">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border bg-surface-muted/30 flex items-center gap-2.5">
+          <Skeleton className="w-9 h-9 rounded-md" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="space-y-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-5 w-36" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export const Profile = ({ profileData, setProfileData, isLoading, loadError, onRetryLoad }: ProfileProps) => {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(profileData || {});
@@ -53,10 +113,23 @@ export const Profile = ({ profileData, setProfileData, isLoading }: ProfileProps
   }, [isEditing, preferenceOptions]);
 
   if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  if (loadError) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <Spinner size="lg" />
-        <p className="text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
+        <PageHeader
+          icon={Settings}
+          title="Meu Perfil"
+          subtitle="Gerencie suas informações e preferências."
+        />
+        <ErrorState
+          title="Não foi possível carregar o perfil"
+          message={loadError}
+          onRetry={onRetryLoad}
+          className="max-w-2xl mx-auto"
+        />
       </div>
     );
   }

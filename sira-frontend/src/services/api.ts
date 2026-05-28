@@ -8,26 +8,31 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
-let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshAuthSession = (): Promise<boolean> => {
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+      .then(response => response.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+};
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const response = await fetch(url, { ...options, credentials: 'include' });
 
-  if (response.status === 401 && !isRefreshing) {
-    isRefreshing = true;
-    try {
-      const refreshed = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+  if (response.status === 401) {
+    const refreshed = await refreshAuthSession();
+    if (refreshed) return fetch(url, { ...options, credentials: 'include' });
 
-      if (refreshed.ok) {
-        isRefreshing = false;
-        return fetch(url, { ...options, credentials: 'include' });
-      }
-    } catch { /* ignore */ }
-
-    isRefreshing = false;
     window.dispatchEvent(new CustomEvent('sira:auth:expired'));
     throw new Error('Sessão expirada. Faça login novamente.');
   }
