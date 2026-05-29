@@ -8,26 +8,58 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+// ── Token storage ────────────────────────────────────────────────
+const TOKEN_KEY = 'sira_access_token';
+const REFRESH_KEY = 'sira_refresh_token';
+
+const saveTokens = (accessToken: string, refreshToken?: string) => {
+  localStorage.setItem(TOKEN_KEY, accessToken);
+  if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken);
+};
+
+export const clearTokens = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+};
+
+const getAccessToken = () => localStorage.getItem(TOKEN_KEY);
+const getRefreshToken = () => localStorage.getItem(REFRESH_KEY);
+
+// ── Fetch with auth ──────────────────────────────────────────────
 let isRefreshing = false;
 
+const buildHeaders = (options: RequestInit): Record<string, string> => {
+  const token = getAccessToken();
+  return {
+    ...(options.headers as Record<string, string> ?? {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
 const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const response = await fetch(url, { ...options, credentials: 'include' });
+  const response = await fetch(url, { ...options, headers: buildHeaders(options), credentials: 'include' });
 
   if (response.status === 401 && !isRefreshing) {
     isRefreshing = true;
     try {
+      const refreshToken = getRefreshToken();
       const refreshed = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: refreshToken ? JSON.stringify({ refreshToken }) : undefined,
       });
 
       if (refreshed.ok) {
+        const data = await refreshed.json();
+        if (data.accessToken) saveTokens(data.accessToken, data.refreshToken);
         isRefreshing = false;
-        return fetch(url, { ...options, credentials: 'include' });
+        return fetch(url, { ...options, headers: buildHeaders(options), credentials: 'include' });
       }
     } catch { /* ignore */ }
 
     isRefreshing = false;
+    clearTokens();
     window.dispatchEvent(new CustomEvent('sira:auth:expired'));
     throw new Error('Sessão expirada. Faça login novamente.');
   }
@@ -48,7 +80,9 @@ export const loginUser = async (data: any) => {
     const error = await response.json();
     throw new Error(error.message || 'Erro ao realizar login');
   }
-  return response.json();
+  const result = await response.json();
+  if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
+  return result;
 };
 
 export const registerUser = async (data: any) => {
@@ -62,7 +96,9 @@ export const registerUser = async (data: any) => {
     const error = await response.json();
     throw new Error(Array.isArray(error.message) ? error.message.join('. ') : error.message || 'Erro ao realizar cadastro');
   }
-  return response.json();
+  const result = await response.json();
+  if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
+  return result;
 };
 
 // --- Password Recovery ---

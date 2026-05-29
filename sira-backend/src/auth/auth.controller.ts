@@ -61,7 +61,7 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken, user } = await this.authService.register(dto);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { user };
+    return { user, accessToken, refreshToken };
   }
 
   @Post('login')
@@ -74,7 +74,7 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken, user } = await this.authService.login(dto);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { user };
+    return { user, accessToken, refreshToken };
   }
 
   @Post('refresh')
@@ -83,15 +83,16 @@ export class AuthController {
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+    @Body('refreshToken') bodyToken?: string,
   ) {
-    const token = req.cookies?.[REFRESH_COOKIE];
+    const token = req.cookies?.[REFRESH_COOKIE] ?? bodyToken;
     if (!token) {
       this.clearAuthCookies(res);
       throw new UnauthorizedException('Refresh token não encontrado');
     }
     const { accessToken, refreshToken } = await this.authService.refreshAccessToken(token);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { ok: true };
+    return { ok: true, accessToken, refreshToken };
   }
 
   @Post('logout')
