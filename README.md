@@ -78,7 +78,10 @@ Edite `sira-backend/.env` com suas chaves. O `DATABASE_URL` já aponta para `loc
 ```env
 ANTHROPIC_API_KEY="sua_chave_aqui"
 JWT_SECRET="uma_string_secreta_qualquer"
+AVATAR_STORAGE_DRIVER="local"
 ```
+
+Para avatares, use `AVATAR_STORAGE_DRIVER="local"` no desenvolvimento. Em produção, use `AVATAR_STORAGE_DRIVER="cloudinary"` e configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` e `CLOUDINARY_API_SECRET`.
 
 **2. Suba apenas o banco de dados**
 
