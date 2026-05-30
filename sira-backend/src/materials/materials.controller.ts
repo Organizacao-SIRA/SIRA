@@ -48,12 +48,16 @@ export class MaterialsController {
   @ApiQuery({ name: 'area', required: false })
   @ApiQuery({ name: 'openAccessOnly', required: false })
   @ApiQuery({ name: 'yearFrom', required: false })
+  @ApiQuery({ name: 'excludeIds', required: false, description: 'IDs de materiais já exibidos, separados por vírgula' })
+  @ApiQuery({ name: 'diversify', required: false, description: 'Quando true, busca uma rodada alternativa de sugestões' })
   async chat(
     @Query('prompt') prompt: string,
     @Query('types') types?: string,
     @Query('area') area?: string,
     @Query('openAccessOnly') openAccessOnly?: string,
     @Query('yearFrom') yearFrom?: string,
+    @Query('excludeIds') excludeIds?: string,
+    @Query('diversify') diversify?: string,
     @CurrentUser() user?: JwtPayload,
   ): Promise<ChatSearchResponseDto> {
     const filters: SearchFilters = {
@@ -62,6 +66,12 @@ export class MaterialsController {
       openAccessOnly: openAccessOnly === 'true',
       yearFrom: yearFrom ? Number(yearFrom) : null,
     };
-    return this.materialsService.chatSearch(prompt, user?.sub, filters);
+    return this.materialsService.chatSearch(prompt, user?.sub, {
+      filters,
+      excludeIds: excludeIds
+        ? excludeIds.split(',').map(id => id.trim()).filter(Boolean).slice(0, 80)
+        : [],
+      diversify: diversify === 'true',
+    });
   }
 }

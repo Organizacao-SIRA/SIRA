@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Sparkles, ArrowLeft } from 'lucide-react';
 import { UserMessageBubble } from '../components/UserMessageBubble';
 import { AiMessageBubble } from '../components/AiMessageBubble';
 import { ChatLoadingSkeleton } from '../components/ChatLoadingSkeleton';
 import { MaterialsSection } from '../components/MaterialsSection';
+import { RegenerateResultsButton } from '../components/RegenerateResultsButton';
 import { PageFooter } from '../components/ui/PageFooter';
 import type { AuthUser } from '../types';
 
@@ -18,13 +19,17 @@ interface RecommendationsProps {
   toggleFavorite: (item: any) => void;
   isFavorite: (id: any) => boolean;
   isLoading?: boolean;
+  isRegenerating?: boolean;
+  onRegenerate?: () => void;
+  isSidebarOpen?: boolean;
   user?: AuthUser | null;
 }
 
 export const Recommendations = ({
   results, aiMessage, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
-  viewDetails, toggleFavorite, isFavorite, isLoading, user,
+  viewDetails, toggleFavorite, isFavorite, isLoading, isRegenerating, onRegenerate, isSidebarOpen, user,
 }: RecommendationsProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClearSearch = () => {
     setSearchQuery('');
@@ -32,9 +37,9 @@ export const Recommendations = ({
   };
 
   return (
-    <div className="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn flex flex-col min-h-[calc(100vh-68px)] relative">
+    <div ref={containerRef} className="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-0 animate-fadeIn flex flex-col min-h-[calc(100vh-68px)] relative">
 
-      <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3 border-b border-border pb-4">
+      <div className="mb-4 sm:mb-5 flex items-center justify-between gap-3 border-b border-border pb-3">
         <button
           type="button"
           onClick={handleClearSearch}
@@ -51,7 +56,7 @@ export const Recommendations = ({
         </div>
       </div>
 
-      <div className="flex-1 space-y-8 sm:space-y-10 pb-32 sm:pb-40">
+      <div className="flex-1 space-y-4 sm:space-y-5 pb-32 sm:pb-40">
         <UserMessageBubble message={searchQuery} user={user} />
 
         {isLoading ? (
@@ -61,6 +66,7 @@ export const Recommendations = ({
             <MaterialsSection
               results={results}
               onRetry={() => handleSearch({ preventDefault: () => {} } as React.FormEvent)}
+              isRegenerating={isRegenerating}
               viewDetails={viewDetails}
               toggleFavorite={toggleFavorite}
               isFavorite={isFavorite}
@@ -73,6 +79,15 @@ export const Recommendations = ({
         text="Resultados gerados por IA. Podem ocorrer erros, use o seu julgamento acadêmico ao selecionar os materiais."
         variant="sticky"
       />
+
+      {results.length > 0 && onRegenerate && (
+        <RegenerateResultsButton
+          anchorRef={containerRef}
+          isLoading={isRegenerating}
+          isSidebarOpen={isSidebarOpen}
+          onClick={onRegenerate}
+        />
+      )}
     </div>
   );
 };

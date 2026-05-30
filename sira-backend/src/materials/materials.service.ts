@@ -8,6 +8,12 @@ export interface SearchFilters {
   languages?: string[];
 }
 
+export interface ChatSearchOptions {
+  filters?: SearchFilters;
+  excludeIds?: string[];
+  diversify?: boolean;
+}
+
 const AREA_GB_SUBJECT: Record<string, string> = {
   ia: 'artificial intelligence',
   cd: 'data science',
@@ -158,8 +164,10 @@ export class MaterialsService {
     return { items: pageItems.sort((a, b) => b.relevance - a.relevance), total };
   }
 
-  async chatSearch(prompt: string, userId?: string, filters?: SearchFilters): Promise<ChatSearchResponseDto> {
+  async chatSearch(prompt: string, userId?: string, options: ChatSearchOptions = {}): Promise<ChatSearchResponseDto> {
+    const { filters, excludeIds = [], diversify = false } = options;
     this.logger.log(`Iniciando chatSearch para: "${prompt}"`);
+    const excluded = new Set(excludeIds.filter(Boolean));
 
     const user = userId ? await this.prisma.user.findUnique({
       where: { id: userId },
@@ -193,7 +201,17 @@ export class MaterialsService {
     let queries: string[] = [];
     try {
       const rawKeywords = await this.ai.complete({
-        system: `Você é um especialista em pesquisa bibliográfica acadêmica.
+        system: diversify ? `Você é um especialista em pesquisa bibliográfica acadêmica.
+            Perfil do usuário: ${userProfileText}
+            Sua tarefa: extrair 4 a 6 termos de busca EM INGLÊS para encontrar materiais alternativos ao pedido.
+            Regras:
+            - Cada termo deve ter 1 a 4 palavras
+            - Use inglês, pois as APIs retornam mais resultados em inglês
+            - Cubra subtemas diferentes, abordagens, métodos ou aplicações relacionadas ao pedido principal
+            - Evite termos genéricos demais e evite repetir o termo principal sem complemento
+            - Retorne APENAS os termos separados por vírgula, sem explicações, sem pontuação extra
+            Exemplo de resposta: "requirements engineering, software architecture, agile software development, software testing"` :
+          `Você é um especialista em pesquisa bibliográfica acadêmica.
             Perfil do usuário: ${userProfileText}
             Sua tarefa: extrair 2 a 3 termos de busca EM INGLÊS para usar nas APIs Google Books e Semantic Scholar.
             Regras:
@@ -203,13 +221,14 @@ export class MaterialsService {
             - Retorne APENAS os termos separados por vírgula, sem explicações, sem pontuação extra
             Exemplo de resposta: "data mining, machine learning, pattern recognition"`,
         user: prompt,
-        maxTokens: 100,
+        maxTokens: diversify ? 160 : 100,
       });
       queries = rawKeywords.split(',').map(q => q.trim()).filter(q => q.length > 0 && q.length < 60);
     } catch (error) {
       this.logger.error(`Erro ao extrair keywords via Claude: ${error.message}`);
       queries = [prompt.trim()];
     }
+    queries = [...new Set(queries)].slice(0, diversify ? 6 : 3);
     this.logger.log(`Queries extraídas: ${queries.join(', ')}`);
 
     // Fase 2: Coleta de Dados
@@ -231,7 +250,7 @@ export class MaterialsService {
     for (const apiResults of resultsArrays) {
       for (const list of apiResults) {
         for (const item of list) {
-          if (!seen.has(item.id)) {
+          if (!excluded.has(item.id) && !seen.has(item.id)) {
             seen.add(item.id);
             candidates.push(item);
           }
@@ -258,10 +277,11 @@ export class MaterialsService {
     const sources = [...bySource.values()];
     const balanced: MaterialDto[] = [];
     let round = 0;
-    while (balanced.length < 24 && sources.some(s => round < s.length)) {
+    const maxCandidatesForAi = diversify ? 36 : 24;
+    while (balanced.length < maxCandidatesForAi && sources.some(s => round < s.length)) {
       for (const s of sources) {
         if (round < s.length) balanced.push(s[round]);
-        if (balanced.length >= 24) break;
+        if (balanced.length >= maxCandidatesForAi) break;
       }
       round++;
     }
@@ -277,8 +297,9 @@ export class MaterialsService {
             ${userProfileText}
 
             Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
+            ${diversify ? 'Esta é uma nova rodada de sugestões. Priorize materiais úteis que tragam diversidade de subtemas, métodos, autores, anos, tipos e fontes. Evite escolhas óbvias ou muito parecidas entre si.' : ''}
             Retorne um JSON com:
-            - "aiMessage": Uma síntese geral em português (2-3 frases) explicando o conjunto de materiais selecionados.
+            - "aiMessage": Uma síntese geral em português (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
             - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
               - "id": o ID exato do candidato
               - "explanation": UMA frase curta em português explicando por que este material específico é relevante para o pedido e o perfil do usuário.`,

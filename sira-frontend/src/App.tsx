@@ -48,6 +48,10 @@ export default function App() {
     return saved ? parseInt(saved, 10) : 0;
   });
   const [aiMessage, setAiMessage] = useState(() => sessionStorage.getItem('@sira:aiMessage') || '');
+  const [seenResultIds, setSeenResultIds] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem('@sira:seenResultIds');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [searchPage, setSearchPage] = useState(() => {
     const saved = sessionStorage.getItem('@sira:searchPage');
     return saved ? parseInt(saved, 10) : 0;
@@ -69,6 +73,7 @@ export default function App() {
   );
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -91,6 +96,7 @@ export default function App() {
   useEffect(() => { sessionStorage.setItem('@sira:results', JSON.stringify(results)); }, [results]);
   useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
   useEffect(() => { sessionStorage.setItem('@sira:aiMessage', aiMessage); }, [aiMessage]);
+  useEffect(() => { sessionStorage.setItem('@sira:seenResultIds', JSON.stringify(seenResultIds)); }, [seenResultIds]);
   useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
   useEffect(() => {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
@@ -192,6 +198,7 @@ export default function App() {
       setSearchQuery('');
       setResults([]);
       setAiMessage('');
+      setSeenResultIds([]);
       setSearchTotal(0);
       setSearchPage(0);
       setSelectedItem(null);
@@ -285,12 +292,41 @@ export default function App() {
       setResults(items);
       setAiMessage(msg);
       setSearchTotal(items.length);
+      setSeenResultIds(items.map(item => item.id).filter(Boolean));
     } catch {
       setResults([]);
       setAiMessage('Desculpe, tive um erro ao processar sua busca conversacional.');
       setSearchTotal(0);
+      setSeenResultIds([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const regenerateSearchResults = async () => {
+    if (!searchQuery.trim() || isLoading || isRegenerating) return;
+
+    const excludeIds = [
+      ...new Set([
+        ...seenResultIds,
+        ...results.map(item => item.id).filter(Boolean),
+      ]),
+    ];
+
+    setIsRegenerating(true);
+    try {
+      const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery, searchFilters, {
+        excludeIds,
+        diversify: true,
+      });
+      setResults(items);
+      setAiMessage(msg);
+      setSearchTotal(items.length);
+      setSeenResultIds(prev => [...new Set([...prev, ...items.map(item => item.id).filter(Boolean)])]);
+    } catch {
+      setAiMessage('Não consegui gerar novas sugestões agora. Tente novamente em instantes.');
+    } finally {
+      setIsRegenerating(false);
     }
   };
 
@@ -468,6 +504,9 @@ export default function App() {
               toggleFavorite={toggleFavorite}
               isFavorite={isFavorite}
               isLoading={isLoading}
+              isRegenerating={isRegenerating}
+              onRegenerate={regenerateSearchResults}
+              isSidebarOpen={isSidebarOpen}
               user={user}
             />
           )}

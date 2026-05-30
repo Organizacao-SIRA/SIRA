@@ -131,11 +131,31 @@ export const searchAcademicContent = async (query: string, page = 0, filters?: S
   }
 };
 
-export const chatSearchMaterials = async (prompt: string, filters?: SearchFilters): Promise<{ aiMessage: string; results: any[] }> => {
+interface ChatSearchOptions {
+  excludeIds?: string[];
+  diversify?: boolean;
+}
+
+function buildChatSearchParams(prompt: string, filters?: SearchFilters, options?: ChatSearchOptions): string {
+  const params = new URLSearchParams({ prompt });
+  if (filters?.types.length === 1) params.set('types', filters.types[0]);
+  if (filters?.area) params.set('area', filters.area);
+  if (filters?.openAccessOnly) params.set('openAccessOnly', 'true');
+  if (filters?.yearFrom !== null && filters?.yearFrom !== undefined) params.set('yearFrom', String(filters.yearFrom));
+  if (options?.excludeIds?.length) params.set('excludeIds', options.excludeIds.join(','));
+  if (options?.diversify) params.set('diversify', 'true');
+  return params.toString();
+}
+
+export const chatSearchMaterials = async (
+  prompt: string,
+  filters?: SearchFilters,
+  options?: ChatSearchOptions,
+): Promise<{ aiMessage: string; results: any[] }> => {
   if (!prompt || prompt.trim().length < 2) return { aiMessage: '', results: [] };
   try {
     const response = await fetchWithAuth(
-      `${API_BASE_URL}/materials/chat?prompt=${encodeURIComponent(prompt)}${buildFilterParams(filters)}`,
+      `${API_BASE_URL}/materials/chat?${buildChatSearchParams(prompt, filters, options)}`,
     );
     if (!response.ok) throw new Error('Erro na resposta do servidor');
     return await response.json();

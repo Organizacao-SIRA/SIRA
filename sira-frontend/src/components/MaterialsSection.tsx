@@ -1,4 +1,6 @@
 import { RecommendationCard } from './RecommendationCard';
+import { CatalogCardSkeleton } from './CatalogCardSkeleton';
+import { RecommendationCardSkeleton } from './RecommendationCardSkeleton';
 import { Button } from './ui/Button';
 import { ViewModeToggle } from './ui/ViewModeToggle';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -7,12 +9,20 @@ import { useViewMode } from '../hooks/useViewMode';
 interface MaterialsSectionProps {
   results: any[];
   onRetry: () => void;
+  isRegenerating?: boolean;
   viewDetails: (item: any) => void;
   toggleFavorite: (item: any) => void;
   isFavorite: (id: any) => boolean;
 }
 
-export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite, isFavorite }: MaterialsSectionProps) => {
+export const MaterialsSection = ({
+  results,
+  onRetry,
+  isRegenerating = false,
+  viewDetails,
+  toggleFavorite,
+  isFavorite,
+}: MaterialsSectionProps) => {
   const isMobile = useIsMobile();
   const { mode, setMode } = useViewMode('search-results', 'horizontal');
   const variant: 'horizontal' | 'vertical' = isMobile ? 'vertical' : mode;
@@ -20,6 +30,7 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
   const containerClasses = variant === 'vertical'
     ? 'grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4 sm:gap-5'
     : 'space-y-4';
+  const skeletonCount = Math.max(4, Math.min(results.length || 4, 10));
 
   return (
     <div className="space-y-4 min-w-0">
@@ -32,7 +43,7 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
             </span>
           )}
         </div>
-        {!isMobile && results.length > 0 && (
+        {!isMobile && results.length > 0 && !isRegenerating && (
           <ViewModeToggle mode={mode} onChange={setMode} />
         )}
       </div>
@@ -45,6 +56,14 @@ export const MaterialsSection = ({ results, onRetry, viewDetails, toggleFavorite
           <Button onClick={onRetry} variant="secondary" size="sm">
             Tentar novamente
           </Button>
+        </div>
+      ) : isRegenerating ? (
+        <div className={containerClasses} aria-busy="true" aria-label="Carregando novas sugestões">
+          {Array.from({ length: skeletonCount }).map((_, index) => (
+            variant === 'vertical'
+              ? <CatalogCardSkeleton key={index} />
+              : <RecommendationCardSkeleton key={index} />
+          ))}
         </div>
       ) : (
         <div className={containerClasses}>
