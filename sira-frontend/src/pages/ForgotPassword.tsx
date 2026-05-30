@@ -1,7 +1,7 @@
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
-import logoSiraPlus from '../assets/logo sira+.png';
+import { SiraLogo } from '../components/ui/SiraLogo';
 
 interface ForgotPasswordProps {
   setCurrentScreen: (screen: string) => void;
@@ -13,11 +13,7 @@ export const ForgotPassword = ({ setCurrentScreen }: ForgotPasswordProps) => (
       title="Recuperar senha"
       subtitle="Enviaremos um link para redefinir sua senha"
       mobileLogo={
-        <img
-          src={logoSiraPlus}
-          alt="SIRA+"
-          className="max-w-[150px] w-full object-contain"
-        />
+        <SiraLogo size="lg" />
       }
       footer={
         <p className="text-sm text-text-muted">

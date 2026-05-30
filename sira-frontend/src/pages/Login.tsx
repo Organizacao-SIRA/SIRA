@@ -1,7 +1,7 @@
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { LoginForm } from '../components/auth/LoginForm';
-import logoSiraPlus from '../assets/logo sira+.png';
+import { SiraLogo } from '../components/ui/SiraLogo';
 
 interface LoginProps {
   setCurrentScreen: (screen: string) => void;
@@ -13,11 +13,7 @@ export const Login = ({ setCurrentScreen }: LoginProps) => (
       title="Acesse o SIRA+"
       subtitle="Entre com a sua conta para continuar"
       mobileLogo={
-        <img
-          src={logoSiraPlus}
-          alt="SIRA+"
-          className="max-w-[150px] w-full object-contain"
-        />
+        <SiraLogo size="lg" />
       }
       footer={
         <p className="text-sm text-text-muted">

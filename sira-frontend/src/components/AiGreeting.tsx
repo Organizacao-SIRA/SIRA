@@ -1,4 +1,4 @@
-import logoSiraPlus from '../assets/logo sira+.png';
+import { SiraLogo } from './ui/SiraLogo';
 
 interface AiGreetingProps {
   userName?: string;
@@ -9,13 +9,11 @@ export const AiGreeting = ({ userName, compact = false }: AiGreetingProps) => (
   <div className={`flex flex-col items-center animate-fadeIn text-center transition-all duration-200 ${
     compact ? 'gap-2 sm:gap-3 mb-2' : 'gap-4 sm:gap-6 mb-4'
   }`}>
-    <img
-      src={logoSiraPlus}
-      alt="SIRA+"
-      className={`w-full object-contain drop-shadow-[0_8px_32px_rgba(59,130,246,0.35)] transition-all duration-200 dark:brightness-125 dark:drop-shadow-[0_8px_40px_rgba(99,153,255,0.65)] animate-fadeIn ${
-        compact
-          ? 'max-w-[156px] sm:max-w-[210px] md:max-w-[240px]'
-          : 'max-w-[200px] sm:max-w-[260px] md:max-w-[290px] mb-1 sm:mb-2'
+    <SiraLogo
+      size={compact ? 'xl' : 'hero'}
+      tone="brand"
+      className={`drop-shadow-[0_8px_28px_rgba(59,130,246,0.16)] transition-all duration-200 dark:drop-shadow-[0_8px_34px_rgba(99,153,255,0.28)] ${
+        compact ? '' : 'mb-1 sm:mb-2'
       }`}
     />
     <div className={`max-w-2xl transition-all duration-200 ${

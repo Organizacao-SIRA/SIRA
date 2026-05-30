@@ -1,7 +1,7 @@
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { RegisterForm } from '../components/auth/RegisterForm';
-import logoSiraPlus from '../assets/logo sira+.png';
+import { SiraLogo } from '../components/ui/SiraLogo';
 
 interface RegisterProps {
   setCurrentScreen: (screen: string) => void;
@@ -13,11 +13,7 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => (
       title="Criar conta"
       subtitle="Junte-se ao SIRA+ e descubra sua próxima leitura"
       mobileLogo={
-        <img
-          src={logoSiraPlus}
-          alt="SIRA+"
-          className="max-w-[150px] w-full object-contain"
-        />
+        <SiraLogo size="lg" />
       }
       footer={
         <p className="text-sm text-text-muted">

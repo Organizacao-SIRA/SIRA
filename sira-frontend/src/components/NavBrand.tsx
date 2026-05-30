@@ -1,5 +1,6 @@
 import { Menu } from 'lucide-react';
 import { Button } from './ui/Button';
+import { SiraLogo } from './ui/SiraLogo';
 
 interface NavBrandProps {
   showMenuButton: boolean;
@@ -26,9 +27,7 @@ export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick }: NavBrand
       onClick={onLogoClick}
       className="flex items-center min-w-0 group bg-transparent border-none p-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg"
     >
-      <span className="font-bold text-xl sm:text-2xl tracking-tight flex-shrink-0">
-        SIRA<span className="text-accent">+</span>
-      </span>
+      <SiraLogo size="sm" tone="light" className="flex-shrink-0" />
       <span className="ml-3 border-l border-blue-400 pl-3 text-sm hidden lg:block font-light text-blue-100 leading-tight group-hover:text-white transition-colors text-left truncate">
         Sistema Inteligente de<br />Recomendação Acadêmica
       </span>

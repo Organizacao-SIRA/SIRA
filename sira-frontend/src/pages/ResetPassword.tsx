@@ -1,7 +1,7 @@
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { ResetPasswordForm } from '../components/auth/ResetPasswordForm';
-import logoSiraPlus from '../assets/logo sira+.png';
+import { SiraLogo } from '../components/ui/SiraLogo';
 
 interface ResetPasswordProps {
   token: string;
@@ -14,11 +14,7 @@ export const ResetPassword = ({ token, setCurrentScreen }: ResetPasswordProps) =
       title="Criar nova senha"
       subtitle="Defina uma senha segura para sua conta"
       mobileLogo={
-        <img
-          src={logoSiraPlus}
-          alt="SIRA+"
-          className="max-w-[150px] w-full object-contain"
-        />
+        <SiraLogo size="lg" />
       }
       footer={
         <p className="text-sm text-text-muted">

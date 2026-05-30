@@ -1,5 +1,5 @@
 import { Sparkles, Library, MessageSquare } from 'lucide-react';
-import logoSiraPlus from '../../assets/logo sira+.png';
+import { SiraLogo } from '../ui/SiraLogo';
 
 const FEATURES = [
   {
@@ -30,11 +30,7 @@ export const AuthVisualPanel = () => (
 
     <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 xl:p-14 w-full">
       <div className="flex flex-col gap-6">
-        <img
-          src={logoSiraPlus}
-          alt=""
-          className="max-w-[180px] xl:max-w-[200px] w-full object-contain drop-shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
-        />
+        <SiraLogo size="xl" tone="light" />
         <div className="space-y-3 max-w-md">
           <h1 className="text-2xl xl:text-4xl font-extrabold leading-tight tracking-tight">
             Sua jornada acadêmica, <span className="text-accent">potencializada por IA</span>.
