@@ -22,7 +22,7 @@ export const CopyLinkButton = ({ url, doi }: CopyLinkButtonProps) => {
       onClick={handleClick}
       aria-label={copied ? 'Link copiado' : 'Copiar link do material'}
       aria-live="polite"
-      className="w-full py-3 px-4 rounded-xl border-2 border-border-strong bg-surface hover:border-primary hover:bg-primary-soft text-text hover:text-primary font-semibold transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98] cursor-pointer"
+      className="w-full min-h-[52px] px-4 py-3 rounded-xl border-2 border-border-strong bg-surface hover:border-primary hover:bg-primary-soft text-text hover:text-primary font-semibold transition-all flex items-center justify-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98] cursor-pointer"
     >
       {copied ? (
         <>

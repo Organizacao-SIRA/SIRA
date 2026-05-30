@@ -16,19 +16,19 @@ const ContentCoverPreview = ({ item }: { item: CatalogItem }) => {
   const showImage = Boolean(item.image) && !imageError;
 
   return (
-    <div className="flex justify-center pb-1">
+    <div className="flex h-52 items-center justify-center pb-1">
       {showImage ? (
         <img
           src={item.image!}
           alt={`Capa de ${item.title}`}
           loading="lazy"
           onError={() => setImageError(true)}
-          className="w-32 aspect-[2/3] object-contain rounded-lg shadow-md border border-border bg-surface-subtle"
+          className="h-48 w-32 object-contain rounded-lg shadow-md border border-border bg-surface-subtle"
         />
       ) : (
         <MaterialPlaceholder
           type={item.type}
-          className="w-32 aspect-[2/3] shadow-md"
+          className="h-48 w-32 shadow-md"
           iconClassName="w-12 h-12"
         />
       )}
@@ -42,7 +42,7 @@ const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
       <div
         role="status"
         aria-label="Link de acesso indisponível"
-        className="w-full py-3.5 px-4 rounded-xl border border-dashed border-border-strong bg-surface-subtle text-text-muted text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full min-h-[52px] px-4 py-3 rounded-xl border border-dashed border-border-strong bg-surface-subtle text-text-muted text-sm font-medium flex items-center justify-center gap-2 text-center"
       >
         <Lock className="w-4 h-4" aria-hidden="true" />
         <span>Link de acesso indisponível</span>
@@ -57,7 +57,7 @@ const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Acessar material gratuitamente: ${item.title} (abre em nova aba)`}
-        className="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-primary-dark dark:hover:bg-primary text-white font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
+        className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark dark:hover:bg-primary text-white font-bold transition-all flex items-center justify-center gap-2 text-center shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
       >
         <Unlock className="w-5 h-5" aria-hidden="true" />
         <span>Acessar Material</span>
@@ -71,7 +71,7 @@ const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Ver material: ${item.title} — pode exigir assinatura (abre em nova aba)`}
-      className="w-full py-3.5 px-4 rounded-xl bg-warning-soft border border-warning-border text-warning-strong font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-border focus-visible:ring-offset-2 active:scale-[0.98]"
+      className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-warning-soft border border-warning-border text-warning-strong font-bold transition-all flex items-center justify-center gap-2 text-center shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-border focus-visible:ring-offset-2 active:scale-[0.98]"
     >
       <ExternalLink className="w-5 h-5 shrink-0" aria-hidden="true" />
       <span>Ver Material</span>
@@ -91,7 +91,7 @@ const FavoriteDetailsButton = ({
     onClick={onToggleFavorite}
     aria-pressed={isFavorite}
     aria-label={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-    className={`w-full py-3 px-4 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] ${
+    className={`w-full min-h-[52px] px-4 py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] ${
       isFavorite
         ? 'bg-primary border-primary text-white shadow-sm hover:bg-primary-dark hover:border-primary-dark dark:hover:bg-primary dark:hover:border-primary focus-visible:ring-primary'
         : 'bg-surface border-border-strong text-text hover:border-primary hover:text-primary focus-visible:ring-border-strong'
@@ -119,11 +119,11 @@ export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: Conte
   return (
     <aside
       aria-label="Ações do material"
-      className="bg-surface rounded-2xl border border-border shadow-sm p-5 space-y-4"
+      className="bg-surface rounded-2xl border border-border shadow-sm p-5 space-y-4 lg:min-h-[496px]"
     >
       <ContentCoverPreview item={item} />
 
-<div className="space-y-3">
+      <div className="space-y-3">
         <AccessMaterialAction item={item} />
         <FavoriteDetailsButton isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
       </div>
@@ -131,8 +131,12 @@ export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: Conte
       <ShareActionsDivider />
 
       <div className="space-y-3">
-        <CitationActionButton item={item} />
-        <CopyLinkButton url={item.url} doi={item.doi} />
+        <div className="min-h-[52px]">
+          <CitationActionButton item={item} />
+        </div>
+        <div className="min-h-[52px]">
+          <CopyLinkButton url={item.url} doi={item.doi} />
+        </div>
       </div>
     </aside>
   );
