@@ -23,6 +23,13 @@ import { Onboarding } from './pages/Onboarding';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { useAuth } from './contexts/AuthContext';
+import { useScreenScrollRestoration } from './hooks/useScreenScrollRestoration';
+
+const SCREEN_SCROLL_KEYS: Record<string, string> = {
+  results: '@sira:resultsScrollY',
+  catalog: '@sira:catalogScrollY',
+  favorites: '@sira:favoritesScrollY',
+};
 
 export default function App() {
   const { isAuthenticated, user, logout, updateUser } = useAuth();
@@ -90,6 +97,7 @@ export default function App() {
     return sessionStorage.getItem('@sira:resetToken') || '';
   });
   const mainRef = useRef<HTMLElement>(null);
+  const saveScreenScroll = useScreenScrollRestoration(mainRef, currentScreen, SCREEN_SCROLL_KEYS);
 
   // Sincroniza as mudanças de estado com o sessionStorage
   useEffect(() => { sessionStorage.setItem('@sira:currentScreen', currentScreen); }, [currentScreen]);
@@ -121,18 +129,6 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
-
-  // Restaura posição de scroll ao voltar para os resultados
-  useEffect(() => {
-    if (currentScreen === 'results') {
-      const savedY = sessionStorage.getItem('@sira:resultsScrollY');
-      if (savedY && mainRef.current) {
-        requestAnimationFrame(() => {
-          if (mainRef.current) mainRef.current.scrollTop = parseInt(savedY, 10);
-        });
-      }
-    }
-  }, [currentScreen]);
 
   // Integração com History API do browser (habilita o botão voltar do navegador)
   const AUTH_SCREENS = ['login', 'register', 'onboarding', 'forgot-password', 'reset-password'];
@@ -351,9 +347,7 @@ export default function App() {
   };
 
   const viewDetails = (item: any) => {
-    if (mainRef.current) {
-      sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
-    }
+    saveScreenScroll(currentScreen);
     setPreviousScreen(currentScreen);
     setSelectedItem(item);
     setCurrentScreen('details');
@@ -400,6 +394,7 @@ export default function App() {
       if (currentScreen === 'home') return;
       if (currentScreen === 'results') {
         // Dentro da seção de busca: resultados → input
+        saveScreenScroll('results');
         setLastSearchScreen('home');
         setCurrentScreen('home');
         return;
@@ -410,10 +405,8 @@ export default function App() {
       // Saindo da seção de busca → memorizar onde estávamos e salvar scroll
       if (currentScreen === 'home' || currentScreen === 'results') {
         setLastSearchScreen(currentScreen as 'home' | 'results');
-        if (currentScreen === 'results' && mainRef.current) {
-          sessionStorage.setItem('@sira:resultsScrollY', String(mainRef.current.scrollTop));
-        }
       }
+      saveScreenScroll(currentScreen);
       setCurrentScreen(screen);
     }
   };

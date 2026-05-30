@@ -1,11 +1,67 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchCatalogItems, TOPIC_SEARCH_QUERIES, getPreferenceOptions } from '../services/api';
+import { usePersistedState } from './usePersistedState';
+import { createSessionCache } from '../utils/sessionCache';
 import type { CatalogItem, PreferenceTopic, SearchFilters } from '../types';
 
 const PAGE_SIZE = 10;
 const DEFAULT_FILTERS: SearchFilters = { types: [], area: null, openAccessOnly: false, yearFrom: null };
 
-const CACHE_VERSION = 'v4';
+const CATALOG_VERSION = 'v1';
+const CATALOG_STATE_KEY = `@sira:catalog:${CATALOG_VERSION}:state`;
+
+interface CatalogStoredState {
+  searchQuery: string;
+  submittedQuery: string;
+  category: string;
+  filters: SearchFilters;
+  page: number;
+}
+
+interface CatalogSnapshot extends CatalogStoredState {
+  items: CatalogItem[];
+  total: number;
+  loading: boolean;
+}
+
+interface CatalogResult {
+  items: CatalogItem[];
+  total: number;
+}
+
+const DEFAULT_CATALOG_STATE: CatalogStoredState = {
+  searchQuery: '',
+  submittedQuery: '',
+  category: 'all',
+  filters: DEFAULT_FILTERS,
+  page: 0,
+};
+
+const catalogCache = createSessionCache<CatalogResult>({
+  namespace: 'catalog',
+  version: CATALOG_VERSION,
+  ttlMs: 15 * 60 * 1000,
+  maxEntries: 50,
+});
+
+const normalizeFilters = (filters: any): SearchFilters => ({
+  types: Array.isArray(filters?.types) ? filters.types : [],
+  area: typeof filters?.area === 'string' ? filters.area : null,
+  openAccessOnly: Boolean(filters?.openAccessOnly),
+  yearFrom: typeof filters?.yearFrom === 'number' ? filters.yearFrom : null,
+});
+
+const validateCatalogState = (value: unknown): CatalogStoredState => {
+  const parsed = value as Partial<CatalogStoredState>;
+  return {
+    searchQuery: typeof parsed?.searchQuery === 'string' ? parsed.searchQuery : DEFAULT_CATALOG_STATE.searchQuery,
+    submittedQuery: typeof parsed?.submittedQuery === 'string' ? parsed.submittedQuery : DEFAULT_CATALOG_STATE.submittedQuery,
+    category: typeof parsed?.category === 'string' ? parsed.category : DEFAULT_CATALOG_STATE.category,
+    filters: normalizeFilters(parsed?.filters),
+    page: Number.isInteger(parsed?.page) && Number(parsed.page) >= 0 ? Number(parsed.page) : DEFAULT_CATALOG_STATE.page,
+  };
+};
+
 const buildFilterKey = (filters: SearchFilters) =>
   [
     filters.types.join(',') || 'all-types',
@@ -14,34 +70,40 @@ const buildFilterKey = (filters: SearchFilters) =>
     filters.yearFrom ?? 'all-years',
   ].join(':');
 
-const buildCacheKey = (categoryId: string, page: number, filters: SearchFilters = DEFAULT_FILTERS) =>
-  `@sira:catalog:${CACHE_VERSION}:${categoryId}:p${page}:${buildFilterKey(filters)}`;
+const buildResultKey = (query: string, categoryId: string) => {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (normalizedQuery.length >= 2) return `search:${encodeURIComponent(normalizedQuery)}`;
+  return `browse:${categoryId}`;
+};
 
-const readInitialCache = (): { items: CatalogItem[]; total: number; loading: boolean } => {
-  try {
-    const hit = sessionStorage.getItem(buildCacheKey('all', 0));
-    if (hit) {
-      const parsed = JSON.parse(hit);
-      return { items: parsed.items, total: parsed.total, loading: false };
-    }
-  } catch {}
-  return { items: [], total: 0, loading: true };
+const buildCacheKey = (query: string, categoryId: string, page: number, filters: SearchFilters = DEFAULT_FILTERS) =>
+  `${buildResultKey(query, categoryId)}:p${page}:${buildFilterKey(filters)}`;
+
+const readInitialSnapshot = (state: CatalogStoredState): CatalogSnapshot => {
+  const hit = catalogCache.get(buildCacheKey(state.submittedQuery, state.category, state.page, state.filters));
+  if (hit) return { ...state, items: hit.items, total: hit.total, loading: false };
+  return { ...state, items: [], total: 0, loading: true };
 };
 
 export const useCatalog = () => {
-  const [searchQuery, setSearchQueryState] = useState('');
-  const [category, setCategoryState] = useState('all');
-  const [filters, setFiltersState] = useState<SearchFilters>(DEFAULT_FILTERS);
-  const [page, setPageState] = useState(0);
-  const [{ items: initialItems, total: initialTotal, loading: initialLoading }] = useState(readInitialCache);
-  const [items, setItems] = useState<CatalogItem[]>(initialItems);
-  const [total, setTotal] = useState(initialTotal);
-  const [loading, setLoading] = useState(initialLoading);
+  const [storedState, setStoredState] = usePersistedState<CatalogStoredState>(
+    CATALOG_STATE_KEY,
+    DEFAULT_CATALOG_STATE,
+    { validate: validateCatalogState },
+  );
+  const [initialSnapshot] = useState(() => readInitialSnapshot(storedState));
+  const [searchQuery, setSearchQueryState] = useState(initialSnapshot.searchQuery);
+  const [category, setCategoryState] = useState(initialSnapshot.category);
+  const [filters, setFiltersState] = useState<SearchFilters>(initialSnapshot.filters);
+  const [page, setPageState] = useState(initialSnapshot.page);
+  const [items, setItems] = useState<CatalogItem[]>(initialSnapshot.items);
+  const [total, setTotal] = useState(initialSnapshot.total);
+  const [loading, setLoading] = useState(initialSnapshot.loading);
   const [error, setError] = useState<string | null>(null);
   const [topics, setTopics] = useState<PreferenceTopic[]>([]);
 
   // Tracks the query that was actually submitted (used for labels/isSearchMode)
-  const [submittedQuery, setSubmittedQuery] = useState('');
+  const [submittedQuery, setSubmittedQuery] = useState(initialSnapshot.submittedQuery);
 
   const abortRef = useRef<AbortController | null>(null);
   // Refs to avoid stale closures in imperative handlers
@@ -63,19 +125,14 @@ export const useCatalog = () => {
       ? query.trim()
       : (TOPIC_SEARCH_QUERIES[catId] ?? 'science research');
 
-    if (!isSearch) {
-      const cacheKey = buildCacheKey(catId, pg, activeFilters);
-      const hit = sessionStorage.getItem(cacheKey);
-      if (hit) {
-        try {
-          const { items: ci, total: ct } = JSON.parse(hit);
-          setItems(ci);
-          setTotal(ct);
-          setLoading(false);
-          setError(null);
-          return;
-        } catch {}
-      }
+    const cacheKey = buildCacheKey(isSearch ? query : '', catId, pg, activeFilters);
+    const hit = catalogCache.get(cacheKey);
+    if (hit) {
+      setItems(hit.items);
+      setTotal(hit.total);
+      setLoading(false);
+      setError(null);
+      return;
     }
 
     setLoading(true);
@@ -85,9 +142,7 @@ export const useCatalog = () => {
       const result = await searchCatalogItems(effectiveQuery, pg, activeFilters, abortRef.current.signal);
       setItems(result.items);
       setTotal(result.total);
-      if (!isSearch) {
-        sessionStorage.setItem(buildCacheKey(catId, pg, activeFilters), JSON.stringify(result));
-      }
+      catalogCache.set(cacheKey, result);
     } catch (err: any) {
       if (err.name === 'AbortError') return;
       setError(err.message ?? 'Erro ao carregar materiais');
@@ -102,10 +157,20 @@ export const useCatalog = () => {
     getPreferenceOptions()
       .then(opts => setTopics(opts.topics))
       .catch(() => {});
-    // Se o cache já populou o estado inicial, não busca novamente
-    if (!initialLoading) return;
-    doFetch('', 'all', 0, DEFAULT_FILTERS);
+    // Se o cache já populou o estado inicial, não busca novamente.
+    if (!initialSnapshot.loading) return;
+    doFetch(initialSnapshot.submittedQuery, initialSnapshot.category, initialSnapshot.page, initialSnapshot.filters);
   }, [doFetch]);
+
+  useEffect(() => {
+    setStoredState({
+      searchQuery,
+      submittedQuery,
+      category,
+      filters,
+      page,
+    });
+  }, [category, filters, page, searchQuery, setStoredState, submittedQuery]);
 
   // Apenas atualiza o texto — não dispara busca
   const setSearchQuery = (q: string) => {

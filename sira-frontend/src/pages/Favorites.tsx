@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Bookmark, BookOpen, FileText, Search } from 'lucide-react';
 import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
@@ -8,20 +7,8 @@ import { Button } from '../components/ui/Button';
 import { ViewModeToggle } from '../components/ui/ViewModeToggle';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useViewMode } from '../hooks/useViewMode';
-import { fetchFavorites } from '../services/api';
+import { FAVORITES_PAGE_SIZE, FAVORITE_TABS, useFavoritesLibrary } from '../hooks/useFavoritesLibrary';
 import type { CatalogItem } from '../types';
-
-const TABS = [
-  { id: 'all',     label: 'Todos os Materiais',  icon: Bookmark  },
-  { id: 'book',    label: 'Livros',               icon: BookOpen  },
-  { id: 'article', label: 'Artigos Científicos',  icon: FileText  },
-] as const;
-
-type TabId = typeof TABS[number]['id'];
-type FavoriteCounts = Record<TabId, number>;
-
-const FAVORITES_PAGE_SIZE = 20;
-const EMPTY_COUNTS: FavoriteCounts = { all: 0, book: 0, article: 0 };
 
 interface FavoritesProps {
   toggleFavorite: (item: CatalogItem) => Promise<boolean> | boolean | void;
@@ -30,15 +17,20 @@ interface FavoritesProps {
 }
 
 export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: FavoritesProps) => {
-  const [activeTab, setActiveTab] = useState<TabId>('all');
-  const [items, setItems] = useState<CatalogItem[]>([]);
-  const [counts, setCounts] = useState<FavoriteCounts>(EMPTY_COUNTS);
-  const [page, setPage] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    activeTab,
+    setActiveTab,
+    items,
+    counts,
+    page,
+    total,
+    totalPages,
+    isInitialLoading,
+    isLoadingMore,
+    error,
+    loadFavoritesPage,
+    removeFavoriteLocally,
+  } = useFavoritesLibrary();
   const isMobile = useIsMobile();
   const { mode: viewMode, setMode: setViewMode } = useViewMode('favorites', 'vertical');
 
@@ -54,64 +46,11 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
   const bookCount = counts.book;
   const articleCount = counts.article;
 
-  const loadFavoritesPage = useCallback(async (
-    tab: TabId,
-    nextPage: number,
-    append = false,
-    signal?: AbortSignal,
-  ) => {
-    if (append) setIsLoadingMore(true);
-    else {
-      setIsInitialLoading(true);
-      setItems([]);
-      setPage(0);
-      setTotal(0);
-      setTotalPages(0);
-    }
-    setError(null);
-
-    try {
-      const data = await fetchFavorites({
-        page: nextPage,
-        limit: FAVORITES_PAGE_SIZE,
-        type: tab,
-        signal,
-      });
-      setItems(prev => append ? [...prev, ...data.items] : data.items);
-      setCounts(data.counts);
-      setPage(data.page);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
-    } catch (err: any) {
-      if (signal?.aborted) return;
-      setError(err?.message || 'Erro ao carregar favoritos');
-    } finally {
-      if (!signal?.aborted) {
-        setIsInitialLoading(false);
-        setIsLoadingMore(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void loadFavoritesPage(activeTab, 0, false, controller.signal);
-    return () => controller.abort();
-  }, [activeTab, loadFavoritesPage]);
-
   const handleFavoriteToggle = async (item: CatalogItem) => {
     const result = await toggleFavorite(item);
     if (result === false) return;
 
-    setItems(prev => prev.filter(f => f.id !== item.id));
-    setTotal(prev => Math.max(0, prev - 1));
-    setCounts(prev => ({
-      ...prev,
-      all: Math.max(0, prev.all - 1),
-      ...(item.type === 'book' || item.type === 'article'
-        ? { [item.type]: Math.max(0, prev[item.type] - 1) }
-        : {}),
-    }));
+    removeFavoriteLocally(item);
   };
 
   return (
@@ -130,7 +69,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
           aria-label="Filtro da biblioteca"
           className="flex space-x-6 sm:space-x-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-        {TABS.map(({ id, label }) => (
+        {FAVORITE_TABS.map(({ id, label }) => (
           <button
             key={id}
             type="button"
