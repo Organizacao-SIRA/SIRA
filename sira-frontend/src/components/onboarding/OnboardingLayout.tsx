@@ -14,7 +14,7 @@ export const OnboardingLayout = ({ children, progress, actions }: OnboardingLayo
           {progress}
         </header>
 
-        <main className="px-5 py-6 sm:px-8 sm:py-8 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+        <main className="sira-scrollbar px-5 py-6 sm:px-8 sm:py-8 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
           {children}
         </main>
 

@@ -85,7 +85,7 @@ export const Sidebar = ({
           </button>
         </div>
 
-        <nav className="flex-1 py-4 overflow-y-auto" aria-label="Navegação principal">
+        <nav className="sira-scrollbar flex-1 py-4 overflow-y-auto" aria-label="Navegação principal">
           <ul className="space-y-1">
             {menuItems.map(item => (
               <SidebarNavItem

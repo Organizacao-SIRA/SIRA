@@ -78,6 +78,8 @@ export default function App() {
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const searchRequestInFlightRef = useRef(false);
+  const regenerateRequestInFlightRef = useRef(false);
   const [resetToken, setResetToken] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     const urlScreen = params.get('screen');
@@ -283,7 +285,8 @@ export default function App() {
 
   const handleSearch = async (e: any) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() || isLoading || isRegenerating || searchRequestInFlightRef.current || regenerateRequestInFlightRef.current) return;
+    searchRequestInFlightRef.current = true;
     setIsLoading(true);
     setCurrentScreen('results');
     setSearchPage(0);
@@ -300,11 +303,13 @@ export default function App() {
       setSeenResultIds([]);
     } finally {
       setIsLoading(false);
+      searchRequestInFlightRef.current = false;
     }
   };
 
   const regenerateSearchResults = async () => {
-    if (!searchQuery.trim() || isLoading || isRegenerating) return;
+    if (!searchQuery.trim() || isLoading || isRegenerating || searchRequestInFlightRef.current || regenerateRequestInFlightRef.current) return;
+    regenerateRequestInFlightRef.current = true;
 
     const excludeIds = [
       ...new Set([
@@ -327,6 +332,7 @@ export default function App() {
       setAiMessage('Não consegui gerar novas sugestões agora. Tente novamente em instantes.');
     } finally {
       setIsRegenerating(false);
+      regenerateRequestInFlightRef.current = false;
     }
   };
 
@@ -480,7 +486,7 @@ export default function App() {
           id="main-content"
           ref={mainRef}
           tabIndex={-1}
-          className="flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable] focus:outline-none"
+          className="sira-scrollbar flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable] focus:outline-none"
         >
           {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">

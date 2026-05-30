@@ -59,7 +59,7 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
           </button>
         </div>
 
-        <div className="px-5 sm:px-6 py-5 overflow-y-auto flex-1">
+        <div className="sira-scrollbar px-5 sm:px-6 py-5 overflow-y-auto flex-1">
           {children}
         </div>
 

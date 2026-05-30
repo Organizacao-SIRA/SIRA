@@ -83,7 +83,7 @@ export const Recommendations = ({
       {results.length > 0 && onRegenerate && (
         <RegenerateResultsButton
           anchorRef={containerRef}
-          isLoading={isRegenerating}
+          isLoading={isLoading || isRegenerating}
           isSidebarOpen={isSidebarOpen}
           onClick={onRegenerate}
         />
