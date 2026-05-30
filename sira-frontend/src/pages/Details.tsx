@@ -8,7 +8,7 @@ import { ContentNotFoundState } from '../components/details/ContentNotFoundState
 
 interface DetailsProps {
   item: CatalogItem | null;
-  setCurrentScreen: (screen: string) => void;
+  onBack: () => void;
   previousScreen: string;
   toggleFavorite: (item: CatalogItem) => void;
   isFavorite: (id: string) => boolean;
@@ -16,16 +16,15 @@ interface DetailsProps {
 
 export const Details = ({
   item,
-  setCurrentScreen,
+  onBack,
   previousScreen,
   toggleFavorite,
   isFavorite,
 }: DetailsProps) => {
   if (!item) {
-    return <ContentNotFoundState onBack={() => setCurrentScreen('home')} />;
+    return <ContentNotFoundState onBack={onBack} />;
   }
 
-  const handleBack = () => setCurrentScreen(previousScreen || 'home');
   const handleToggleFavorite = () => toggleFavorite(item);
   const favorited = isFavorite(item.id);
 
@@ -34,7 +33,7 @@ export const Details = ({
       <ContentBreadcrumb
         previousScreen={previousScreen}
         title={item.title}
-        onBack={handleBack}
+        onBack={onBack}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">

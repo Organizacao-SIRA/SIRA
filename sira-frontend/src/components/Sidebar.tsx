@@ -7,6 +7,7 @@ interface SidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean) => void;
   currentScreen: string;
+  previousScreen: string;
   setCurrentScreen: (screen: string) => void;
   user: AuthUser | null;
 }
@@ -15,14 +16,16 @@ export const Sidebar = ({
   isSidebarOpen,
   setIsSidebarOpen,
   currentScreen,
+  previousScreen,
   setCurrentScreen,
   user,
 }: SidebarProps) => {
   const menuItems = SIDEBAR_ITEMS.filter(item => !item.authRequired || !!user);
+  const activeScreen = currentScreen === 'details'
+    ? previousScreen === 'results' ? 'home' : previousScreen
+    : currentScreen === 'results' ? 'home' : currentScreen;
 
-  const isActive = (id: string) =>
-    currentScreen === id ||
-    (id === 'home' && (currentScreen === 'results' || currentScreen === 'details'));
+  const isActive = (id: string) => activeScreen === id;
 
   // Em mobile (< md), navegar fecha o drawer; em desktop, mantém o estado atual.
   const handleItemClick = (id: string) => {

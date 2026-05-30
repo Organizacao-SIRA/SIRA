@@ -4,6 +4,7 @@ export const useScreenScrollRestoration = (
   ref: RefObject<HTMLElement | null>,
   activeScreen: string,
   storageKeys: Record<string, string>,
+  resetScreens: string[] = [],
 ) => {
   const saveScroll = useCallback((screen = activeScreen) => {
     const key = storageKeys[screen];
@@ -16,7 +17,14 @@ export const useScreenScrollRestoration = (
 
   useEffect(() => {
     const key = storageKeys[activeScreen];
-    if (!key) return;
+    if (!key) {
+      if (!resetScreens.includes(activeScreen) || !ref.current) return;
+
+      requestAnimationFrame(() => {
+        if (ref.current) ref.current.scrollTop = 0;
+      });
+      return;
+    }
 
     let savedY: string | null = null;
     try {
@@ -30,7 +38,7 @@ export const useScreenScrollRestoration = (
     requestAnimationFrame(() => {
       if (ref.current) ref.current.scrollTop = nextScrollTop;
     });
-  }, [activeScreen, ref, storageKeys]);
+  }, [activeScreen, ref, resetScreens, storageKeys]);
 
   return saveScroll;
 };

@@ -212,6 +212,20 @@ export const useCatalog = () => {
     doFetch(submittedQueryRef.current, categoryRef.current, pg, filtersRef.current);
   };
 
+  const resetCatalogHome = useCallback(() => {
+    setSearchQueryState(DEFAULT_CATALOG_STATE.searchQuery);
+    setSubmittedQuery(DEFAULT_CATALOG_STATE.submittedQuery);
+    setCategoryState(DEFAULT_CATALOG_STATE.category);
+    setFiltersState(DEFAULT_CATALOG_STATE.filters);
+    setPageState(DEFAULT_CATALOG_STATE.page);
+    doFetch(
+      DEFAULT_CATALOG_STATE.submittedQuery,
+      DEFAULT_CATALOG_STATE.category,
+      DEFAULT_CATALOG_STATE.page,
+      DEFAULT_CATALOG_STATE.filters,
+    );
+  }, [doFetch]);
+
   const refetch = () => doFetch(submittedQueryRef.current, categoryRef.current, page, filtersRef.current);
 
   return {
@@ -234,5 +248,6 @@ export const useCatalog = () => {
     submittedQuery,
     topics,
     refetch,
+    resetCatalogHome,
   };
 };

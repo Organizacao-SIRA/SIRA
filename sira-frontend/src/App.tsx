@@ -30,6 +30,38 @@ const SCREEN_SCROLL_KEYS: Record<string, string> = {
   catalog: '@sira:catalogScrollY',
   favorites: '@sira:favoritesScrollY',
 };
+const RESET_SCROLL_SCREENS = ['details'];
+type SearchSectionScreen = 'home' | 'results' | 'details';
+type SearchDetailOrigin = 'home' | 'results';
+type CatalogSectionScreen = 'catalog' | 'details';
+type FavoritesSectionScreen = 'favorites' | 'details';
+
+const isSearchSectionScreen = (screen: string): screen is SearchSectionScreen =>
+  screen === 'home' || screen === 'results' || screen === 'details';
+const isSearchDetailOrigin = (screen: string): screen is SearchDetailOrigin =>
+  screen === 'home' || screen === 'results';
+const isCatalogSectionScreen = (screen: string): screen is CatalogSectionScreen =>
+  screen === 'catalog' || screen === 'details';
+const isFavoritesSectionScreen = (screen: string): screen is FavoritesSectionScreen =>
+  screen === 'favorites' || screen === 'details';
+
+const readLastSearchScreen = (): SearchSectionScreen => {
+  const stored = sessionStorage.getItem('@sira:lastSearchScreen');
+  return isSearchSectionScreen(stored ?? '') ? stored as SearchSectionScreen : 'home';
+};
+
+const readSearchDetailOrigin = (): SearchDetailOrigin => {
+  const stored = sessionStorage.getItem('@sira:searchDetailOrigin');
+  return isSearchDetailOrigin(stored ?? '') ? stored as SearchDetailOrigin : 'results';
+};
+const readLastCatalogScreen = (): CatalogSectionScreen => {
+  const stored = sessionStorage.getItem('@sira:lastCatalogScreen');
+  return isCatalogSectionScreen(stored ?? '') ? stored as CatalogSectionScreen : 'catalog';
+};
+const readLastFavoritesScreen = (): FavoritesSectionScreen => {
+  const stored = sessionStorage.getItem('@sira:lastFavoritesScreen');
+  return isFavoritesSectionScreen(stored ?? '') ? stored as FavoritesSectionScreen : 'favorites';
+};
 
 export default function App() {
   const { isAuthenticated, user, logout, updateUser } = useAuth();
@@ -67,9 +99,22 @@ export default function App() {
     const saved = sessionStorage.getItem('@sira:selectedItem');
     return saved ? JSON.parse(saved) : null;
   });
-  const [lastSearchScreen, setLastSearchScreen] = useState<'home' | 'results'>(() =>
-    (sessionStorage.getItem('@sira:lastSearchScreen') as 'home' | 'results') || 'home'
-  );
+  const [searchDetailItem, setSearchDetailItem] = useState<any>(() => {
+    const saved = sessionStorage.getItem('@sira:searchDetailItem');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [searchDetailOrigin, setSearchDetailOrigin] = useState<SearchDetailOrigin>(readSearchDetailOrigin);
+  const [lastSearchScreen, setLastSearchScreen] = useState<SearchSectionScreen>(readLastSearchScreen);
+  const [catalogDetailItem, setCatalogDetailItem] = useState<any>(() => {
+    const saved = sessionStorage.getItem('@sira:catalogDetailItem');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [favoritesDetailItem, setFavoritesDetailItem] = useState<any>(() => {
+    const saved = sessionStorage.getItem('@sira:favoritesDetailItem');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [lastCatalogScreen, setLastCatalogScreen] = useState<CatalogSectionScreen>(readLastCatalogScreen);
+  const [lastFavoritesScreen, setLastFavoritesScreen] = useState<FavoritesSectionScreen>(readLastFavoritesScreen);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>(() => {
     const saved = sessionStorage.getItem('@sira:searchFilters');
     return saved ? JSON.parse(saved) : { types: [], area: null, openAccessOnly: false, yearFrom: null };
@@ -85,6 +130,8 @@ export default function App() {
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const [catalogHomeResetKey, setCatalogHomeResetKey] = useState(0);
+  const [favoritesHomeResetKey, setFavoritesHomeResetKey] = useState(0);
   const searchRequestInFlightRef = useRef(false);
   const regenerateRequestInFlightRef = useRef(false);
   const [resetToken, setResetToken] = useState<string>(() => {
@@ -97,7 +144,26 @@ export default function App() {
     return sessionStorage.getItem('@sira:resetToken') || '';
   });
   const mainRef = useRef<HTMLElement>(null);
-  const saveScreenScroll = useScreenScrollRestoration(mainRef, currentScreen, SCREEN_SCROLL_KEYS);
+  const saveScreenScroll = useScreenScrollRestoration(
+    mainRef,
+    currentScreen,
+    SCREEN_SCROLL_KEYS,
+    RESET_SCROLL_SCREENS,
+  );
+  const resetScreenScroll = (screen: string) => {
+    const key = SCREEN_SCROLL_KEYS[screen];
+    if (key) {
+      try {
+        sessionStorage.setItem(key, '0');
+      } catch {
+        // sessionStorage can be unavailable in private browsing modes.
+      }
+    }
+
+    requestAnimationFrame(() => {
+      if (mainRef.current) mainRef.current.scrollTop = 0;
+    });
+  };
 
   // Sincroniza as mudanças de estado com o sessionStorage
   useEffect(() => { sessionStorage.setItem('@sira:currentScreen', currentScreen); }, [currentScreen]);
@@ -112,7 +178,22 @@ export default function App() {
     if (selectedItem) sessionStorage.setItem('@sira:selectedItem', JSON.stringify(selectedItem));
     else sessionStorage.removeItem('@sira:selectedItem');
   }, [selectedItem]);
+  useEffect(() => {
+    if (searchDetailItem) sessionStorage.setItem('@sira:searchDetailItem', JSON.stringify(searchDetailItem));
+    else sessionStorage.removeItem('@sira:searchDetailItem');
+  }, [searchDetailItem]);
+  useEffect(() => {
+    if (catalogDetailItem) sessionStorage.setItem('@sira:catalogDetailItem', JSON.stringify(catalogDetailItem));
+    else sessionStorage.removeItem('@sira:catalogDetailItem');
+  }, [catalogDetailItem]);
+  useEffect(() => {
+    if (favoritesDetailItem) sessionStorage.setItem('@sira:favoritesDetailItem', JSON.stringify(favoritesDetailItem));
+    else sessionStorage.removeItem('@sira:favoritesDetailItem');
+  }, [favoritesDetailItem]);
+  useEffect(() => { sessionStorage.setItem('@sira:searchDetailOrigin', searchDetailOrigin); }, [searchDetailOrigin]);
   useEffect(() => { sessionStorage.setItem('@sira:lastSearchScreen', lastSearchScreen); }, [lastSearchScreen]);
+  useEffect(() => { sessionStorage.setItem('@sira:lastCatalogScreen', lastCatalogScreen); }, [lastCatalogScreen]);
+  useEffect(() => { sessionStorage.setItem('@sira:lastFavoritesScreen', lastFavoritesScreen); }, [lastFavoritesScreen]);
   useEffect(() => { sessionStorage.setItem('@sira:searchFilters', JSON.stringify(searchFilters)); }, [searchFilters]);
   useEffect(() => {
     if (resetToken) sessionStorage.setItem('@sira:resetToken', resetToken);
@@ -350,6 +431,17 @@ export default function App() {
     saveScreenScroll(currentScreen);
     setPreviousScreen(currentScreen);
     setSelectedItem(item);
+    if (currentScreen === 'home' || currentScreen === 'results') {
+      setSearchDetailItem(item);
+      setSearchDetailOrigin(currentScreen);
+      setLastSearchScreen('details');
+    } else if (currentScreen === 'catalog') {
+      setCatalogDetailItem(item);
+      setLastCatalogScreen('details');
+    } else if (currentScreen === 'favorites') {
+      setFavoritesDetailItem(item);
+      setLastFavoritesScreen('details');
+    }
     setCurrentScreen('details');
   };
 
@@ -389,6 +481,94 @@ export default function App() {
 
   const isFavorite = (id: any) => favoriteIds.has(id);
 
+  const restoreSearchSection = () => {
+    if (lastSearchScreen !== 'details') {
+      setCurrentScreen(lastSearchScreen);
+      return;
+    }
+
+    if (searchDetailItem) {
+      setSelectedItem(searchDetailItem);
+      setPreviousScreen(searchDetailOrigin);
+      setCurrentScreen('details');
+      return;
+    }
+
+    const fallbackScreen: SearchSectionScreen = results.length > 0 ? 'results' : 'home';
+    setLastSearchScreen(fallbackScreen);
+    setCurrentScreen(fallbackScreen);
+  };
+
+  const restoreCatalogSection = () => {
+    if (lastCatalogScreen === 'details' && catalogDetailItem) {
+      setSelectedItem(catalogDetailItem);
+      setPreviousScreen('catalog');
+      setCurrentScreen('details');
+      return;
+    }
+
+    setLastCatalogScreen('catalog');
+    setCurrentScreen('catalog');
+  };
+
+  const restoreFavoritesSection = () => {
+    if (lastFavoritesScreen === 'details' && favoritesDetailItem) {
+      setSelectedItem(favoritesDetailItem);
+      setPreviousScreen('favorites');
+      setCurrentScreen('details');
+      return;
+    }
+
+    setLastFavoritesScreen('favorites');
+    setCurrentScreen('favorites');
+  };
+
+  const resetCatalogHome = () => {
+    resetScreenScroll('catalog');
+    setLastCatalogScreen('catalog');
+    setCurrentScreen('catalog');
+    setCatalogHomeResetKey(key => key + 1);
+  };
+
+  const resetFavoritesHome = () => {
+    resetScreenScroll('favorites');
+    setLastFavoritesScreen('favorites');
+    setCurrentScreen('favorites');
+    setFavoritesHomeResetKey(key => key + 1);
+  };
+
+  const rememberCurrentSection = () => {
+    if (currentScreen === 'home' || currentScreen === 'results') {
+      setLastSearchScreen(currentScreen);
+    } else if (currentScreen === 'catalog') {
+      setLastCatalogScreen('catalog');
+    } else if (currentScreen === 'favorites') {
+      setLastFavoritesScreen('favorites');
+    } else if (currentScreen === 'details') {
+      if (previousScreen === 'home' || previousScreen === 'results') {
+        setLastSearchScreen('details');
+      } else if (previousScreen === 'catalog') {
+        setLastCatalogScreen('details');
+      } else if (previousScreen === 'favorites') {
+        setLastFavoritesScreen('details');
+      }
+    }
+  };
+
+  const handleDetailsBack = () => {
+    const target = previousScreen || 'home';
+
+    if (target === 'home' || target === 'results') {
+      setLastSearchScreen(target);
+    } else if (target === 'catalog') {
+      setLastCatalogScreen('catalog');
+    } else if (target === 'favorites') {
+      setLastFavoritesScreen('favorites');
+    }
+
+    setCurrentScreen(target);
+  };
+
   const handleSidebarNavigation = (screen: string) => {
     if (screen === 'home') {
       if (currentScreen === 'home') return;
@@ -399,13 +579,44 @@ export default function App() {
         setCurrentScreen('home');
         return;
       }
+      if (currentScreen === 'details' && (previousScreen === 'home' || previousScreen === 'results')) {
+        // Dentro da seção de busca: detalhe → origem do detalhe
+        const target = previousScreen === 'results' ? 'results' : 'home';
+        setLastSearchScreen(target);
+        setCurrentScreen(target);
+        return;
+      }
       // Vindo de outra aba → restaurar exatamente onde o usuário estava
-      setCurrentScreen(lastSearchScreen);
+      restoreSearchSection();
+    } else if (screen === 'catalog') {
+      if (currentScreen === 'catalog') {
+        resetCatalogHome();
+        return;
+      }
+      if (currentScreen === 'details' && previousScreen === 'catalog') {
+        setLastCatalogScreen('catalog');
+        setCurrentScreen('catalog');
+        return;
+      }
+      rememberCurrentSection();
+      saveScreenScroll(currentScreen);
+      restoreCatalogSection();
+    } else if (screen === 'favorites') {
+      if (currentScreen === 'favorites') {
+        resetFavoritesHome();
+        return;
+      }
+      if (currentScreen === 'details' && previousScreen === 'favorites') {
+        setLastFavoritesScreen('favorites');
+        setCurrentScreen('favorites');
+        return;
+      }
+      rememberCurrentSection();
+      saveScreenScroll(currentScreen);
+      restoreFavoritesSection();
     } else {
       // Saindo da seção de busca → memorizar onde estávamos e salvar scroll
-      if (currentScreen === 'home' || currentScreen === 'results') {
-        setLastSearchScreen(currentScreen as 'home' | 'results');
-      }
+      rememberCurrentSection();
       saveScreenScroll(currentScreen);
       setCurrentScreen(screen);
     }
@@ -470,6 +681,7 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
             currentScreen={currentScreen}
+            previousScreen={previousScreen}
             setCurrentScreen={handleSidebarNavigation} // Sidebar usa navegação inteligente
             user={user}
           />
@@ -510,13 +722,23 @@ export default function App() {
             />
           )}
           {currentScreen === 'details' && (
-            <Details item={selectedItem} setCurrentScreen={setCurrentScreen} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+            <Details item={selectedItem} onBack={handleDetailsBack} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
           )}
           {currentScreen === 'catalog' && (
-            <Catalog viewDetails={viewDetails} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+            <Catalog
+              viewDetails={viewDetails}
+              toggleFavorite={toggleFavorite}
+              isFavorite={isFavorite}
+              homeResetKey={catalogHomeResetKey}
+            />
           )}
           {currentScreen === 'favorites' && (
-            <Favorites toggleFavorite={toggleFavorite} viewDetails={viewDetails} setCurrentScreen={setCurrentScreen} />
+            <Favorites
+              toggleFavorite={toggleFavorite}
+              viewDetails={viewDetails}
+              setCurrentScreen={setCurrentScreen}
+              homeResetKey={favoritesHomeResetKey}
+            />
           )}
           {currentScreen === 'profile' && (
             <Profile

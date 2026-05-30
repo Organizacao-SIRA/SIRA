@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Bookmark, BookOpen, FileText, Search } from 'lucide-react';
 import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
@@ -14,9 +15,10 @@ interface FavoritesProps {
   toggleFavorite: (item: CatalogItem) => Promise<boolean> | boolean | void;
   viewDetails: (item: CatalogItem) => void;
   setCurrentScreen: (screen: string) => void;
+  homeResetKey?: number;
 }
 
-export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: FavoritesProps) => {
+export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeResetKey = 0 }: FavoritesProps) => {
   const {
     activeTab,
     setActiveTab,
@@ -30,6 +32,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
     error,
     loadFavoritesPage,
     removeFavoriteLocally,
+    resetFavoritesHome,
   } = useFavoritesLibrary();
   const isMobile = useIsMobile();
   const { mode: viewMode, setMode: setViewMode } = useViewMode('favorites', 'vertical');
@@ -45,6 +48,13 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen }: Fav
 
   const bookCount = counts.book;
   const articleCount = counts.article;
+  const lastHomeResetKey = useRef(homeResetKey);
+
+  useEffect(() => {
+    if (lastHomeResetKey.current === homeResetKey) return;
+    lastHomeResetKey.current = homeResetKey;
+    resetFavoritesHome();
+  }, [homeResetKey, resetFavoritesHome]);
 
   const handleFavoriteToggle = async (item: CatalogItem) => {
     const result = await toggleFavorite(item);

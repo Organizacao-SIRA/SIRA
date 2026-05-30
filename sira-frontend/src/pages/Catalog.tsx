@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Library } from 'lucide-react';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
@@ -14,9 +15,10 @@ interface CatalogProps {
   viewDetails: (item: CatalogItem) => void;
   toggleFavorite: (item: CatalogItem) => void;
   isFavorite: (id: string) => boolean;
+  homeResetKey?: number;
 }
 
-export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProps) => {
+export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey = 0 }: CatalogProps) => {
   const {
     searchQuery, setSearchQuery, submitSearch, clearSearch,
     category, setCategory,
@@ -27,11 +29,19 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite }: CatalogProp
     isSearchMode, submittedQuery,
     topics,
     refetch,
+    resetCatalogHome,
   } = useCatalog();
 
   const { mode: viewMode, setMode: setViewMode } = useViewMode('catalog', 'vertical');
   const isMobile = useIsMobile();
   const effectiveMode = isMobile ? 'vertical' : viewMode;
+  const lastHomeResetKey = useRef(homeResetKey);
+
+  useEffect(() => {
+    if (lastHomeResetKey.current === homeResetKey) return;
+    lastHomeResetKey.current = homeResetKey;
+    resetCatalogHome();
+  }, [homeResetKey, resetCatalogHome]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn">

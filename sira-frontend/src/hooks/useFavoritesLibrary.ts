@@ -188,7 +188,6 @@ export const useFavoritesLibrary = () => {
       setError(null);
     } else {
       setItems([]);
-      setCounts(EMPTY_COUNTS);
       setPage(0);
       setTotal(0);
       setTotalPages(0);
@@ -218,6 +217,34 @@ export const useFavoritesLibrary = () => {
     }
   };
 
+  const resetFavoritesHome = useCallback(() => {
+    const hit = favoritesCache.get(cacheKeyFor('all'));
+    setActiveTabState('all');
+    setError(null);
+
+    if (hit) {
+      setItems(hit.items);
+      setCounts(hit.counts);
+      setPage(hit.page);
+      setTotal(hit.total);
+      setTotalPages(hit.totalPages);
+      setIsInitialLoading(false);
+    } else if (activeTab !== 'all') {
+      setItems([]);
+      setCounts(EMPTY_COUNTS);
+      setPage(0);
+      setTotal(0);
+      setTotalPages(0);
+      setIsInitialLoading(true);
+    } else if (itemsRef.current.length === 0) {
+      setIsInitialLoading(true);
+    }
+
+    if (activeTab === 'all') {
+      void loadFavoritesPage('all', 0, false);
+    }
+  }, [activeTab, loadFavoritesPage]);
+
   return {
     activeTab,
     setActiveTab,
@@ -231,5 +258,6 @@ export const useFavoritesLibrary = () => {
     error,
     loadFavoritesPage,
     removeFavoriteLocally,
+    resetFavoritesHome,
   };
 };
