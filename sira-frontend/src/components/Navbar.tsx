@@ -12,12 +12,12 @@ interface NavbarProps {
   setIsSidebarOpen: (value: boolean) => void;
   setCurrentScreen: (screen: string) => void;
   currentScreen: string;
+  showMenuButton: boolean;
   user: AuthUser | null;
   onLogout: () => void;
 }
 
-export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, currentScreen, user, onLogout }: NavbarProps) => {
-  const isAuthPage = currentScreen === 'login' || currentScreen === 'register';
+export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, currentScreen, showMenuButton, user, onLogout }: NavbarProps) => {
   const displayName = user?.name || user?.email || '';
 
   return (
@@ -27,7 +27,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
         <div className="flex justify-between items-center h-16 gap-2 sm:gap-3">
 
           <NavBrand
-            showMenuButton={!isAuthPage}
+            showMenuButton={showMenuButton}
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             onLogoClick={() => setCurrentScreen('home')}
           />

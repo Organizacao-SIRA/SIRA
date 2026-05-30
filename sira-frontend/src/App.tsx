@@ -31,6 +31,7 @@ const SCREEN_SCROLL_KEYS: Record<string, string> = {
   favorites: '@sira:favoritesScrollY',
 };
 const RESET_SCROLL_SCREENS = ['details'];
+const SCREENS_WITHOUT_SIDEBAR = new Set(['login', 'register', 'onboarding', 'forgot-password', 'reset-password']);
 type SearchSectionScreen = 'home' | 'results' | 'details';
 type SearchDetailOrigin = 'home' | 'results';
 type CatalogSectionScreen = 'catalog' | 'details';
@@ -622,7 +623,7 @@ export default function App() {
     }
   };
 
-  const showSidebar = !['login', 'register', 'onboarding', 'forgot-password', 'reset-password'].includes(currentScreen);
+  const showSidebar = !SCREENS_WITHOUT_SIDEBAR.has(currentScreen);
 
   if (isProfileLoading && isAuthenticated && (currentScreen === 'login' || currentScreen === 'register')) {
     return (
@@ -632,6 +633,7 @@ export default function App() {
           setIsSidebarOpen={setIsSidebarOpen}
           setCurrentScreen={setCurrentScreen}
           currentScreen={currentScreen}
+          showMenuButton={showSidebar}
           user={user}
           onLogout={logout}
         />
@@ -671,6 +673,7 @@ export default function App() {
         setIsSidebarOpen={setIsSidebarOpen}
         setCurrentScreen={setCurrentScreen} // Navbar mantém o reset absoluto
         currentScreen={currentScreen}
+        showMenuButton={showSidebar}
         user={user}
         onLogout={logout}
       />
