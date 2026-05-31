@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lock, Unlock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MaterialTypeBadge } from '../ui/MaterialTypeBadge';
 import { StatusBadge } from '../ui/StatusBadge';
 
@@ -16,6 +17,7 @@ interface ContentHeroProps {
 const AUTHOR_CHAR_THRESHOLD = 50;
 
 export const ContentHero = ({ type, title, authors, year, source, provider, isOpenAccess }: ContentHeroProps) => {
+  const { t } = useTranslation(['details', 'common']);
   const isLong = authors.length > AUTHOR_CHAR_THRESHOLD;
   const [expanded, setExpanded] = useState(false);
 
@@ -27,12 +29,12 @@ export const ContentHero = ({ type, title, authors, year, source, provider, isOp
         {source && source !== provider && <StatusBadge variant="neutral">{source}</StatusBadge>}
         {isOpenAccess === true && (
           <StatusBadge variant="success" icon={<Unlock className="w-3 h-3" />}>
-            Acesso Aberto
+            {t('common:access.openFull')}
           </StatusBadge>
         )}
         {isOpenAccess === false && (
           <StatusBadge variant="warning" icon={<Lock className="w-3 h-3" />}>
-            Acesso Restrito
+            {t('common:access.restrictedFull')}
           </StatusBadge>
         )}
       </div>
@@ -42,7 +44,7 @@ export const ContentHero = ({ type, title, authors, year, source, provider, isOp
       </h1>
 
       <div className="text-base text-text-muted">
-        <span className="sr-only">Autores: </span>
+        <span className="sr-only">{t('hero.authorsLabel')} </span>
         <span className={`font-medium text-text${isLong && !expanded ? ' line-clamp-1' : ''}`}>
           {authors}
         </span>
@@ -52,11 +54,11 @@ export const ContentHero = ({ type, title, authors, year, source, provider, isOp
             onClick={() => setExpanded(v => !v)}
             className="block text-xs text-primary hover:text-primary-dark dark:hover:text-primary transition-colors mt-1 cursor-pointer font-semibold"
           >
-            {expanded ? 'ver menos ↑' : 'ver todos os autores ↓'}
+            {expanded ? t('hero.showLess') : t('hero.showAll')}
           </button>
         )}
         <div className="mt-1 text-sm text-text-subtle">
-          <span className="sr-only">Ano: </span>
+          <span className="sr-only">{t('hero.yearLabel')} </span>
           {year}
         </div>
       </div>

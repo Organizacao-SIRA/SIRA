@@ -7,6 +7,12 @@ export const details = {
     results: 'Back to Results',
     home: 'Back to Home',
   },
+  hero: {
+    authorsLabel: 'Authors:',
+    yearLabel: 'Year:',
+    showAll: 'show all authors ↓',
+    showLess: 'show less ↑',
+  },
   summary: {
     title: 'Summary',
     unavailable: 'Summary is not available for this material.',

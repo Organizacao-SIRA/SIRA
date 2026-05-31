@@ -14,6 +14,10 @@ export const catalog = {
     available_one: '{{count}} material available',
     available_other: '{{count}} materials available',
   },
+  categories: {
+    label: 'Catalog categories',
+    all: 'All',
+  },
   filters: {
     label: 'Filters',
     clear: 'Clear',

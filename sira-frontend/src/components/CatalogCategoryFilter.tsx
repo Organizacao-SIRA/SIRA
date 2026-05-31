@@ -1,5 +1,6 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PreferenceTopic } from '../types';
+import { preferenceTopicLabel } from '../i18n/preferenceLabels';
 
 interface CatalogCategoryFilterProps {
   categories: PreferenceTopic[];
@@ -33,20 +34,25 @@ export const CatalogCategoryFilter = ({
   categories,
   selected,
   onSelect,
-}: CatalogCategoryFilterProps) => (
-  <div
-    aria-label="Categorias do catálogo"
-    className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-  >
-    <CategoryPill id="all" label="Todas" selected={selected === 'all'} onSelect={onSelect} />
-    {categories.map(cat => (
-      <CategoryPill
-        key={cat.id}
-        id={cat.id}
-        label={cat.label}
-        selected={selected === cat.id}
-        onSelect={onSelect}
-      />
-    ))}
-  </div>
-);
+}: CatalogCategoryFilterProps) => {
+  const { t } = useTranslation('catalog');
+  const { t: tPref } = useTranslation('preferences');
+
+  return (
+    <div
+      aria-label={t('categories.label')}
+      className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <CategoryPill id="all" label={t('categories.all')} selected={selected === 'all'} onSelect={onSelect} />
+      {categories.map(cat => (
+        <CategoryPill
+          key={cat.id}
+          id={cat.id}
+          label={preferenceTopicLabel(cat, tPref)}
+          selected={selected === cat.id}
+          onSelect={onSelect}
+        />
+      ))}
+    </div>
+  );
+};

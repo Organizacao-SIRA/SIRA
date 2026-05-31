@@ -7,6 +7,12 @@ export const details = {
     results: 'Voltar aos Resultados',
     home: 'Voltar ao Início',
   },
+  hero: {
+    authorsLabel: 'Autores:',
+    yearLabel: 'Ano:',
+    showAll: 'ver todos os autores ↓',
+    showLess: 'ver menos ↑',
+  },
   summary: {
     title: 'Resumo',
     unavailable: 'Resumo não disponível para este material.',
