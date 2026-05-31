@@ -6,7 +6,7 @@ import {
   unauthorizedError,
 } from '../common/errors/http-error';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import * as Brevo from '@getbrevo/brevo';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   scrypt as _scrypt,
@@ -15,6 +15,9 @@ import {
   createHash,
 } from 'node:crypto';
 import { promisify } from 'node:util';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import * as Handlebars from 'handlebars';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { authMessages, normalizeUiLocale } from './auth-i18n';
@@ -25,11 +28,18 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
+  private readonly brevoClient: Brevo.TransactionalEmailsApi;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService,
-  ) {}
+  ) {
+    this.brevoClient = new Brevo.TransactionalEmailsApi();
+    this.brevoClient.setApiKey(
+      Brevo.TransactionalEmailsApiApiKeys.apiKey,
+      process.env.BREVO_API_KEY || '',
+    );
+  }
 
   // ── Hashing helpers ─────────────────────────────────────────────
 
@@ -159,24 +169,30 @@ export class AuthService {
     const messages = authMessages[uiLocale];
     const emailCopy = messages.resetEmail;
 
-    // Envia e-mail de recuperação
+    // Envia e-mail de recuperação via Resend
     try {
-      await this.mailerService.sendMail({
-        to: user.email,
-        subject: emailCopy.subject,
-        template: 'reset-password',
-        context: {
-          ...emailCopy,
-          name: user.name || emailCopy.fallbackName,
-          resetLink,
-          year: new Date().getFullYear(),
-        },
+      const templatePath = join(__dirname, 'templates', 'reset-password.hbs');
+      const templateSource = readFileSync(templatePath, 'utf8');
+      const html = Handlebars.compile(templateSource)({
+        ...emailCopy,
+        name: user.name || emailCopy.fallbackName,
+        resetLink,
+        year: new Date().getFullYear(),
       });
+
+      const sendEmail = new Brevo.SendSmtpEmail();
+      sendEmail.subject = emailCopy.subject;
+      sendEmail.htmlContent = html;
+      sendEmail.sender = {
+        name: 'SIRA+',
+        email: process.env.BREVO_SENDER_EMAIL || 'noreply@example.com',
+      };
+      sendEmail.to = [{ email: user.email, name: user.name || emailCopy.fallbackName }];
+
+      await this.brevoClient.sendTransacEmail(sendEmail);
       this.logger.log(`[MAIL] Password reset email sent to ${user.email}`);
     } catch (mailError) {
-      // Loga o erro mas não expõe para o usuário (anti-enumeração)
       this.logger.error(`[MAIL] Failed to send reset email: ${mailError}`);
-      // Fallback: loga o link no console para ambiente de desenvolvimento
       this.logger.warn(`[MAIL-FALLBACK] Reset link for ${user.email}: ${resetLink}`);
     }
   }

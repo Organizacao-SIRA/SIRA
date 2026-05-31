@@ -10,8 +10,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
-let refreshPromise: Promise<boolean> | null = null;
+// ── Token storage ────────────────────────────────────────────────
+const TOKEN_KEY = 'sira_access_token';
+const REFRESH_KEY = 'sira_refresh_token';
 
+const saveTokens = (accessToken: string, refreshToken?: string) => {
+  localStorage.setItem(TOKEN_KEY, accessToken);
+  if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken);
+};
+
+export const clearTokens = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+};
+
+const getAccessToken = () => localStorage.getItem(TOKEN_KEY);
+const getRefreshToken = () => localStorage.getItem(REFRESH_KEY);
+
+// ── i18n helpers ─────────────────────────────────────────────────
 const withLocaleHeader = (headers?: HeadersInit): Headers => {
   const next = new Headers(headers);
   next.set('Accept-Language', getStoredUiLocale());
@@ -40,29 +56,49 @@ const resolveApiError = (error: any, fallbackKey: string): string => {
   return apiMessage(fallbackKey);
 };
 
-const refreshAuthSession = (): Promise<boolean> => {
-  if (!refreshPromise) {
-    refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then(response => response.ok)
-      .catch(() => false)
-      .finally(() => {
-        refreshPromise = null;
-      });
-  }
+// ── Fetch with auth ──────────────────────────────────────────────
+let isRefreshing = false;
 
-  return refreshPromise;
+const buildHeaders = (options: RequestInit): Record<string, string> => {
+  const token = getAccessToken();
+  return {
+    ...(options.headers as Record<string, string> ?? {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 };
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const response = await fetch(url, { ...options, headers: withLocaleHeader(options.headers), credentials: 'include' });
+  const response = await fetch(url, {
+    ...options,
+    headers: withLocaleHeader(buildHeaders(options)),
+    credentials: 'include',
+  });
 
-  if (response.status === 401) {
-    const refreshed = await refreshAuthSession();
-    if (refreshed) return fetch(url, { ...options, headers: withLocaleHeader(options.headers), credentials: 'include' });
+  if (response.status === 401 && !isRefreshing) {
+    isRefreshing = true;
+    try {
+      const refreshToken = getRefreshToken();
+      const refreshed = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: withLocaleHeader({ 'Content-Type': 'application/json' }),
+        credentials: 'include',
+        body: refreshToken ? JSON.stringify({ refreshToken }) : undefined,
+      });
 
+      if (refreshed.ok) {
+        const data = await refreshed.json();
+        if (data.accessToken) saveTokens(data.accessToken, data.refreshToken);
+        isRefreshing = false;
+        return fetch(url, {
+          ...options,
+          headers: withLocaleHeader(buildHeaders(options)),
+          credentials: 'include',
+        });
+      }
+    } catch { /* ignore */ }
+
+    isRefreshing = false;
+    clearTokens();
     window.dispatchEvent(new CustomEvent('sira:auth:expired'));
     throw new Error(apiMessage('sessionExpired'));
   }
@@ -83,7 +119,9 @@ export const loginUser = async (data: any) => {
     const error = await response.json().catch(() => ({}));
     throw new Error(resolveApiError(error, 'login'));
   }
-  return response.json();
+  const result = await response.json();
+  if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
+  return result;
 };
 
 export const registerUser = async (data: any) => {
@@ -97,7 +135,9 @@ export const registerUser = async (data: any) => {
     const error = await response.json().catch(() => ({}));
     throw new Error(resolveApiError(error, 'register'));
   }
-  return response.json();
+  const result = await response.json();
+  if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
+  return result;
 };
 
 // --- Password Recovery ---

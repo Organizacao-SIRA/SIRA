@@ -25,10 +25,12 @@ import { authMessages, normalizeUiLocale } from './auth-i18n';
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const COOKIE_BASE = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
 };
 
 @ApiTags('Auth')
@@ -63,7 +65,7 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken, user } = await this.authService.register(dto, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { user };
+    return { user, accessToken, refreshToken };
   }
 
   @Post('login')
@@ -77,7 +79,7 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken, user } = await this.authService.login(dto, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { user };
+    return { user, accessToken, refreshToken };
   }
 
   @Post('refresh')
@@ -87,16 +89,17 @@ export class AuthController {
     @Req() req: Request,
     @Headers('accept-language') acceptLanguage: string | undefined,
     @Res({ passthrough: true }) res: Response,
+    @Body('refreshToken') bodyToken?: string,
   ) {
     const messages = authMessages[normalizeUiLocale(acceptLanguage)];
-    const token = req.cookies?.[REFRESH_COOKIE];
+    const token = req.cookies?.[REFRESH_COOKIE] ?? bodyToken;
     if (!token) {
       this.clearAuthCookies(res);
       throw unauthorizedError(ERROR_CODES.AUTH_MISSING_REFRESH_TOKEN, messages.missingRefreshToken);
     }
     const { accessToken, refreshToken } = await this.authService.refreshAccessToken(token, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { ok: true };
+    return { ok: true, accessToken, refreshToken };
   }
 
   @Post('logout')
