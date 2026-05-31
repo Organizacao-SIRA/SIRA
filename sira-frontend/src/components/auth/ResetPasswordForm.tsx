@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { resetPassword, validateResetToken } from '../../services/api';
 import { PasswordInput } from '../ui/PasswordInput';
 import { Button } from '../ui/Button';
@@ -13,6 +14,7 @@ interface ResetPasswordFormProps {
 type FormState = 'validating' | 'ready' | 'invalid' | 'success';
 
 export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormProps) => {
+  const { t } = useTranslation('auth');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +38,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
     setError('');
 
     if (newPassword !== confirmPassword) {
-      setError('As senhas não coincidem.');
+      setError(t('resetPassword.passwordMismatch'));
       return;
     }
 
@@ -47,7 +49,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
       setFormState('success');
     } catch (err: any) {
       // Se o backend retorna array de mensagens (validação), junta
-      const msg = err.message || 'Erro ao redefinir a senha. Tente novamente.';
+      const msg = err.message || t('resetPassword.error');
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -59,7 +61,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
     return (
       <div className="text-center space-y-4 py-4 animate-fadeIn">
         <Loader2 className="w-8 h-8 text-primary mx-auto animate-spin" />
-        <p className="text-sm text-text-muted font-medium">Validando link de recuperação...</p>
+        <p className="text-sm text-text-muted font-medium">{t('resetPassword.validating')}</p>
       </div>
     );
   }
@@ -72,10 +74,9 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
           <AlertTriangle className="w-7 h-7 text-warning-strong" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-primary-dark dark:text-text">Link inválido ou expirado</h3>
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text">{t('resetPassword.invalidTitle')}</h3>
           <p className="text-sm text-text-muted leading-relaxed">
-            Este link de recuperação não é mais válido. Links expiram após 30 minutos
-            e só podem ser usados uma vez.
+            {t('resetPassword.invalidDescription')}
           </p>
         </div>
         <Button
@@ -85,7 +86,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
           className="w-full mt-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          Solicitar novo link
+          {t('resetPassword.requestNew')}
         </Button>
       </div>
     );
@@ -99,9 +100,9 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
           <CheckCircle className="w-7 h-7 text-success-strong" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-primary-dark dark:text-text">Senha redefinida!</h3>
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text">{t('resetPassword.successTitle')}</h3>
           <p className="text-sm text-text-muted leading-relaxed">
-            Sua senha foi atualizada com sucesso. Use a nova senha para acessar sua conta.
+            {t('resetPassword.successDescription')}
           </p>
         </div>
         <Button
@@ -109,7 +110,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
           onClick={onBackToLogin}
           className="w-full mt-2"
         >
-          Ir para o login
+          {t('resetPassword.goToLogin')}
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
@@ -120,7 +121,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
   return (
     <form className="space-y-5" onSubmit={handleSubmit} noValidate>
       <p className="text-sm text-text-muted leading-relaxed">
-        Crie uma nova senha segura para a sua conta.
+        {t('resetPassword.instructions')}
       </p>
 
       {error && (
@@ -131,10 +132,10 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
 
       <div className="space-y-3">
         <PasswordInput
-          label="Nova senha"
+          label={t('resetPassword.newPasswordLabel')}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="Crie uma nova senha"
+          placeholder={t('resetPassword.newPasswordPlaceholder')}
           autoComplete="new-password"
           required
         />
@@ -142,14 +143,14 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
       </div>
 
       <PasswordInput
-        label="Confirmar nova senha"
+        label={t('resetPassword.confirmPasswordLabel')}
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Repita a nova senha"
+        placeholder={t('resetPassword.confirmPasswordPlaceholder')}
         autoComplete="new-password"
         error={
           confirmPassword && confirmPassword !== newPassword
-            ? 'As senhas não coincidem'
+            ? t('resetPassword.passwordMismatchInline')
             : undefined
         }
         required
@@ -161,7 +162,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
         className="w-full mt-1"
         disabled={!newPassword || !confirmPassword || newPassword !== confirmPassword}
       >
-        Redefinir senha
+        {t('resetPassword.submit')}
         {!isLoading && <ArrowRight className="w-4 h-4" />}
       </Button>
     </form>

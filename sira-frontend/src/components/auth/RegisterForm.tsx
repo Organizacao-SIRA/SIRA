@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, UserPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { registerUser } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Input } from '../ui/Input';
@@ -11,6 +12,7 @@ interface RegisterFormProps {
 }
 
 export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
+  const { t } = useTranslation('auth');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +29,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       const response = await registerUser({ name, email, password });
       login(response.user);
     } catch (err: any) {
-      setError(err.message || 'Erro ao tentar realizar cadastro.');
+      setError(err.message || t('register.error'));
     } finally {
       setIsLoading(false);
     }
@@ -42,32 +44,32 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       )}
 
       <Input
-        label="Nome Completo"
+        label={t('register.nameLabel')}
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Seu nome completo"
+        placeholder={t('register.namePlaceholder')}
         icon={<User className="w-4 h-4" />}
         autoComplete="name"
         required
       />
 
       <Input
-        label="E-mail"
+        label={t('register.emailLabel')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="seu@email.com"
+        placeholder={t('register.emailPlaceholder')}
         icon={<Mail className="w-4 h-4" />}
         autoComplete="email"
         required
       />
 
       <PasswordInput
-        label="Senha"
+        label={t('register.passwordLabel')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Crie uma senha"
+        placeholder={t('register.passwordPlaceholder')}
         autoComplete="new-password"
         required
       />
@@ -77,7 +79,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         isLoading={isLoading}
         className="w-full mt-1"
       >
-        Finalizar cadastro
+        {t('register.submit')}
         {!isLoading && <UserPlus className="w-4 h-4" />}
       </Button>
     </form>

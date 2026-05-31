@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { forgotPassword } from '../../services/api';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -9,6 +10,7 @@ interface ForgotPasswordFormProps {
 }
 
 export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
       await forgotPassword(email);
       setIsSent(true);
     } catch (err: any) {
-      setError(err.message || 'Erro ao processar a solicitação. Tente novamente.');
+      setError(err.message || t('forgotPassword.error'));
     } finally {
       setIsLoading(false);
     }
@@ -36,13 +38,17 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
           <CheckCircle className="w-7 h-7 text-success-strong" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-primary-dark dark:text-text">E-mail enviado!</h3>
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text">{t('forgotPassword.sentTitle')}</h3>
           <p className="text-sm text-text-muted leading-relaxed">
-            Se o e-mail <strong className="text-text">{email}</strong> estiver cadastrado,
-            você receberá um link para redefinir sua senha.
+            <Trans
+              i18nKey="forgotPassword.sentDescription"
+              ns="auth"
+              values={{ email }}
+              components={{ strong: <strong className="text-text" /> }}
+            />
           </p>
           <p className="text-xs text-text-subtle">
-            Verifique também a pasta de spam. O link expira em 30 minutos.
+            {t('forgotPassword.sentHint')}
           </p>
         </div>
         <Button
@@ -52,7 +58,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
           className="w-full mt-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar para o login
+          {t('common:actions.backToLogin')}
         </Button>
       </div>
     );
@@ -61,7 +67,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
   return (
     <form className="space-y-5" onSubmit={handleSubmit} noValidate>
       <p className="text-sm text-text-muted leading-relaxed">
-        Informe o e-mail associado à sua conta. Enviaremos um link para você criar uma nova senha.
+        {t('forgotPassword.instructions')}
       </p>
 
       {error && (
@@ -71,11 +77,11 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
       )}
 
       <Input
-        label="E-mail"
+        label={t('forgotPassword.emailLabel')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="seu@email.com"
+        placeholder={t('forgotPassword.emailPlaceholder')}
         icon={<Mail className="w-4 h-4" />}
         autoComplete="email"
         required
@@ -86,7 +92,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
         isLoading={isLoading}
         className="w-full mt-1"
       >
-        Enviar link de recuperação
+        {t('forgotPassword.submit')}
         {!isLoading && <Send className="w-4 h-4" />}
       </Button>
 
@@ -97,7 +103,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
           className="text-xs font-semibold text-primary hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 inline-flex items-center gap-1"
         >
           <ArrowLeft className="w-3 h-3" />
-          Voltar para o login
+          {t('common:actions.backToLogin')}
         </button>
       </div>
     </form>

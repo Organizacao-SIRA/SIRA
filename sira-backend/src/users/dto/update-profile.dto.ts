@@ -7,6 +7,8 @@ import {
   PREFERENCE_TOPIC_IDS,
 } from '../preferences-options';
 
+const UI_LOCALES = ['pt-BR', 'en-US'] as const;
+
 export class UpdateProfileDto {
   @IsOptional()
   @IsString()
@@ -49,6 +51,10 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsBoolean()
   wantsOpenAccessOnly?: boolean;
+
+  @IsOptional()
+  @IsIn(UI_LOCALES)
+  uiLocale?: string;
 
   @IsOptional()
   @IsArray()

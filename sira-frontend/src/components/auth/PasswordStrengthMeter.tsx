@@ -1,27 +1,29 @@
 import { useMemo } from 'react';
 import { Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface PasswordStrengthMeterProps {
   password: string;
 }
 
 const RULES = [
-  { label: 'Mínimo de 8 caracteres', test: (p: string) => p.length >= 8 },
-  { label: 'Letra maiúscula (A-Z)', test: (p: string) => /[A-Z]/.test(p) },
-  { label: 'Letra minúscula (a-z)', test: (p: string) => /[a-z]/.test(p) },
-  { label: 'Número (0-9)', test: (p: string) => /\d/.test(p) },
-  { label: 'Caractere especial (!@#$...)', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+  { labelKey: 'password.rules.minLength', test: (p: string) => p.length >= 8 },
+  { labelKey: 'password.rules.uppercase', test: (p: string) => /[A-Z]/.test(p) },
+  { labelKey: 'password.rules.lowercase', test: (p: string) => /[a-z]/.test(p) },
+  { labelKey: 'password.rules.number', test: (p: string) => /\d/.test(p) },
+  { labelKey: 'password.rules.special', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
 ];
 
 const LEVELS = [
-  { label: 'Muito fraca', color: 'bg-red-500', textColor: 'text-red-500' },
-  { label: 'Fraca', color: 'bg-orange-500', textColor: 'text-orange-500' },
-  { label: 'Razoável', color: 'bg-amber-500', textColor: 'text-amber-500' },
-  { label: 'Forte', color: 'bg-lime-500', textColor: 'text-lime-500' },
-  { label: 'Muito forte', color: 'bg-emerald-500', textColor: 'text-emerald-500' },
+  { labelKey: 'password.strength.veryWeak', color: 'bg-red-500', textColor: 'text-red-500' },
+  { labelKey: 'password.strength.weak', color: 'bg-orange-500', textColor: 'text-orange-500' },
+  { labelKey: 'password.strength.fair', color: 'bg-amber-500', textColor: 'text-amber-500' },
+  { labelKey: 'password.strength.strong', color: 'bg-lime-500', textColor: 'text-lime-500' },
+  { labelKey: 'password.strength.veryStrong', color: 'bg-emerald-500', textColor: 'text-emerald-500' },
 ];
 
 export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) => {
+  const { t } = useTranslation('common');
   const passed = useMemo(() => RULES.map(r => r.test(password)), [password]);
   const score = passed.filter(Boolean).length;
   const level = score === 0 ? null : LEVELS[score - 1];
@@ -44,7 +46,7 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
         </div>
         {level && (
           <p className={`text-xs font-semibold ${level.textColor} transition-colors duration-200`}>
-            {level.label}
+            {t(level.labelKey)}
           </p>
         )}
       </div>
@@ -63,7 +65,7 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
             ) : (
               <X className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />
             )}
-            <span>{rule.label}</span>
+            <span>{t(rule.labelKey)}</span>
           </li>
         ))}
       </ul>

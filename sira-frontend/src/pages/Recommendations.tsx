@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Sparkles, ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { UserMessageBubble } from '../components/UserMessageBubble';
 import { AiMessageBubble } from '../components/AiMessageBubble';
 import { ChatLoadingSkeleton } from '../components/ChatLoadingSkeleton';
@@ -29,6 +30,7 @@ export const Recommendations = ({
   results, aiMessage, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
   viewDetails, toggleFavorite, isFavorite, isLoading, isRegenerating, onRegenerate, isSidebarOpen, user,
 }: RecommendationsProps) => {
+  const { t } = useTranslation('recommendations');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClearSearch = () => {
@@ -46,13 +48,13 @@ export const Recommendations = ({
           className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md px-1 py-1"
         >
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
-          <span className="text-sm">Nova pesquisa</span>
+          <span className="text-sm">{t('header.newSearch')}</span>
         </button>
         <div className="flex items-center gap-2 min-w-0">
           <div className="p-2 bg-primary-soft rounded-lg flex-shrink-0">
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-base sm:text-xl font-bold text-primary-dark dark:text-text hidden sm:block truncate">Busca Inteligente</h1>
+          <h1 className="text-base sm:text-xl font-bold text-primary-dark dark:text-text hidden sm:block truncate">{t('header.intelligentSearch')}</h1>
         </div>
       </div>
 
@@ -76,7 +78,7 @@ export const Recommendations = ({
       </div>
 
       <PageFooter
-        text="Resultados gerados por IA. Podem ocorrer erros, use o seu julgamento acadêmico ao selecionar os materiais."
+        text={t('footer')}
         variant="sticky"
       />
 

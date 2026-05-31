@@ -29,7 +29,16 @@ type RecommendationUser = {
   interests: string[];
   academicGoal: string | null;
   onboardingCompletedAt: Date | null;
+  uiLocale: string | null;
 };
+
+const normalizeUiLocale = (locale?: string | null): 'pt-BR' | 'en-US' => {
+  if (!locale) return 'pt-BR';
+  return locale.toLowerCase().startsWith('en') ? 'en-US' : 'pt-BR';
+};
+
+const aiOutputLanguage = (locale: 'pt-BR' | 'en-US') =>
+  locale === 'en-US' ? 'English' : 'português do Brasil';
 
 @Injectable()
 export class RecommendationsService {
@@ -97,6 +106,7 @@ export class RecommendationsService {
           interests: true,
           academicGoal: true,
           onboardingCompletedAt: true,
+          uiLocale: true,
         },
       }),
       this.prisma.favorite.findMany({
@@ -297,6 +307,7 @@ export class RecommendationsService {
       .join('\n');
 
     const topN = Math.min(8, candidates.length);
+    const outputLanguage = aiOutputLanguage(normalizeUiLocale(user.uiLocale));
 
     // Perfil no system: muda só quando o usuário edita o onboarding — cacheado pela Anthropic entre gerações.
     // Favoritos/buscas/candidatos no user: mudam a cada geração — não cacheáveis.
@@ -305,7 +316,7 @@ export class RecommendationsService {
     try {
       const raw = await this.ai.complete({
         system: systemPrompt,
-        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em português explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Para o campo "level": se o candidato já tem nivel diferente de "?", use exatamente esse valor. Caso seja "?", determine: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
+        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta em ${outputLanguage} explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Para o campo "level": se o candidato já tem nivel diferente de "?", use exatamente esse valor. Caso seja "?", determine: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}`,
         maxTokens: 1024,
       });
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();

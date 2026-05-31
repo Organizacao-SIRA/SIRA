@@ -63,6 +63,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       interests: profile.interests || [],
       academicGoal: profile.academicGoal || '',
       avatarUrl: profile.avatarUrl ?? profileData.avatarUrl,
+      uiLocale: profile.uiLocale ?? profileData.uiLocale,
       hasCompletedOnboarding: true,
       onboardingCompletedAt: profile.onboardingCompletedAt,
     });

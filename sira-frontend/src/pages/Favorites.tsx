@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Bookmark, BookOpen, FileText, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
 import { RecommendationCard } from '../components/RecommendationCard';
@@ -19,6 +20,7 @@ interface FavoritesProps {
 }
 
 export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeResetKey = 0 }: FavoritesProps) => {
+  const { t } = useTranslation('favorites');
   const {
     activeTab,
     setActiveTab,
@@ -68,18 +70,18 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
 
       <PageHeader
         icon={Bookmark}
-        title="Minha Biblioteca"
-        subtitle="Acesse rapidamente os livros e artigos que você salvou."
+        title={t('header.title')}
+        subtitle={t('header.subtitle')}
       />
 
       {/* Tabs + contador — empilha em mobile */}
       <div className="border-b border-border-strong mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div
           role="tablist"
-          aria-label="Filtro da biblioteca"
+          aria-label={t('tabs.label')}
           className="flex space-x-6 sm:space-x-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-        {FAVORITE_TABS.map(({ id, label }) => (
+        {FAVORITE_TABS.map(({ id }) => (
           <button
             key={id}
             type="button"
@@ -92,7 +94,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
                 : 'border-transparent text-text-subtle hover:text-text-muted'
             }`}
           >
-            {label}
+            {t(`tabs.${id}`)}
           </button>
         ))}
         </div>
@@ -101,12 +103,12 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 bg-primary text-white text-sm font-semibold px-3 py-1 rounded-full shadow-sm">
                 <Bookmark className="w-3.5 h-3.5" />
-                {counts.all} {counts.all === 1 ? 'salvo' : 'salvos'}
+                {t('counts.saved', { count: counts.all })}
               </span>
               <span className="text-xs text-text-muted font-medium whitespace-nowrap">
-                {bookCount > 0 && <>{bookCount} {bookCount === 1 ? 'livro' : 'livros'}</>}
+                {bookCount > 0 && <>{t('counts.book', { count: bookCount })}</>}
                 {bookCount > 0 && articleCount > 0 && <span className="mx-1 opacity-40">·</span>}
-                {articleCount > 0 && <>{articleCount} {articleCount === 1 ? 'artigo' : 'artigos'}</>}
+                {articleCount > 0 && <>{t('counts.article', { count: articleCount })}</>}
               </span>
             </div>
             {!isMobile && (items.length > 0 || isInitialLoading) && (
@@ -120,12 +122,12 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
       {isEmpty && (
         <div className="text-center py-12 sm:py-20 px-4 bg-surface rounded-3xl border-2 border-dashed border-border">
           <Bookmark className="h-12 w-12 text-text-subtle mx-auto mb-4" />
-          <h3 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">Nenhum material salvo</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">{t('states.emptyTitle')}</h3>
           <p className="text-text-muted mb-6 sm:mb-8 max-w-xs mx-auto text-sm sm:text-base">
-            Salve livros e artigos para acessá-los rapidamente aqui.
+            {t('states.emptyDescription')}
           </p>
           <Button variant="primary" size="lg" onClick={() => setCurrentScreen('home')} className="mx-auto">
-            <Search className="w-4 h-4" /> Explorar Conteúdos
+            <Search className="w-4 h-4" /> {t('states.explore')}
           </Button>
         </div>
       )}
@@ -138,13 +140,13 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
             : <FileText className="h-12 w-12 text-text-subtle mx-auto mb-4" />
           }
           <h3 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">
-            Nenhum {activeTab === 'book' ? 'livro' : 'artigo'} salvo
+            {activeTab === 'book' ? t('states.filteredBookTitle') : t('states.filteredArticleTitle')}
           </h3>
           <p className="text-text-muted mb-6 sm:mb-8 max-w-xs mx-auto text-sm sm:text-base">
-            Você ainda não salvou {activeTab === 'book' ? 'livros' : 'artigos'} na sua biblioteca.
+            {activeTab === 'book' ? t('states.filteredBookDescription') : t('states.filteredArticleDescription')}
           </p>
           <Button variant="secondary" size="lg" onClick={() => setActiveTab('all')} className="mx-auto">
-            Ver todos os materiais
+            {t('states.viewAll')}
           </Button>
         </div>
       )}
@@ -169,7 +171,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
         <div className="bg-surface border border-danger-border rounded-2xl p-8 text-center space-y-4">
           <p className="text-sm text-danger-strong font-medium">{error}</p>
           <Button variant="secondary" size="sm" onClick={() => loadFavoritesPage(activeTab, 0)}>
-            Tentar novamente
+            {t('common:actions.retry')}
           </Button>
         </div>
       )}
@@ -199,7 +201,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
                 isLoading={isLoadingMore}
                 onClick={() => loadFavoritesPage(activeTab, page + 1, true)}
               >
-                Carregar mais
+                {t('states.loadMore')}
               </Button>
             </div>
           )}

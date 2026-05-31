@@ -1,8 +1,11 @@
+import type { UiLocale } from '../i18n/locales';
+
 export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
   avatarUrl?: string | null;
+  uiLocale?: UiLocale;
 }
 
 export type PreferenceTopic = {
@@ -35,6 +38,7 @@ export type UserProfile = {
   interests: string[];
   academicGoal: string | null;
   avatarUrl: string | null;
+  uiLocale: UiLocale;
   onboardingCompletedAt: string | null;
   hasCompletedOnboarding: boolean;
 };
@@ -67,6 +71,7 @@ export type ProfileData = {
   interests: string[];
   academicGoal: string;
   avatarUrl: string | null;
+  uiLocale: UiLocale;
   hasCompletedOnboarding: boolean;
   onboardingCompletedAt: string | null;
 };

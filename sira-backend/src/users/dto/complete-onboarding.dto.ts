@@ -15,6 +15,8 @@ import {
   PREFERENCE_TOPIC_IDS,
 } from '../preferences-options';
 
+const UI_LOCALES = ['pt-BR', 'en-US'] as const;
+
 export class CompleteOnboardingDto {
   @IsString()
   @MinLength(2)
@@ -57,4 +59,8 @@ export class CompleteOnboardingDto {
   @IsString()
   @IsIn(ACADEMIC_GOAL_LIST)
   academicGoal?: string;
+
+  @IsOptional()
+  @IsIn(UI_LOCALES)
+  uiLocale?: string;
 }

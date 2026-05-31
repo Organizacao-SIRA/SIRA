@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { BookOpenCheck, Lock, Unlock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StatusBadge } from './ui/StatusBadge';
 import { MaterialTypeBadge } from './ui/MaterialTypeBadge';
 import { FavoriteButton } from './ui/FavoriteButton';
@@ -25,14 +26,14 @@ const ACCESS_STYLES = {
   restricted: 'bg-warning-soft text-warning-strong border-warning-border',
 } as const;
 
-const getAccessConfig = (isOpenAccess?: boolean): AccessConfig | null => {
+const getAccessConfig = (isOpenAccess: boolean | undefined, translate: (key: string) => string): AccessConfig | null => {
   if (isOpenAccess === undefined) return null;
   return {
     Icon:    isOpenAccess ? Unlock : Lock,
-    label:   isOpenAccess ? 'Acesso aberto' : 'Acesso restrito',
+    label:   isOpenAccess ? translate('access.open') : translate('access.restricted'),
     classes: isOpenAccess ? ACCESS_STYLES.open : ACCESS_STYLES.restricted,
-    short:   isOpenAccess ? 'Aberto' : 'Restrito',
-    full:    isOpenAccess ? 'Acesso Aberto' : 'Acesso Restrito',
+    short:   isOpenAccess ? translate('access.openShort') : translate('access.restrictedShort'),
+    full:    isOpenAccess ? translate('access.openFull') : translate('access.restrictedFull'),
   };
 };
 
@@ -55,7 +56,8 @@ const AccessStrip = ({
   position: 'middle' | 'bottom';
   compact?: boolean;
 }) => {
-  const cfg = getAccessConfig(isOpenAccess);
+  const { t } = useTranslation('common');
+  const cfg = getAccessConfig(isOpenAccess, t);
   if (!cfg) return null;
 
   const sizing = compact
@@ -104,6 +106,7 @@ export const RecommendationCard = ({
   stretch = true,
   analysisSlot = 'auto',
 }: RecommendationCardProps) => {
+  const { t } = useTranslation('common');
   const [imageError, setImageError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const impressionFired = useRef(false);
@@ -149,7 +152,7 @@ export const RecommendationCard = ({
   const cover = showImage ? (
     <img
       src={item.image}
-      alt={`Capa de ${item.title}`}
+      alt={t('materialCard.coverAlt', { title: item.title })}
       loading="lazy"
       onError={() => setImageError(true)}
       className={
@@ -198,17 +201,17 @@ export const RecommendationCard = ({
 
       {!item.aiExplanation && shouldShowAnalysisSlot && (
         <aside
-          aria-label="Origem do material"
+          aria-label={t('materialCard.sourceLabel')}
           className="bg-surface-subtle border-l-4 border-border-strong rounded-r-md px-2.5 py-1.5 sm:px-3 sm:py-2 min-h-[4.75rem] min-w-0"
         >
           <div className="flex items-center gap-1.5 mb-1">
             <BookOpenCheck className="w-3.5 h-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
             <span className="font-bold uppercase tracking-wider text-text-subtle text-[10px]">
-              Catálogo acadêmico
+              {t('materialCard.catalogSource')}
             </span>
           </div>
           <p className="text-xs leading-snug text-text-muted line-clamp-2 break-words min-w-0">
-            Material salvo diretamente do catálogo, sem análise personalizada da IA.
+            {t('materialCard.savedWithoutAi')}
           </p>
         </aside>
       )}
@@ -264,7 +267,7 @@ export const RecommendationCard = ({
       ref={cardRef}
       role="button"
       tabIndex={0}
-      aria-label={`Ver detalhes de ${item.title}`}
+      aria-label={t('materialCard.viewDetails', { title: item.title })}
       onClick={handleCardClick}
       onKeyDown={e => {
         if (e.key !== 'Enter' && e.key !== ' ') return;

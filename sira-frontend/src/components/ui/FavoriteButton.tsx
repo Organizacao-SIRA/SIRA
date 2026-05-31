@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FavoriteButtonProps {
   isFavorite: boolean;
@@ -8,6 +9,7 @@ interface FavoriteButtonProps {
 }
 
 export const FavoriteButton = ({ isFavorite, onToggle, size = 'md' }: FavoriteButtonProps) => {
+  const { t } = useTranslation('common');
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
   return (
@@ -21,7 +23,7 @@ export const FavoriteButton = ({ isFavorite, onToggle, size = 'md' }: FavoriteBu
     >
       <button
         type="button"
-        aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        aria-label={isFavorite ? t('favorites.remove') : t('favorites.add')}
         onClick={e => { e.stopPropagation(); onToggle(e); }}
         className={`p-2.5 rounded-full border transition-colors duration-150 cursor-pointer flex-shrink-0 active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
           isFavorite

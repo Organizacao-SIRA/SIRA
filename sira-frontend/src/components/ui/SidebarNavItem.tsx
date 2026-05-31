@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { SidebarItem } from '../sidebar/sidebarItems';
 
 interface SidebarNavItemProps {
@@ -8,14 +9,16 @@ interface SidebarNavItemProps {
 }
 
 export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarNavItemProps) => {
+  const { t } = useTranslation('navigation');
   const Icon = item.icon;
+  const label = t(item.labelKey);
 
   return (
     <li>
       <button
         onClick={onClick}
-        aria-label={item.label}
-        title={!isExpanded ? item.label : undefined}
+        aria-label={label}
+        title={!isExpanded ? label : undefined}
         className={`
           w-full flex items-center pl-5 pr-2 py-3 text-sm font-medium
           transition-colors cursor-pointer border-l-4
@@ -31,7 +34,7 @@ export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarN
           whitespace-nowrap overflow-hidden transition-all duration-300
           ${isExpanded ? 'opacity-100 max-w-xs ml-3' : 'opacity-0 max-w-0 ml-0'}
         `}>
-          {item.label}
+          {label}
         </span>
       </button>
     </li>

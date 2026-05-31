@@ -234,6 +234,7 @@ export class AuthService {
       materialLevels: user.materialLevels,
       wantsBooks: user.wantsBooks,
       wantsArticles: user.wantsArticles,
+      uiLocale: user.uiLocale || 'pt-BR',
       interests: user.interests,
       academicGoal: user.academicGoal,
       avatarUrl: user.avatarUrl,

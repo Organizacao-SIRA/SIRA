@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Headers, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MaterialsService, SearchFilters } from './materials.service';
 import { MaterialDto } from './dto/material.dto';
@@ -58,6 +58,7 @@ export class MaterialsController {
     @Query('yearFrom') yearFrom?: string,
     @Query('excludeIds') excludeIds?: string,
     @Query('diversify') diversify?: string,
+    @Headers('accept-language') acceptLanguage?: string,
     @CurrentUser() user?: JwtPayload,
   ): Promise<ChatSearchResponseDto> {
     const filters: SearchFilters = {
@@ -72,6 +73,7 @@ export class MaterialsController {
         ? excludeIds.split(',').map(id => id.trim()).filter(Boolean).slice(0, 80)
         : [],
       diversify: diversify === 'true',
+      locale: acceptLanguage,
     });
   }
 }

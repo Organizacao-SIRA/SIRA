@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AuthUser, SearchFilters } from '../types';
 import { AiGreeting } from '../components/AiGreeting';
 import { ChatInputForm } from '../components/ChatInputForm';
@@ -15,6 +16,7 @@ interface HomeProps {
 }
 
 export const Home = ({ searchQuery, setSearchQuery, handleSearch, filters, setFilters, user }: HomeProps) => {
+  const { t } = useTranslation('home');
   const isWritingSearch = searchQuery.trim().length > 0;
 
   return (
@@ -50,7 +52,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, filters, setFi
         </div>
       </main>
 
-      <PageFooter text="Resultados gerados por IA. Podem ocorrer erros, use o seu julgamento acadêmico ao selecionar os materiais." />
+      <PageFooter text={t('search.footer')} />
     </div>
   );
 };

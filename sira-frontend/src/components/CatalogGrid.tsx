@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { RecommendationCard } from './RecommendationCard';
 import { CatalogCardSkeleton } from './CatalogCardSkeleton';
 import { RecommendationCardSkeleton } from './RecommendationCardSkeleton';
@@ -34,6 +35,8 @@ export const CatalogGrid = ({
   viewDetails, toggleFavorite, isFavorite,
   viewMode = 'vertical',
 }: CatalogGridProps) => {
+  const { t } = useTranslation('catalog');
+
   if (loading) {
     return viewMode === 'horizontal' ? (
       <div className="space-y-4">
@@ -53,7 +56,7 @@ export const CatalogGrid = ({
   if (error) {
     return (
       <ErrorState
-        title="Erro ao carregar o catálogo"
+        title={t('states.loadErrorTitle')}
         message={error}
         onRetry={onRetry}
         className="max-w-2xl mx-auto"
@@ -65,13 +68,13 @@ export const CatalogGrid = ({
     return (
       <EmptyState
         icon={<BookOpen className="w-full h-full" />}
-        title="Nenhum material encontrado"
+        title={t('states.emptyTitle')}
         description={
           isSearchMode
-            ? `Nenhum resultado para "${searchQuery}". Tente outros termos de busca.`
-            : 'Nenhum material disponível para esta categoria no momento.'
+            ? t('states.emptySearch', { query: searchQuery })
+            : t('states.emptyCategory')
         }
-        actionLabel={isSearchMode ? undefined : 'Tentar novamente'}
+        actionLabel={isSearchMode ? undefined : t('common:actions.retry')}
         onAction={isSearchMode ? undefined : onRetry}
       />
     );

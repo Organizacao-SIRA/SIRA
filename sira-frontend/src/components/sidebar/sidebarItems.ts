@@ -3,14 +3,14 @@ import type { LucideIcon } from 'lucide-react';
 
 export interface SidebarItem {
   id: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   authRequired?: boolean;
 }
 
 export const SIDEBAR_ITEMS: SidebarItem[] = [
-  { id: 'catalog',   label: 'Catálogo de Livros', icon: Library  },
-  { id: 'home',      label: 'Recomendações',       icon: Sparkles },
-  { id: 'favorites', label: 'Meus Favoritos',      icon: Bookmark },
-  { id: 'profile',   label: 'Configurações',       icon: Settings, authRequired: true },
+  { id: 'catalog',   labelKey: 'items.catalog',   icon: Library  },
+  { id: 'home',      labelKey: 'items.home',      icon: Sparkles },
+  { id: 'favorites', labelKey: 'items.favorites', icon: Bookmark },
+  { id: 'profile',   labelKey: 'items.profile',   icon: Settings, authRequired: true },
 ];

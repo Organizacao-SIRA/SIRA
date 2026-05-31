@@ -1,11 +1,15 @@
 import { LogIn } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { AuthUser } from '../types';
-import { resolveAvatarUrl } from '../services/api';
+import { resolveAvatarUrl, updateProfile } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import type { UiLocale } from '../i18n/locales';
 import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
 import { NavLogoutButton } from './NavLogoutButton';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { LanguageToggle } from './ui/LanguageToggle';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
@@ -18,7 +22,15 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, currentScreen, showMenuButton, user, onLogout }: NavbarProps) => {
+  const { t } = useTranslation('navigation');
+  const { updateUser } = useAuth();
   const displayName = user?.name || user?.email || '';
+
+  const handleLocaleChange = (uiLocale: UiLocale) => {
+    if (!user) return;
+    updateUser({ uiLocale });
+    updateProfile({ uiLocale }).catch(() => {});
+  };
 
   return (
     <header className="bg-primary text-white shadow-md sticky top-0 z-50 w-full transition-all">
@@ -33,6 +45,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
           />
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <LanguageToggle variant="navbar" onChange={handleLocaleChange} />
             <ThemeToggle />
             {user ? (
               <>
@@ -51,7 +64,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
                 disabled={currentScreen === 'login'}
               >
                 {currentScreen !== 'login' && <LogIn className="w-4 h-4" />}
-                {currentScreen === 'login' ? 'Acessando...' : 'Entrar'}
+                {currentScreen === 'login' ? t('auth.signingIn') : t('auth.signIn')}
               </Button>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, type RefObject } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/Button';
 
 interface RegenerateResultsButtonProps {
@@ -15,6 +16,7 @@ export const RegenerateResultsButton = ({
   isSidebarOpen,
   onClick,
 }: RegenerateResultsButtonProps) => {
+  const { t } = useTranslation('recommendations');
   const [left, setLeft] = useState<number | null>(null);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export const RegenerateResultsButton = ({
       style={{ left }}
     >
       <span className="pointer-events-none absolute right-0 top-0 hidden h-[52px] w-[52px] items-center overflow-hidden rounded-full border border-primary/30 bg-primary pl-5 pr-[68px] text-sm font-semibold text-white opacity-0 shadow-lg shadow-primary/20 transition-all duration-150 sm:flex sm:group-hover:w-[224px] sm:group-hover:bg-primary-dark sm:group-hover:opacity-100 sm:group-focus-within:w-[224px] sm:group-focus-within:bg-primary-dark sm:group-focus-within:opacity-100">
-        <span className="whitespace-nowrap leading-none">Gerar novas sugestões</span>
+        <span className="whitespace-nowrap leading-none">{t('actions.regenerate')}</span>
       </span>
       <Button
         type="button"
@@ -76,7 +78,7 @@ export const RegenerateResultsButton = ({
         disabled={isLoading}
         aria-busy={isLoading}
         onClick={onClick}
-        aria-label="Gerar novas sugestões"
+        aria-label={t('actions.regenerate')}
         className="relative z-10 h-[52px] w-[52px] border-primary/30 bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-dark focus-visible:bg-primary-dark"
       >
         <RefreshCw className={`h-5 w-5 flex-shrink-0 ${isLoading ? 'animate-spin' : ''}`} />

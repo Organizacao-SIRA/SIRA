@@ -1,16 +1,17 @@
 import { Filter, X, BookOpen, FileText, Unlock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { SearchFilters as SearchFiltersState } from '../types';
 
 const AREAS = [
-  { value: 'ia', label: 'Inteligência Artificial' },
-  { value: 'cd', label: 'Ciência de Dados' },
-  { value: 'edu', label: 'Educação' },
-  { value: 'sau', label: 'Saúde & Medicina' },
-  { value: 'dir', label: 'Direito' },
-  { value: 'eco', label: 'Economia' },
-  { value: 'soc', label: 'Sociologia' },
-  { value: 'amb', label: 'Meio Ambiente' },
-  { value: 'gp', label: 'Gestão Pública' },
+  { value: 'ia', labelKey: 'filters.areas.ia' },
+  { value: 'cd', labelKey: 'filters.areas.cd' },
+  { value: 'edu', labelKey: 'filters.areas.edu' },
+  { value: 'sau', labelKey: 'filters.areas.sau' },
+  { value: 'dir', labelKey: 'filters.areas.dir' },
+  { value: 'eco', labelKey: 'filters.areas.eco' },
+  { value: 'soc', labelKey: 'filters.areas.soc' },
+  { value: 'amb', labelKey: 'filters.areas.amb' },
+  { value: 'gp', labelKey: 'filters.areas.gp' },
 ];
 
 interface SearchFiltersProps {
@@ -18,21 +19,21 @@ interface SearchFiltersProps {
   onChange: (filters: SearchFiltersState) => void;
 }
 
-type TypeOption = { value: 'book' | 'article' | null; label: string; icon: React.ReactNode };
+type TypeOption = { value: 'book' | 'article' | null; labelKey: string; icon: React.ReactNode };
 
 const TYPE_OPTIONS: TypeOption[] = [
-  { value: null, label: 'Todos', icon: null },
-  { value: 'book', label: 'Livros', icon: <BookOpen className="w-3.5 h-3.5" /> },
-  { value: 'article', label: 'Artigos', icon: <FileText className="w-3.5 h-3.5" /> },
+  { value: null, labelKey: 'filters.allTypes', icon: null },
+  { value: 'book', labelKey: 'filters.books', icon: <BookOpen className="w-3.5 h-3.5" /> },
+  { value: 'article', labelKey: 'filters.articles', icon: <FileText className="w-3.5 h-3.5" /> },
 ];
 
 function getPeriodOptions() {
   const y = new Date().getFullYear();
   return [
-    { value: null, label: 'Qualquer período' },
-    { value: y, label: 'Este ano' },
-    { value: y - 4, label: 'Últimos 5 anos' },
-    { value: y - 9, label: 'Últimos 10 anos' },
+    { value: null, labelKey: 'filters.anyPeriod' },
+    { value: y, labelKey: 'filters.thisYear' },
+    { value: y - 4, labelKey: 'filters.lastFiveYears' },
+    { value: y - 9, labelKey: 'filters.lastTenYears' },
   ];
 }
 
@@ -40,6 +41,7 @@ const hasActiveFilters = (f: SearchFiltersState) =>
   f.types.length > 0 || f.area !== null || f.openAccessOnly || f.yearFrom !== null;
 
 export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
+  const { t } = useTranslation('catalog');
   const PERIOD_OPTIONS = getPeriodOptions();
   const isActive = hasActiveFilters(filters);
 
@@ -67,7 +69,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
     <div className="w-full space-y-3">
       <div className="flex items-center gap-2 text-text-muted">
         <Filter className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-xs uppercase tracking-widest font-semibold">Filtros</span>
+        <span className="text-xs uppercase tracking-widest font-semibold">{t('filters.label')}</span>
         {isActive && (
           <button
             type="button"
@@ -75,7 +77,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
             className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-primary/70 font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 py-0.5"
           >
             <X className="w-3 h-3" />
-            Limpar
+            {t('filters.clear')}
           </button>
         )}
       </div>
@@ -99,7 +101,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
                 }`}
               >
                 {opt.icon}
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             );
           })}
@@ -116,9 +118,9 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
                 : 'border-border text-text-muted hover:border-primary/50'
             }`}
           >
-            <option value="">Todas as áreas</option>
+            <option value="">{t('filters.allAreas')}</option>
             {AREAS.map(a => (
-              <option key={a.value} value={a.value}>{a.label}</option>
+              <option key={a.value} value={a.value}>{t(a.labelKey)}</option>
             ))}
           </select>
           <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted">
@@ -140,7 +142,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
           }`}
         >
           <Unlock className="w-3.5 h-3.5" />
-          Acesso Aberto
+          {t('filters.openAccess')}
         </button>
 
         {/* Período */}
@@ -159,7 +161,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
                     : 'text-text-muted hover:text-text hover:bg-surface-muted'
                 }`}
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             );
           })}

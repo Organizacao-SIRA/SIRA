@@ -12,6 +12,7 @@ export interface ChatSearchOptions {
   filters?: SearchFilters;
   excludeIds?: string[];
   diversify?: boolean;
+  locale?: string;
 }
 
 const AREA_GB_SUBJECT: Record<string, string> = {
@@ -43,6 +44,19 @@ const LANGUAGE_ISO: Record<string, string> = {
   'Inglês': 'en',
   'Espanhol': 'es',
 };
+
+const normalizeUiLocale = (locale?: string | null): 'pt-BR' | 'en-US' => {
+  if (!locale) return 'pt-BR';
+  return locale.toLowerCase().startsWith('en') ? 'en-US' : 'pt-BR';
+};
+
+const aiOutputLanguage = (locale: 'pt-BR' | 'en-US') =>
+  locale === 'en-US' ? 'English' : 'português do Brasil';
+
+const emptyChatMessage = (locale: 'pt-BR' | 'en-US') =>
+  locale === 'en-US'
+    ? 'I could not find materials in the academic databases for this request. Try rephrasing your search.'
+    : 'Não consegui encontrar materiais nas bases acadêmicas para este pedido. Tente reformular sua busca.';
 
 const AREA_OA_CONCEPT: Record<string, string> = {
   ia: 'artificial intelligence',
@@ -178,9 +192,13 @@ export class MaterialsService {
         interests: true,
         academicGoal: true,
         materialLevels: true,
-        languages: true
+        languages: true,
+        uiLocale: true,
       }
     }) : null;
+
+    const uiLocale = normalizeUiLocale(user?.uiLocale ?? options.locale);
+    const outputLanguage = aiOutputLanguage(uiLocale);
 
     if (userId) {
       this.saveSearchHistory(userId, prompt.trim()).catch(() => {});
@@ -260,7 +278,7 @@ export class MaterialsService {
 
     if (candidates.length === 0) {
       return {
-        aiMessage: 'Não consegui encontrar materiais nas bases acadêmicas para este pedido. Tente reformular sua busca.',
+        aiMessage: emptyChatMessage(uiLocale),
         results: [],
       };
     }
@@ -299,10 +317,10 @@ export class MaterialsService {
             Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
             ${diversify ? 'Esta é uma nova rodada de sugestões. Priorize materiais úteis que tragam diversidade de subtemas, métodos, autores, anos, tipos e fontes. Evite escolhas óbvias ou muito parecidas entre si.' : ''}
             Retorne um JSON com:
-            - "aiMessage": Uma síntese geral em português (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
+            - "aiMessage": Uma síntese geral em ${outputLanguage} (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
             - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
               - "id": o ID exato do candidato
-              - "explanation": UMA frase curta em português explicando por que este material específico é relevante para o pedido e o perfil do usuário.`,
+              - "explanation": UMA frase curta em ${outputLanguage} explicando por que este material específico é relevante para o pedido e o perfil do usuário.`,
         user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}`,
         maxTokens: 1500,
       });

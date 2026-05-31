@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface SiraLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'hero';
   tone?: 'brand' | 'light' | 'inherit';
@@ -37,6 +39,7 @@ export const SiraLogo = ({
   showTagline = false,
   className = '',
 }: SiraLogoProps) => {
+  const { t } = useTranslation('navigation');
   const colors = TONE_CLASSES[tone];
 
   return (
@@ -50,7 +53,7 @@ export const SiraLogo = ({
       </span>
       {showTagline && (
         <span className={`mt-2 text-xs font-medium leading-snug ${colors.tagline}`}>
-          Sistema Inteligente de Recomendação Acadêmica
+          {t('brand.taglineLine1')} {t('brand.taglineLine2')}
         </span>
       )}
     </span>

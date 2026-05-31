@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { i18n } from '../i18n';
+import { normalizeLocale, setStoredUiLocale, type UiLocale } from '../i18n/locales';
 
 interface User {
   id: string;
@@ -6,6 +8,7 @@ interface User {
   name: string;
   avatarUrl?: string | null;
   hasCompletedOnboarding?: boolean;
+  uiLocale?: UiLocale;
 }
 
 interface AuthContextData {
@@ -38,6 +41,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (userData: User) => {
+    if (userData.uiLocale) {
+      const locale = normalizeLocale(userData.uiLocale);
+      setStoredUiLocale(locale);
+      void i18n.changeLanguage(locale);
+      userData = { ...userData, uiLocale: locale };
+    }
+
     localStorage.setItem('@sira:user', JSON.stringify(userData));
     setUser(userData);
   };
@@ -57,6 +67,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(prev => {
       if (!prev) return null;
       const updated = { ...prev, ...userData };
+      if (updated.uiLocale) {
+        const locale = normalizeLocale(updated.uiLocale);
+        setStoredUiLocale(locale);
+        void i18n.changeLanguage(locale);
+        updated.uiLocale = locale;
+      }
       localStorage.setItem('@sira:user', JSON.stringify(updated));
       return updated;
     });

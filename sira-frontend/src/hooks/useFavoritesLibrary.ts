@@ -7,9 +7,9 @@ import type { CatalogItem } from '../types';
 export const FAVORITES_PAGE_SIZE = 20;
 
 export const FAVORITE_TABS = [
-  { id: 'all',     label: 'Todos os Materiais' },
-  { id: 'book',    label: 'Livros' },
-  { id: 'article', label: 'Artigos Científicos' },
+  { id: 'all' },
+  { id: 'book' },
+  { id: 'article' },
 ] as const;
 
 export type FavoriteTabId = typeof FAVORITE_TABS[number]['id'];

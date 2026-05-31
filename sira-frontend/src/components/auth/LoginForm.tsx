@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { loginUser } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Input } from '../ui/Input';
@@ -11,6 +12,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
       const response = await loginUser({ email, password });
       login(response.user);
     } catch (err: any) {
-      setError(err.message || 'Erro ao tentar fazer login.');
+      setError(err.message || t('login.error'));
     } finally {
       setIsLoading(false);
     }
@@ -41,11 +43,11 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
       )}
 
       <Input
-        label="E-mail"
+        label={t('login.emailLabel')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="seu@email.com"
+        placeholder={t('login.emailPlaceholder')}
         icon={<Mail className="w-4 h-4" />}
         autoComplete="email"
         required
@@ -53,10 +55,10 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
 
       <div className="space-y-2">
         <PasswordInput
-          label="Senha"
+          label={t('common:password.label')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Digite sua senha"
+          placeholder={t('login.passwordPlaceholder')}
           autoComplete="current-password"
           required
         />
@@ -66,7 +68,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
             onClick={onForgotPassword}
             className="text-xs font-semibold text-primary hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1"
           >
-            Esqueceu sua senha?
+            {t('login.forgotPassword')}
           </button>
         </div>
       </div>
@@ -76,7 +78,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
         isLoading={isLoading}
         className="w-full mt-1"
       >
-        Entrar no sistema
+        {t('login.submit')}
         {!isLoading && <ArrowRight className="w-4 h-4" />}
       </Button>
     </form>

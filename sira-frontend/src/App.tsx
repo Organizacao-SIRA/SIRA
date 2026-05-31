@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ProfileData, SearchFilters } from './types';
 import { 
   searchAcademicContent, 
@@ -24,6 +25,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { useAuth } from './contexts/AuthContext';
 import { useScreenScrollRestoration } from './hooks/useScreenScrollRestoration';
+import { DEFAULT_LOCALE } from './i18n/locales';
 
 const SCREEN_SCROLL_KEYS: Record<string, string> = {
   results: '@sira:resultsScrollY',
@@ -65,6 +67,7 @@ const readLastFavoritesScreen = (): FavoritesSectionScreen => {
 };
 
 export default function App() {
+  const { t } = useTranslation('common');
   const { isAuthenticated, user, logout, updateUser } = useAuth();
   
   // Estados persistidos via sessionStorage para sobreviver a reloads (F5)
@@ -247,6 +250,7 @@ export default function App() {
     interests: [],
     academicGoal: '',
     avatarUrl: user?.avatarUrl ?? null,
+    uiLocale: user?.uiLocale ?? DEFAULT_LOCALE,
     hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
     onboardingCompletedAt: null,
   });
@@ -259,6 +263,7 @@ export default function App() {
         name: user.name || prev.name,
         email: user.email || prev.email,
         hasCompletedOnboarding: user.hasCompletedOnboarding ?? prev.hasCompletedOnboarding,
+        uiLocale: user.uiLocale ?? prev.uiLocale,
       }));
 
       loadSessionData();
@@ -268,7 +273,7 @@ export default function App() {
         name: '', email: '', course: '', educationLevel: 'Graduação',
         mainArea: '', subAreas: '', languages: ['Português'],
         materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true, wantsOpenAccessOnly: false,
-        interests: [], academicGoal: '', avatarUrl: null,
+        interests: [], academicGoal: '', avatarUrl: null, uiLocale: DEFAULT_LOCALE,
         hasCompletedOnboarding: false, onboardingCompletedAt: null,
       });
       setIsProfileLoading(false);
@@ -329,12 +334,18 @@ export default function App() {
         interests: data.interests || [],
         academicGoal: data.academicGoal || '',
         avatarUrl: data.avatarUrl ?? null,
+        uiLocale: data.uiLocale ?? DEFAULT_LOCALE,
         hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,
         onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
       setIsProfileLoaded(true);
       setProfileError(null);
-      if (data.avatarUrl !== undefined) updateUser({ avatarUrl: data.avatarUrl });
+      if (data.avatarUrl !== undefined || data.uiLocale !== undefined) {
+        updateUser({
+          ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
+          ...(data.uiLocale !== undefined ? { uiLocale: data.uiLocale } : {}),
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
       const message = error instanceof Error ? error.message : 'Erro ao carregar perfil';
@@ -376,7 +387,7 @@ export default function App() {
       setSeenResultIds(items.map(item => item.id).filter(Boolean));
     } catch {
       setResults([]);
-      setAiMessage('Desculpe, tive um erro ao processar sua busca conversacional.');
+      setAiMessage(t('errors.conversationalSearch'));
       setSearchTotal(0);
       setSeenResultIds([]);
     } finally {
@@ -407,7 +418,7 @@ export default function App() {
       setSearchTotal(items.length);
       setSeenResultIds(prev => [...new Set([...prev, ...items.map(item => item.id).filter(Boolean)])]);
     } catch {
-      setAiMessage('Não consegui gerar novas sugestões agora. Tente novamente em instantes.');
+      setAiMessage(t('errors.regenerateSearch'));
     } finally {
       setIsRegenerating(false);
       regenerateRequestInFlightRef.current = false;
@@ -467,7 +478,7 @@ export default function App() {
       return true;
     } catch (error: any) {
       console.error('Erro ao alternar favorito:', error);
-      setFavoriteError(error?.message || 'Erro desconhecido ao favoritar');
+      setFavoriteError(error?.message || t('errors.unknownFavorite'));
       setTimeout(() => setFavoriteError(null), 5000);
       // Rollback em caso de falha
       setFavoriteIds(prev => {
@@ -640,7 +651,7 @@ export default function App() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Spinner size="lg" className="mx-auto" />
-            <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Carregando perfil...</p>
+            <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">{t('states.loadingProfile')}</p>
           </div>
         </div>
       </div>
@@ -653,15 +664,15 @@ export default function App() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
       >
-        Pular para o conteúdo principal
+        {t('states.skipToContent')}
       </a>
       {favoriteError && (
         <div className="fixed top-4 right-4 z-50 bg-danger-soft border border-danger-border text-danger-strong px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
-          <span>Erro ao favoritar: {favoriteError}</span>
+          <span>{t('errors.favoriteAlert', { message: favoriteError })}</span>
           <button
             type="button"
             onClick={() => setFavoriteError(null)}
-            aria-label="Fechar alerta de erro"
+            aria-label={t('errors.closeErrorAlert')}
             className="text-danger-strong hover:opacity-70 font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-strong/40 rounded px-1"
           >
             ×

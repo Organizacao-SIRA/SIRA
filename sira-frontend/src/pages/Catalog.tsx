@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Library } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
 import { CatalogCategoryFilter } from '../components/CatalogCategoryFilter';
@@ -19,6 +20,7 @@ interface CatalogProps {
 }
 
 export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey = 0 }: CatalogProps) => {
+  const { t } = useTranslation('catalog');
   const {
     searchQuery, setSearchQuery, submitSearch, clearSearch,
     category, setCategory,
@@ -47,8 +49,8 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey 
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn">
       <PageHeader
         icon={Library}
-        title="Catálogo Acadêmico"
-        subtitle="Navegue pelo nosso acervo integrado de livros acadêmicos e artigos científicos."
+        title={t('header.title')}
+        subtitle={t('header.subtitle')}
       />
 
       <div className="bg-surface p-3 sm:p-4 rounded-xl border border-border-strong shadow-sm mb-6 flex flex-col gap-3">
@@ -69,18 +71,17 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey 
           <div className="min-w-0">
             {isSearchMode ? (
               <p className="text-sm text-text-muted">
-                Resultados para{' '}
+                {t('search.resultsFor')}{' '}
                 <span className="font-bold text-text">"{submittedQuery}"</span>
                 {total > 0 && (
                   <span className="text-text-subtle ml-1.5">
-                    ({total} {total === 1 ? 'material' : 'materiais'})
+                    ({t('search.materialCount', { count: total })})
                   </span>
                 )}
               </p>
             ) : (
               <p className="text-sm text-text-muted">
-                <span className="font-semibold text-text">{total}</span>{' '}
-                {total === 1 ? 'material disponível' : 'materiais disponíveis'}
+                {t('search.available', { count: total })}
               </p>
             )}
           </div>

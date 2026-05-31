@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -7,6 +8,7 @@ interface SpinnerProps {
 }
 
 export const Spinner = ({ size = 'md', fullScreen = false, className = '' }: SpinnerProps) => {
+  const { t } = useTranslation('common');
   const sizeClasses = {
     sm: 'h-4 w-4 border-2',
     md: 'h-8 w-8 border-2',
@@ -19,9 +21,9 @@ export const Spinner = ({ size = 'md', fullScreen = false, className = '' }: Spi
     <div 
       className={`animate-spin rounded-full border-transparent border-t-current border-r-current ${sizeClasses[size]} ${className}`}
       role="status"
-      aria-label="Carregando"
+      aria-label={t('states.loading')}
     >
-      <span className="sr-only">Carregando...</span>
+      <span className="sr-only">{t('states.loadingEllipsis')}</span>
     </div>
   );
 

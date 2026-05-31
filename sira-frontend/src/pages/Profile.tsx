@@ -15,6 +15,8 @@ import { InterestAreasCard } from '../components/profile/InterestAreasCard';
 import { ContentPreferencesCard } from '../components/profile/ContentPreferencesCard';
 import { EditActionBar } from '../components/profile/EditActionBar';
 import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
+import { LanguageToggle } from '../components/ui/LanguageToggle';
+import type { UiLocale } from '../i18n/locales';
 
 interface ProfileProps {
   profileData: ProfileData;
@@ -186,10 +188,14 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
         interests: saved.interests?.length ? saved.interests : prev.interests,
         academicGoal: saved.academicGoal || '',
         avatarUrl: saved.avatarUrl ?? prev.avatarUrl,
+        uiLocale: saved.uiLocale ?? prev.uiLocale,
         hasCompletedOnboarding: saved.hasCompletedOnboarding,
         onboardingCompletedAt: saved.onboardingCompletedAt,
       }));
-      updateUser({ name: saved.name });
+      updateUser({
+        name: saved.name,
+        ...(saved.uiLocale !== undefined ? { uiLocale: saved.uiLocale } : {}),
+      });
       setIsEditing(false);
     } catch (err: any) {
       setSaveError(err.message || 'Erro ao salvar perfil. Tente novamente.');
@@ -212,6 +218,15 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     updateUser({ avatarUrl: updated.avatarUrl });
   };
 
+  const handleLocaleChange = (uiLocale: UiLocale) => {
+    setProfileData(prev => ({ ...prev, uiLocale }));
+    setEditData((prev: any) => ({ ...prev, uiLocale }));
+    updateUser({ uiLocale });
+    updateProfile({ uiLocale }).catch((err: any) => {
+      setSaveError(err?.message || 'Erro ao salvar perfil. Tente novamente.');
+    });
+  };
+
   const topicsList            = preferenceOptions?.topics          || DEFAULT_TOPICS;
   const languagesList         = preferenceOptions?.languages       || ['Português', 'Inglês', 'Espanhol'];
   const materialLevelsList    = preferenceOptions?.materialLevels  || ['Introdutório', 'Intermediário', 'Avançado'];
@@ -227,9 +242,12 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
           subtitle="Gerencie suas informações e preferências."
         />
         {!isEditing && (
-          <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto sm:mt-1">
-            <Pencil className="w-4 h-4" /> Editar Perfil
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:mt-1">
+            <LanguageToggle onChange={handleLocaleChange} />
+            <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
+              <Pencil className="w-4 h-4" /> Editar Perfil
+            </Button>
+          </div>
         )}
       </div>
 

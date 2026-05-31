@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AuthUser } from '../types';
 import { SidebarNavItem } from './ui/SidebarNavItem';
 import { SIDEBAR_ITEMS } from './sidebar/sidebarItems';
@@ -20,6 +21,7 @@ export const Sidebar = ({
   setCurrentScreen,
   user,
 }: SidebarProps) => {
+  const { t } = useTranslation('navigation');
   const menuItems = SIDEBAR_ITEMS.filter(item => !item.authRequired || !!user);
   const activeScreen = currentScreen === 'details'
     ? previousScreen === 'results' ? 'home' : previousScreen
@@ -59,7 +61,7 @@ export const Sidebar = ({
       )}
 
       <aside
-        aria-label="Menu lateral"
+        aria-label={t('menu.sidebar')}
         aria-modal={isSidebarOpen ? 'true' : undefined}
         role={isSidebarOpen ? 'dialog' : undefined}
         className={`
@@ -78,9 +80,9 @@ export const Sidebar = ({
       >
         {/* Cabeçalho visível apenas em mobile */}
         <div className="p-4 border-b border-border bg-surface-muted flex justify-between items-center md:hidden">
-          <span className="font-bold text-primary-dark dark:text-text">Menu Principal</span>
+          <span className="font-bold text-primary-dark dark:text-text">{t('menu.title')}</span>
           <button
-            aria-label="Fechar menu"
+            aria-label={t('menu.close')}
             onClick={() => setIsSidebarOpen(false)}
             className="cursor-pointer text-text-muted hover:text-danger-strong text-2xl leading-none w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-subtle transition-colors"
           >
@@ -88,7 +90,7 @@ export const Sidebar = ({
           </button>
         </div>
 
-        <nav className="sira-scrollbar flex-1 py-4 overflow-y-auto" aria-label="Navegação principal">
+        <nav className="sira-scrollbar flex-1 py-4 overflow-y-auto" aria-label={t('menu.mainNavigation')}>
           <ul className="space-y-1">
             {menuItems.map(item => (
               <SidebarNavItem

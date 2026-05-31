@@ -53,6 +53,7 @@ export class UsersService {
         materialLevels: dto.materialLevels,
         wantsBooks: dto.wantsBooks,
         wantsArticles: dto.wantsArticles,
+        uiLocale: dto.uiLocale,
         interests: dto.interests,
         academicGoal: dto.academicGoal,
         onboardingCompletedAt: new Date(),
@@ -128,6 +129,7 @@ export class UsersService {
       'wantsBooks',
       'wantsArticles',
       'wantsOpenAccessOnly',
+      'uiLocale',
       'interests',
       'academicGoal',
     ].some(field => Object.prototype.hasOwnProperty.call(dto, field));
@@ -151,6 +153,7 @@ export class UsersService {
       wantsBooks: user.wantsBooks,
       wantsArticles: user.wantsArticles,
       wantsOpenAccessOnly: user.wantsOpenAccessOnly,
+      uiLocale: user.uiLocale || 'pt-BR',
       interests: user.interests,
       academicGoal: user.academicGoal,
       avatarUrl: user.avatarUrl,
