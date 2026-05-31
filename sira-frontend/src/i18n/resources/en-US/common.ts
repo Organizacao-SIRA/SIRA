@@ -54,6 +54,9 @@ export const common = {
     activateLight: 'Activate light mode',
     activateDark: 'Activate dark mode',
   },
+  aiAnalysis: {
+    label: 'SIRA+ Analysis',
+  },
   viewMode: {
     label: 'View mode',
     horizontal: 'Horizontal list',

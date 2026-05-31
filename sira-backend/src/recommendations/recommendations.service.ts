@@ -4,6 +4,8 @@ import { MaterialsService } from '../materials/materials.service';
 import { MaterialDto, MaterialType } from '../materials/dto/material.dto';
 import { getPreferenceTopicKeywords, getPreferenceTopicLabels } from '../users/preferences-options';
 import { AiProvider } from '../ai/ai-provider.abstract';
+import { normalizeUiLocale } from '../common/constants/ui-locale';
+import { aiOutputInstruction, aiOutputLanguageLabel } from '../common/constants/ai-output-language';
 
 export interface RecommendationItem extends MaterialDto {
   aiExplanation: string | null;
@@ -31,14 +33,6 @@ type RecommendationUser = {
   onboardingCompletedAt: Date | null;
   uiLocale: string | null;
 };
-
-const normalizeUiLocale = (locale?: string | null): 'pt-BR' | 'en-US' => {
-  if (!locale) return 'pt-BR';
-  return locale.toLowerCase().startsWith('en') ? 'en-US' : 'pt-BR';
-};
-
-const aiOutputLanguage = (locale: 'pt-BR' | 'en-US') =>
-  locale === 'en-US' ? 'English' : 'português do Brasil';
 
 @Injectable()
 export class RecommendationsService {
@@ -307,11 +301,13 @@ export class RecommendationsService {
       .join('\n');
 
     const topN = Math.min(8, candidates.length);
-    const outputLanguage = aiOutputLanguage(normalizeUiLocale(user.uiLocale));
+    const uiLocale = normalizeUiLocale(user.uiLocale);
+    const outputLanguage = aiOutputLanguageLabel(uiLocale);
 
     // Perfil no system: muda só quando o usuário edita o onboarding — cacheado pela Anthropic entre gerações.
     // Favoritos/buscas/candidatos no user: mudam a cada geração — não cacheáveis.
-    const systemPrompt = `Você é um sistema de recomendação acadêmica. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.\n\nPERFIL DO USUÁRIO:\n${this.buildPreferencesText(user)}`;
+    // O suffix de instrução de locale fica no final para não quebrar o prefixo cacheável quando o usuário troca de idioma.
+    const systemPrompt = `Você é um sistema de recomendação acadêmica. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.\n\nPERFIL DO USUÁRIO:\n${this.buildPreferencesText(user)}\n\n${aiOutputInstruction(uiLocale)}`;
 
     try {
       const raw = await this.ai.complete({

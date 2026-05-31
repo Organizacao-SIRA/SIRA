@@ -1,4 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { normalizeUiLocale } from '../common/constants/ui-locale';
+import {
+  aiEmptyChatMessage,
+  aiGenericFallbackMessage,
+  aiOutputInstruction,
+  aiOutputLanguageLabel,
+} from '../common/constants/ai-output-language';
 
 export interface SearchFilters {
   types: ('book' | 'article')[];
@@ -44,19 +51,6 @@ const LANGUAGE_ISO: Record<string, string> = {
   'Inglês': 'en',
   'Espanhol': 'es',
 };
-
-const normalizeUiLocale = (locale?: string | null): 'pt-BR' | 'en-US' => {
-  if (!locale) return 'pt-BR';
-  return locale.toLowerCase().startsWith('en') ? 'en-US' : 'pt-BR';
-};
-
-const aiOutputLanguage = (locale: 'pt-BR' | 'en-US') =>
-  locale === 'en-US' ? 'English' : 'português do Brasil';
-
-const emptyChatMessage = (locale: 'pt-BR' | 'en-US') =>
-  locale === 'en-US'
-    ? 'I could not find materials in the academic databases for this request. Try rephrasing your search.'
-    : 'Não consegui encontrar materiais nas bases acadêmicas para este pedido. Tente reformular sua busca.';
 
 const AREA_OA_CONCEPT: Record<string, string> = {
   ia: 'artificial intelligence',
@@ -198,7 +192,8 @@ export class MaterialsService {
     }) : null;
 
     const uiLocale = normalizeUiLocale(user?.uiLocale ?? options.locale);
-    const outputLanguage = aiOutputLanguage(uiLocale);
+    const outputLanguage = aiOutputLanguageLabel(uiLocale);
+    const outputInstruction = aiOutputInstruction(uiLocale);
 
     if (userId) {
       this.saveSearchHistory(userId, prompt.trim()).catch(() => {});
@@ -278,7 +273,7 @@ export class MaterialsService {
 
     if (candidates.length === 0) {
       return {
-        aiMessage: emptyChatMessage(uiLocale),
+        aiMessage: aiEmptyChatMessage(uiLocale),
         results: [],
       };
     }
@@ -320,7 +315,9 @@ export class MaterialsService {
             - "aiMessage": Uma síntese geral em ${outputLanguage} (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
             - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
               - "id": o ID exato do candidato
-              - "explanation": UMA frase curta em ${outputLanguage} explicando por que este material específico é relevante para o pedido e o perfil do usuário.`,
+              - "explanation": UMA frase curta em ${outputLanguage} explicando por que este material específico é relevante para o pedido e o perfil do usuário.
+
+            ${outputInstruction}`,
         user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}`,
         maxTokens: 1500,
       });
@@ -347,7 +344,7 @@ export class MaterialsService {
     } catch (e) {
       this.logger.error(`Erro na síntese da IA: ${e.message}`);
       return {
-        aiMessage: 'Encontrei alguns materiais que podem te ajudar na sua pesquisa.',
+        aiMessage: aiGenericFallbackMessage(uiLocale),
         results: candidates.slice(0, 5),
       };
     }

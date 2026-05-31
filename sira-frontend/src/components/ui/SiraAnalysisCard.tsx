@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SiraAnalysisCardProps {
   explanation: string;
@@ -6,11 +7,13 @@ interface SiraAnalysisCardProps {
 }
 
 export const SiraAnalysisCard = ({ explanation, size = 'full' }: SiraAnalysisCardProps) => {
+  const { t } = useTranslation('common');
   const isCompact = size === 'compact';
+  const label = t('aiAnalysis.label');
 
   return (
     <aside
-      aria-label="Análise do SIRA+"
+      aria-label={label}
       className={`bg-accent-light dark:bg-accent/10 border-l-4 border-accent min-w-0 ${
         isCompact
           ? 'rounded-r-md px-2.5 py-1.5 sm:px-3 sm:py-2 min-h-[4.75rem]'
@@ -23,7 +26,7 @@ export const SiraAnalysisCard = ({ explanation, size = 'full' }: SiraAnalysisCar
           aria-hidden="true"
         />
         <span className={`font-bold uppercase tracking-wider text-accent-dark dark:text-accent ${isCompact ? 'text-[10px]' : 'text-xs'}`}>
-          Análise do SIRA+
+          {label}
         </span>
       </div>
       <p className={`text-text break-words ${
