@@ -1,9 +1,6 @@
-export type UiLocale = 'pt-BR' | 'en-US';
+import { normalizeUiLocale, type UiLocale } from '../common/constants/ui-locale';
 
-export const normalizeUiLocale = (locale?: string | null): UiLocale => {
-  if (!locale) return 'pt-BR';
-  return locale.toLowerCase().startsWith('en') ? 'en-US' : 'pt-BR';
-};
+export { normalizeUiLocale, type UiLocale };
 
 export const authMessages = {
   'pt-BR': {

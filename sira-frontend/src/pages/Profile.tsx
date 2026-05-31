@@ -5,6 +5,7 @@ import { updateProfile, getPreferenceOptions } from '../services/api';
 import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
 import { Button } from '../components/ui/Button';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -224,13 +225,14 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     updateUser({ avatarUrl: updated.avatarUrl });
   };
 
+  const { setUiLocale } = useUiLocaleSync({
+    onError: () => setSaveError(t('errors.localeSave')),
+  });
+
   const handleLocaleChange = (uiLocale: UiLocale) => {
     setProfileData(prev => ({ ...prev, uiLocale }));
     setEditData((prev: any) => ({ ...prev, uiLocale }));
-    updateUser({ uiLocale });
-    updateProfile({ uiLocale }).catch((err: any) => {
-      setSaveError(err?.message || t('errors.save'));
-    });
+    setUiLocale(uiLocale);
   };
 
   const topicsList            = preferenceOptions?.topics          || DEFAULT_TOPICS;

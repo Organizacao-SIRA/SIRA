@@ -56,5 +56,6 @@ export const profile = {
   },
   errors: {
     save: 'Erro ao salvar perfil. Tente novamente.',
+    localeSave: 'Não foi possível salvar o idioma da interface. A escolha continua ativa neste dispositivo.',
   },
 };

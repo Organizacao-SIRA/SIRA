@@ -56,5 +56,6 @@ export const profile = {
   },
   errors: {
     save: 'Unable to save profile. Please try again.',
+    localeSave: 'Unable to save the interface language. The choice remains active on this device.',
   },
 };

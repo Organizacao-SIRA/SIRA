@@ -6,8 +6,7 @@ import {
   MATERIAL_LEVEL_LIST,
   PREFERENCE_TOPIC_IDS,
 } from '../preferences-options';
-
-const UI_LOCALES = ['pt-BR', 'en-US'] as const;
+import { UI_LOCALES } from '../../common/constants/ui-locale';
 
 export class UpdateProfileDto {
   @IsOptional()
