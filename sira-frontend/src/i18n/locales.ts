@@ -34,14 +34,17 @@ export const setStoredUiLocale = (locale: UiLocale) => {
 };
 
 export const getInitialUiLocale = (): UiLocale => {
+  // Visitantes novos sempre começam em pt-BR (idioma padrão do sistema).
+  // O navegador NÃO é usado como sugestão: usuários autenticados sobrescrevem
+  // pelo user.uiLocale; anônimos só mudam idioma após logar e ajustar na Profile.
   try {
     const stored = localStorage.getItem(UI_LOCALE_STORAGE_KEY);
     if (stored) return normalizeLocale(stored);
   } catch {
-    // Ignore storage failures and fall back to browser language.
+    // localStorage indisponível em modo privado — segue com o default.
   }
 
-  return normalizeLocale(navigator.language);
+  return DEFAULT_LOCALE;
 };
 
 export const htmlLangForLocale = (locale: UiLocale) => locale === 'en-US' ? 'en' : 'pt-BR';

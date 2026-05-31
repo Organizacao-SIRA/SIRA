@@ -2,13 +2,11 @@ import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AuthUser } from '../types';
 import { resolveAvatarUrl } from '../services/api';
-import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
 import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
 import { NavLogoutButton } from './NavLogoutButton';
 import { ThemeToggle } from './ui/ThemeToggle';
-import { LanguageToggle } from './ui/LanguageToggle';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
@@ -22,7 +20,6 @@ interface NavbarProps {
 
 export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, currentScreen, showMenuButton, user, onLogout }: NavbarProps) => {
   const { t } = useTranslation('navigation');
-  const { setUiLocale } = useUiLocaleSync();
   const displayName = user?.name || user?.email || '';
 
   return (
@@ -38,7 +35,6 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
           />
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <LanguageToggle variant="navbar" onChange={setUiLocale} />
             <ThemeToggle />
             {user ? (
               <>
