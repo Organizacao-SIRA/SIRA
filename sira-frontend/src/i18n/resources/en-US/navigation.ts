@@ -21,4 +21,13 @@ export const navigation = {
     signingIn: 'Opening...',
     signIn: 'Sign in',
   },
+  user: {
+    goToProfile: 'Go to profile',
+  },
+  logout: {
+    label: 'Sign out',
+    title: 'Sign out',
+    confirmMessage: 'Are you sure you want to sign out? You will need to sign in again to access your account.',
+    confirm: 'Sign out',
+  },
 };

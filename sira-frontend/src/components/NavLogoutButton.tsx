@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
 
@@ -8,6 +9,7 @@ interface NavLogoutButtonProps {
 }
 
 export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
+  const { t } = useTranslation(['navigation', 'common']);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,18 +25,18 @@ export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        title="Sair da conta"
-        aria-label="Sair da conta"
+        title={t('logout.title')}
+        aria-label={t('logout.title')}
         className="inline-flex items-center justify-center gap-2 bg-red-800 hover:bg-red-700 text-red-100 border border-red-600/50 hover:border-red-600 rounded-full px-3 sm:px-4 h-9 sm:h-10 text-sm font-semibold transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-red-400/60 active:opacity-75 flex-shrink-0"
       >
         <LogOut className="w-4 h-4" />
-        <span className="hidden sm:inline">Sair</span>
+        <span className="hidden sm:inline">{t('logout.label')}</span>
       </button>
 
       <Modal
         isOpen={isOpen}
         onClose={() => !isLoading && setIsOpen(false)}
-        title="Sair da conta"
+        title={t('logout.title')}
         size="sm"
         footer={
           <div className="flex justify-end gap-3">
@@ -44,7 +46,7 @@ export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
             >
-              Cancelar
+              {t('common:actions.cancel')}
             </Button>
             <Button
               variant="danger"
@@ -53,13 +55,13 @@ export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
               onClick={handleConfirm}
             >
               <LogOut className="w-4 h-4" />
-              Sair
+              {t('logout.confirm')}
             </Button>
           </div>
         }
       >
         <p className="text-text-muted text-sm leading-relaxed">
-          Tem certeza que deseja sair? Você precisará fazer login novamente para acessar sua conta.
+          {t('logout.confirmMessage')}
         </p>
       </Modal>
     </>

@@ -48,6 +48,17 @@ export const common = {
     portuguese: 'Portuguese',
     english: 'English',
   },
+  theme: {
+    light: 'Light mode',
+    dark: 'Dark mode',
+    activateLight: 'Activate light mode',
+    activateDark: 'Activate dark mode',
+  },
+  viewMode: {
+    label: 'View mode',
+    horizontal: 'Horizontal list',
+    vertical: 'Vertical grid',
+  },
   password: {
     label: 'Password',
     show: 'Show password',

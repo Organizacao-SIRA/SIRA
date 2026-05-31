@@ -21,4 +21,13 @@ export const navigation = {
     signingIn: 'Acessando...',
     signIn: 'Entrar',
   },
+  user: {
+    goToProfile: 'Ir para o perfil',
+  },
+  logout: {
+    label: 'Sair',
+    title: 'Sair da conta',
+    confirmMessage: 'Tem certeza que deseja sair? Você precisará fazer login novamente para acessar sua conta.',
+    confirm: 'Sair',
+  },
 };

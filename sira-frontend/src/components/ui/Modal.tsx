@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ const sizeClasses = {
 };
 
 export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }: ModalProps) => {
+  const { t } = useTranslation('common');
+
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -52,7 +55,7 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
           </h2>
           <button
             onClick={onClose}
-            aria-label="Fechar"
+            aria-label={t('actions.close')}
             className="p-1.5 -m-1.5 rounded-lg text-text-subtle hover:text-text hover:bg-surface-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <X className="w-5 h-5" />
