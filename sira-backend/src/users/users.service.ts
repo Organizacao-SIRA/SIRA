@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ERROR_CODES } from '../common/constants/error-codes';
+import { badRequestError } from '../common/errors/http-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
@@ -36,7 +38,7 @@ export class UsersService {
 
   async completeOnboarding(userId: string, dto: CompleteOnboardingDto) {
     if (!dto.wantsBooks && !dto.wantsArticles) {
-      throw new BadRequestException('Selecione pelo menos um formato de material');
+      throw badRequestError(ERROR_CODES.PROFILE_FORMAT_REQUIRED, 'Selecione pelo menos um formato de material');
     }
 
     const exists = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -72,7 +74,7 @@ export class UsersService {
     const wantsBooks = dto.wantsBooks ?? current.wantsBooks;
     const wantsArticles = dto.wantsArticles ?? current.wantsArticles;
     if (wantsBooks === false && wantsArticles === false) {
-      throw new BadRequestException('Selecione pelo menos um formato de material');
+      throw badRequestError(ERROR_CODES.PROFILE_FORMAT_REQUIRED, 'Selecione pelo menos um formato de material');
     }
 
     const user = await this.prisma.user.update({

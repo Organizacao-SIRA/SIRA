@@ -1,0 +1,28 @@
+/**
+ * Códigos de erro estáveis para o contrato API → frontend.
+ *
+ * O frontend usa estes códigos como chaves de tradução
+ * (common.errorCodes.<CODE>), caindo no campo `message` da resposta
+ * apenas como fallback quando o code não estiver mapeado.
+ */
+export const ERROR_CODES = {
+  // Auth
+  AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS',
+  AUTH_EMAIL_ALREADY_REGISTERED: 'AUTH_EMAIL_ALREADY_REGISTERED',
+  AUTH_INVALID_REFRESH_TOKEN: 'AUTH_INVALID_REFRESH_TOKEN',
+  AUTH_MISSING_REFRESH_TOKEN: 'AUTH_MISSING_REFRESH_TOKEN',
+  AUTH_RESET_TOKEN_INVALID: 'AUTH_RESET_TOKEN_INVALID',
+  AUTH_TOKEN_MISSING: 'AUTH_TOKEN_MISSING',
+  AUTH_TOKEN_INVALID: 'AUTH_TOKEN_INVALID',
+
+  // Profile / Users
+  PROFILE_FORMAT_REQUIRED: 'PROFILE_FORMAT_REQUIRED',
+  AVATAR_FILE_MISSING: 'AVATAR_FILE_MISSING',
+  AVATAR_FORMAT_INVALID: 'AVATAR_FORMAT_INVALID',
+
+  // Favorites
+  FAVORITE_ALREADY_EXISTS: 'FAVORITE_ALREADY_EXISTS',
+  FAVORITE_NOT_FOUND: 'FAVORITE_NOT_FOUND',
+} as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

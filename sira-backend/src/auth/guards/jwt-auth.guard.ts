@@ -1,6 +1,8 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { ERROR_CODES } from '../../common/constants/error-codes';
+import { unauthorizedError } from '../../common/errors/http-error';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -10,7 +12,7 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractToken(request);
 
-    if (!token) throw new UnauthorizedException('Token não fornecido');
+    if (!token) throw unauthorizedError(ERROR_CODES.AUTH_TOKEN_MISSING, 'Token não fornecido');
 
     try {
       const payload = this.jwtService.verify(token);
@@ -18,7 +20,7 @@ export class JwtAuthGuard implements CanActivate {
       request['user'] = payload;
       return true;
     } catch {
-      throw new UnauthorizedException('Token inválido ou expirado');
+      throw unauthorizedError(ERROR_CODES.AUTH_TOKEN_INVALID, 'Token inválido ou expirado');
     }
   }
 

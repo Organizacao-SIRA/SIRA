@@ -1,6 +1,8 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddFavoriteDto } from './dto/add-favorite.dto';
+import { ERROR_CODES } from '../common/constants/error-codes';
+import { conflictError, notFoundError } from '../common/errors/http-error';
 
 type FavoriteTypeFilter = 'book' | 'article';
 type FavoriteWithMaterial = {
@@ -52,7 +54,7 @@ export class FavoritesService {
       await this.invalidateRecommendationCache(userId);
       return favorite;
     } catch {
-      throw new ConflictException('Material já está nos favoritos');
+      throw conflictError(ERROR_CODES.FAVORITE_ALREADY_EXISTS, 'Material já está nos favoritos');
     }
   }
 
@@ -124,7 +126,7 @@ export class FavoritesService {
       where: { userId_materialId: { userId, materialId } },
     });
 
-    if (!favorite) throw new NotFoundException('Favorito não encontrado');
+    if (!favorite) throw notFoundError(ERROR_CODES.FAVORITE_NOT_FOUND, 'Favorito não encontrado');
 
     await this.prisma.favorite.delete({
       where: { userId_materialId: { userId, materialId } },

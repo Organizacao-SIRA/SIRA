@@ -9,8 +9,9 @@ import {
   Res,
   Req,
   Headers,
-  UnauthorizedException,
 } from '@nestjs/common';
+import { ERROR_CODES } from '../common/constants/error-codes';
+import { unauthorizedError } from '../common/errors/http-error';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
@@ -91,7 +92,7 @@ export class AuthController {
     const token = req.cookies?.[REFRESH_COOKIE];
     if (!token) {
       this.clearAuthCookies(res);
-      throw new UnauthorizedException(messages.missingRefreshToken);
+      throw unauthorizedError(ERROR_CODES.AUTH_MISSING_REFRESH_TOKEN, messages.missingRefreshToken);
     }
     const { accessToken, refreshToken } = await this.authService.refreshAccessToken(token, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);

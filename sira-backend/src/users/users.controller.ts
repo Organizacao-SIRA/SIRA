@@ -17,6 +17,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, JwtPayload } from '../auth/decorators/current-user.decorator';
+import { ERROR_CODES } from '../common/constants/error-codes';
+import { badRequestError } from '../common/errors/http-error';
 
 interface MulterMemoryFile {
   buffer: Buffer;
@@ -60,14 +62,17 @@ export class UsersController {
       limits: { fileSize: MAX_AVATAR_BYTES },
       fileFilter: (_req, file, cb) => {
         if (!ALLOWED_MIMES.includes(file.mimetype)) {
-          return cb(new BadRequestException('Apenas imagens JPG, PNG ou WEBP são permitidas'), false);
+          return cb(
+            badRequestError(ERROR_CODES.AVATAR_FORMAT_INVALID, 'Apenas imagens JPG, PNG ou WEBP são permitidas'),
+            false,
+          );
         }
         cb(null, true);
       },
     }),
   )
   uploadAvatar(@CurrentUser() user: JwtPayload, @UploadedFile() file: MulterMemoryFile) {
-    if (!file) throw new BadRequestException('Nenhum arquivo enviado');
+    if (!file) throw badRequestError(ERROR_CODES.AVATAR_FILE_MISSING, 'Nenhum arquivo enviado');
     return this.usersService.updateAvatar(user.sub, file.buffer, file.mimetype);
   }
 

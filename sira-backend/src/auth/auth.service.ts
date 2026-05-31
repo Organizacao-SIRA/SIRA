@@ -1,10 +1,10 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ERROR_CODES } from '../common/constants/error-codes';
 import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+  badRequestError,
+  conflictError,
+  unauthorizedError,
+} from '../common/errors/http-error';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '../prisma/prisma.service';
@@ -70,7 +70,7 @@ export class AuthService {
     const uiLocale = normalizeUiLocale(locale);
     const messages = authMessages[uiLocale];
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new ConflictException(messages.emailAlreadyRegistered);
+    if (exists) throw conflictError(ERROR_CODES.AUTH_EMAIL_ALREADY_REGISTERED, messages.emailAlreadyRegistered);
 
     const hashedPassword = await this.hashPassword(dto.password);
     const user = await this.prisma.user.create({
@@ -87,10 +87,10 @@ export class AuthService {
   async login(dto: LoginDto, locale?: string) {
     const messages = authMessages[normalizeUiLocale(locale)];
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException(messages.invalidCredentials);
+    if (!user) throw unauthorizedError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, messages.invalidCredentials);
 
     const valid = await this.comparePasswords(dto.password, user.password);
-    if (!valid) throw new UnauthorizedException(messages.invalidCredentials);
+    if (!valid) throw unauthorizedError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, messages.invalidCredentials);
 
     return {
       accessToken: this.signAccess(user),
@@ -113,7 +113,7 @@ export class AuthService {
         refreshToken: this.signRefresh(user),
       };
     } catch {
-      throw new UnauthorizedException(messages.invalidRefreshToken);
+      throw unauthorizedError(ERROR_CODES.AUTH_INVALID_REFRESH_TOKEN, messages.invalidRefreshToken);
     }
   }
 
@@ -208,7 +208,10 @@ export class AuthService {
 
     if (!record || record.isUsed || record.expiresAt <= new Date()) {
       this.logger.warn(`[SECURITY] Invalid/expired reset token attempt`);
-      throw new BadRequestException(authMessages[normalizeUiLocale(locale)].resetTokenInvalid);
+      throw badRequestError(
+        ERROR_CODES.AUTH_RESET_TOKEN_INVALID,
+        authMessages[normalizeUiLocale(locale)].resetTokenInvalid,
+      );
     }
 
     const hashedPassword = await this.hashPassword(newPassword);

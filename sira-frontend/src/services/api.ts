@@ -20,6 +20,26 @@ const withLocaleHeader = (headers?: HeadersInit): Headers => {
 
 const apiMessage = (key: string) => i18n.t(`errors.${key}`, { ns: 'common' });
 
+/**
+ * Resolve a mensagem de erro a partir do payload do backend.
+ *
+ * Ordem de prioridade:
+ *   1. `errorCodes.<code>` no namespace common (tradução estável);
+ *   2. `error.message` (fallback humano vindo do backend);
+ *   3. fallback genérico passado pelo caller.
+ */
+const resolveApiError = (error: any, fallbackKey: string): string => {
+  const code = error?.code;
+  if (typeof code === 'string') {
+    const translated = i18n.t(`errorCodes.${code}`, { ns: 'common', defaultValue: '' });
+    if (translated) return translated;
+  }
+  const message = error?.message;
+  if (Array.isArray(message)) return message.join('. ');
+  if (typeof message === 'string' && message) return message;
+  return apiMessage(fallbackKey);
+};
+
 const refreshAuthSession = (): Promise<boolean> => {
   if (!refreshPromise) {
     refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -60,8 +80,8 @@ export const loginUser = async (data: any) => {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || apiMessage('login'));
+    const error = await response.json().catch(() => ({}));
+    throw new Error(resolveApiError(error, 'login'));
   }
   return response.json();
 };
@@ -74,8 +94,8 @@ export const registerUser = async (data: any) => {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(Array.isArray(error.message) ? error.message.join('. ') : error.message || apiMessage('register'));
+    const error = await response.json().catch(() => ({}));
+    throw new Error(resolveApiError(error, 'register'));
   }
   return response.json();
 };
@@ -90,7 +110,7 @@ export const forgotPassword = async (email: string) => {
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || apiMessage('forgotPassword'));
+    throw new Error(resolveApiError(error, 'forgotPassword'));
   }
   return response.json();
 };
@@ -103,7 +123,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(Array.isArray(error.message) ? error.message.join('. ') : error.message || apiMessage('resetPassword'));
+    throw new Error(resolveApiError(error, 'resetPassword'));
   }
   return response.json();
 };
@@ -273,7 +293,7 @@ export const addFavorite = async (material: any) => {
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(`[${response.status}] ${Array.isArray(body.message) ? body.message.join('; ') : body.message || apiMessage('favoriteAdd')}`);
+    throw new Error(`[${response.status}] ${resolveApiError(body, 'favoriteAdd')}`);
   }
   return response.json();
 };
@@ -285,7 +305,7 @@ export const removeFavoriteApi = async (materialId: string) => {
   );
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(`[${response.status}] ${body.message || apiMessage('favoriteRemove')}`);
+    throw new Error(`[${response.status}] ${resolveApiError(body, 'favoriteRemove')}`);
   }
   return response.json();
 };
@@ -304,7 +324,10 @@ export const updateProfile = async (data: Record<string, any>) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(apiMessage('profileSave'));
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(resolveApiError(body, 'profileSave'));
+  }
   return response.json();
 };
 
@@ -322,7 +345,7 @@ export const uploadAvatar = async (file: File): Promise<UserProfile> => {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(Array.isArray(body.message) ? body.message.join('; ') : body.message || apiMessage('avatarUpload'));
+    throw new Error(resolveApiError(body, 'avatarUpload'));
   }
   return body;
 };
