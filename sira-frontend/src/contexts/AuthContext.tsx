@@ -25,6 +25,13 @@ const AUTH_API = import.meta.env.VITE_API_URL
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
+const applyUiLocale = (locale: UiLocale) => {
+  const normalized = normalizeLocale(locale);
+  setStoredUiLocale(normalized);
+  void i18n.changeLanguage(normalized);
+  return normalized;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('@sira:user');
@@ -40,12 +47,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('sira:auth:expired', handleAuthExpired);
   }, []);
 
+  useEffect(() => {
+    if (!user?.uiLocale) return;
+    applyUiLocale(user.uiLocale);
+  }, [user?.uiLocale]);
+
   const login = (userData: User) => {
     if (userData.uiLocale) {
-      const locale = normalizeLocale(userData.uiLocale);
-      setStoredUiLocale(locale);
-      void i18n.changeLanguage(locale);
-      userData = { ...userData, uiLocale: locale };
+      userData = { ...userData, uiLocale: applyUiLocale(userData.uiLocale) };
     }
 
     localStorage.setItem('@sira:user', JSON.stringify(userData));
@@ -64,15 +73,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUser = (userData: Partial<User>) => {
+    const normalizedData = userData.uiLocale
+      ? { ...userData, uiLocale: normalizeLocale(userData.uiLocale) }
+      : userData;
+
+    if (normalizedData.uiLocale) {
+      setStoredUiLocale(normalizedData.uiLocale);
+    }
+
     setUser(prev => {
       if (!prev) return null;
-      const updated = { ...prev, ...userData };
-      if (updated.uiLocale) {
-        const locale = normalizeLocale(updated.uiLocale);
-        setStoredUiLocale(locale);
-        void i18n.changeLanguage(locale);
-        updated.uiLocale = locale;
-      }
+      const updated = { ...prev, ...normalizedData };
       localStorage.setItem('@sira:user', JSON.stringify(updated));
       return updated;
     });

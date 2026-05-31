@@ -1,6 +1,8 @@
 import { School, CheckCircle2, Globe, Cpu, Landmark, Scale, LineChart, GraduationCap, Activity, TrendingUp, Users } from 'lucide-react';
 import type { ElementType } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SectionCard } from './SectionCard';
+import { preferenceTopicDescription, preferenceTopicLabel } from '../../i18n/preferenceLabels';
 import type { PreferenceTopic } from '../../types';
 
 const TOPIC_ICONS: Record<string, ElementType> = {
@@ -22,8 +24,12 @@ interface InterestAreasCardProps {
   onToggle: (id: string) => void;
 }
 
-export const InterestAreasCard = ({ isEditing, topicsList, selectedIds, onToggle }: InterestAreasCardProps) => (
-  <SectionCard icon={School} title="Áreas de Interesse">
+export const InterestAreasCard = ({ isEditing, topicsList, selectedIds, onToggle }: InterestAreasCardProps) => {
+  const { t } = useTranslation('profile');
+  const { t: tp } = useTranslation('preferences');
+
+  return (
+    <SectionCard icon={School} title={t('sections.interests')}>
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {topicsList.map((topic) => {
         const Icon = TOPIC_ICONS[topic.id] || Globe;
@@ -40,18 +46,19 @@ export const InterestAreasCard = ({ isEditing, topicsList, selectedIds, onToggle
                 ? 'border-primary bg-primary text-white shadow-sm'
                 : 'border-border bg-surface-muted text-text-muted'
             } ${isEditing ? 'cursor-pointer hover:border-primary hover:bg-primary/10 shadow-sm' : 'cursor-default'}`}
-            title={topic.description}
+            title={preferenceTopicDescription(topic, tp)}
           >
             {isSelected && (
               <CheckCircle2 className={`absolute top-2 right-2 w-4 h-4 ${isEditing ? 'text-white/80' : 'text-white/60'}`} />
             )}
             <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-white' : 'text-text-subtle dark:text-text-muted'}`} />
             <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-text-muted'}`}>
-              {topic.label}
+              {preferenceTopicLabel(topic, tp)}
             </span>
           </button>
         );
       })}
     </div>
-  </SectionCard>
-);
+    </SectionCard>
+  );
+};

@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Target, BookOpen, Rocket, Trophy, GraduationCap,
   Briefcase, Lightbulb, FlaskConical, ScrollText, X,
 } from 'lucide-react';
+import { preferenceValueLabel } from '../../../i18n/preferenceLabels';
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   'TCC':                  ScrollText,
@@ -21,18 +23,22 @@ interface AcademicGoalStepProps {
   onSelect: (goal: string) => void;
 }
 
-export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStepProps) => (
-  <div className="space-y-5 max-w-2xl mx-auto">
+export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStepProps) => {
+  const { t } = useTranslation('onboarding');
+  const { t: tp } = useTranslation('preferences');
+
+  return (
+    <div className="space-y-5 max-w-2xl mx-auto">
     <header className="flex items-start gap-3">
       <div className="p-2 bg-primary-soft rounded-lg text-primary">
         <Target className="w-5 h-5" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
         <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">
-          Qual o seu objetivo? <span className="text-xs font-normal text-text-subtle ml-1">(opcional)</span>
+          {t('goal.title')} <span className="text-xs font-normal text-text-subtle ml-1">{t('goal.optional')}</span>
         </h2>
         <p className="text-sm text-text-muted mt-0.5">
-          Saber o seu foco nos ajuda a priorizar materiais mais relevantes.
+          {t('goal.description')}
         </p>
       </div>
     </header>
@@ -65,7 +71,7 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
                 isSelected ? 'text-primary' : 'text-text'
               }`}
             >
-              {goal}
+              {preferenceValueLabel(goal, tp)}
             </span>
           </button>
         );
@@ -79,8 +85,9 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
         className="text-xs font-bold text-text-muted hover:text-danger-strong inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-strong/40 rounded px-1 py-0.5"
       >
         <X className="w-3.5 h-3.5" />
-        Limpar seleção
+        {t('goal.clear')}
       </button>
     )}
-  </div>
-);
+    </div>
+  );
+};

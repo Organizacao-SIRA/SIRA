@@ -1,0 +1,60 @@
+export const profile = {
+  header: {
+    title: 'My Profile',
+    subtitle: 'Manage your information and preferences.',
+    edit: 'Edit Profile',
+    loadErrorTitle: 'Unable to load profile',
+  },
+  sections: {
+    personal: 'Personal Info',
+    academic: 'Academic Profile',
+    interests: 'Interest Areas',
+    content: 'Content Preferences',
+  },
+  fields: {
+    name: 'Name',
+    email: 'Email',
+    course: 'Course',
+    level: 'Level',
+    area: 'Area',
+    objective: 'Goal',
+    languages: 'Languages',
+    formats: 'Formats',
+    access: 'Access',
+  },
+  values: {
+    notInformed: 'Not informed',
+    selectArea: 'Select area',
+  },
+  status: {
+    completed: 'Preferences completed',
+    pending: 'Preferences pending',
+  },
+  content: {
+    books: 'Books',
+    articles: 'Articles',
+    openAccessOnly: 'Open access only',
+    openAccessHint: 'Recommendations will include only free materials.',
+  },
+  avatar: {
+    title: 'Profile photo',
+    changePhoto: 'Change profile photo',
+    changeTitle: 'Change photo',
+    selectFile: 'Select image file',
+    chooseImage: 'Choose image',
+    replaceImage: 'Replace image',
+    removePhoto: 'Remove photo',
+    savePhoto: 'Save photo',
+    invalidFormat: 'Invalid format. Use JPG, PNG, or WEBP.',
+    tooLarge: 'Image too large. The maximum size is 5 MB.',
+    uploadError: 'Unable to upload image. Please try again.',
+    removeError: 'Unable to remove image.',
+    hint: 'We accept JPG, PNG, or WEBP up to 5 MB.<br />The image will be displayed as a circle.',
+  },
+  actions: {
+    saveChanges: 'Save Changes',
+  },
+  errors: {
+    save: 'Unable to save profile. Please try again.',
+  },
+};

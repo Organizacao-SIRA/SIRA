@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Res,
   Req,
+  Headers,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -18,6 +19,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { authMessages, normalizeUiLocale } from './auth-i18n';
 
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
@@ -55,9 +57,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Cadastro de novo usuário' })
   async register(
     @Body() dto: RegisterDto,
+    @Headers('accept-language') acceptLanguage: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, user } = await this.authService.register(dto);
+    const { accessToken, refreshToken, user } = await this.authService.register(dto, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }
@@ -68,9 +71,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Login e geração de token JWT' })
   async login(
     @Body() dto: LoginDto,
+    @Headers('accept-language') acceptLanguage: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, user } = await this.authService.login(dto);
+    const { accessToken, refreshToken, user } = await this.authService.login(dto, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }
@@ -80,14 +84,16 @@ export class AuthController {
   @ApiOperation({ summary: 'Renova access token via refresh token' })
   async refresh(
     @Req() req: Request,
+    @Headers('accept-language') acceptLanguage: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const messages = authMessages[normalizeUiLocale(acceptLanguage)];
     const token = req.cookies?.[REFRESH_COOKIE];
     if (!token) {
       this.clearAuthCookies(res);
-      throw new UnauthorizedException('Refresh token não encontrado');
+      throw new UnauthorizedException(messages.missingRefreshToken);
     }
-    const { accessToken, refreshToken } = await this.authService.refreshAccessToken(token);
+    const { accessToken, refreshToken } = await this.authService.refreshAccessToken(token, acceptLanguage);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { ok: true };
   }
@@ -110,10 +116,14 @@ export class AuthController {
     status: 202,
     description: 'Resposta uniforme — sempre retorna sucesso (anti-enumeração)',
   })
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    await this.authService.forgotPassword(dto.email);
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+    @Headers('accept-language') acceptLanguage: string | undefined,
+  ) {
+    const messages = authMessages[normalizeUiLocale(acceptLanguage)];
+    await this.authService.forgotPassword(dto.email, acceptLanguage);
     return {
-      message: 'Se este e-mail estiver em nossa base, um link de recuperação será enviado.',
+      message: messages.forgotPasswordAccepted,
     };
   }
 
@@ -123,9 +133,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Redefine a senha usando token de recuperação' })
   @ApiResponse({ status: 200, description: 'Senha redefinida com sucesso' })
   @ApiResponse({ status: 400, description: 'Token inválido ou expirado' })
-  async resetPassword(@Body() dto: ResetPasswordDto) {
-    await this.authService.resetPassword(dto.token, dto.newPassword);
-    return { message: 'Senha redefinida com sucesso. Faça login com a nova senha.' };
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Headers('accept-language') acceptLanguage: string | undefined,
+  ) {
+    const messages = authMessages[normalizeUiLocale(acceptLanguage)];
+    await this.authService.resetPassword(dto.token, dto.newPassword, acceptLanguage);
+    return { message: messages.resetPasswordSuccess };
   }
 
   @Get('validate-reset-token')

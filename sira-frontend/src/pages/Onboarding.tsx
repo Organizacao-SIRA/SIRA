@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { getPreferenceOptions } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
@@ -24,6 +25,7 @@ interface OnboardingProps {
 }
 
 export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: OnboardingProps) => {
+  const { t } = useTranslation('onboarding');
   const { user } = useAuth();
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
@@ -36,7 +38,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       const opts = await getPreferenceOptions();
       setPreferenceOptions(opts);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao carregar opções';
+      const message = err instanceof Error ? err.message : t('loading.errorTitle');
       setOptionsError(message);
     } finally {
       setIsLoadingOptions(false);
@@ -85,7 +87,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
         <div className="text-center">
           <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">
-            Carregando opções...
+            {t('loading.options')}
           </p>
         </div>
       </div>
@@ -97,10 +99,10 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
         <div className="bg-surface rounded-2xl shadow-sm border border-border p-6 sm:p-8 max-w-md w-full text-center">
           <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">Erro ao carregar opções</h3>
-          <p className="text-text-muted text-sm mb-4">{optionsError || 'Opções indisponíveis.'}</p>
+          <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">{t('loading.errorTitle')}</h3>
+          <p className="text-text-muted text-sm mb-4">{optionsError || t('loading.unavailable')}</p>
           <Button onClick={loadPreferenceOptions} className="px-6">
-            Tentar novamente
+            {t('common:actions.retry')}
           </Button>
         </div>
       </div>
@@ -164,7 +166,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   const stepHint = (() => {
     if (onboarding.step === 2) {
       const count = onboarding.data.interests.length;
-      return `${count} / 3 mín. selecionados`;
+      return t('interests.hint', { count });
     }
     return null;
   })();

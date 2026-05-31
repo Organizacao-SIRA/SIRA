@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
+
 interface AcademicSummarySectionProps {
   abstract?: string;
   keywords?: string[];
 }
 
 export const AcademicSummarySection = ({ abstract, keywords }: AcademicSummarySectionProps) => {
+  const { t } = useTranslation('details');
   const hasAbstract = abstract && abstract.trim().length > 0;
   const hasKeywords = keywords && keywords.length > 0;
 
@@ -16,7 +19,7 @@ export const AcademicSummarySection = ({ abstract, keywords }: AcademicSummarySe
           id="academic-summary-heading"
           className="text-xs font-bold uppercase tracking-widest text-text-subtle"
         >
-          Resumo
+          {t('summary.title')}
         </h2>
         {hasAbstract ? (
           <p className="text-text leading-[1.75] text-[17px] text-justify">
@@ -24,7 +27,7 @@ export const AcademicSummarySection = ({ abstract, keywords }: AcademicSummarySe
           </p>
         ) : (
           <p className="text-sm text-text-subtle italic">
-            Resumo não disponível para este material.
+            {t('summary.unavailable')}
           </p>
         )}
       </div>
@@ -32,9 +35,9 @@ export const AcademicSummarySection = ({ abstract, keywords }: AcademicSummarySe
       {hasKeywords && (
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-widest text-text-subtle">
-            Palavras-chave
+            {t('summary.keywords')}
           </h3>
-          <ul className="flex flex-wrap gap-2" aria-label="Palavras-chave do material">
+          <ul className="flex flex-wrap gap-2" aria-label={t('summary.keywordsLabel')}>
             {keywords!.map((kw, idx) => (
               <li
                 key={`${kw}-${idx}`}

@@ -1,16 +1,18 @@
 import { Sparkles, BookOpen, Compass, BrainCircuit } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface WelcomeStepProps {
   userName?: string | null;
 }
 
 const HIGHLIGHTS = [
-  { icon: Compass,      label: 'Recomendações personalizadas com base no seu perfil acadêmico.' },
-  { icon: BookOpen,     label: 'Livros e artigos científicos curados para suas áreas de interesse.' },
-  { icon: BrainCircuit, label: 'Busca conversacional com IA para encontrar exatamente o que precisa.' },
+  { icon: Compass,      labelKey: 'welcome.highlights.recommendations' },
+  { icon: BookOpen,     labelKey: 'welcome.highlights.library' },
+  { icon: BrainCircuit, labelKey: 'welcome.highlights.aiSearch' },
 ];
 
 export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
+  const { t } = useTranslation('onboarding');
   const firstName = userName?.trim().split(' ')[0];
 
   return (
@@ -20,23 +22,22 @@ export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
       </div>
 
       <h1 className="text-2xl sm:text-3xl font-bold text-primary-dark dark:text-text mb-3">
-        {firstName ? `Olá, ${firstName}!` : 'Bem-vindo ao SIRA+'}
+        {firstName ? t('welcome.hello', { name: firstName }) : t('welcome.fallback')}
       </h1>
       <p className="text-text-muted text-sm sm:text-base mb-8">
-        Para personalizar suas recomendações acadêmicas, vamos conhecer rapidamente o seu perfil.
-        Em poucos minutos você terá o SIRA+ adaptado ao seu jeito de estudar.
+        {t('welcome.description')}
       </p>
 
       <ul className="space-y-3 text-left">
-        {HIGHLIGHTS.map(({ icon: Icon, label }) => (
+        {HIGHLIGHTS.map(({ icon: Icon, labelKey }) => (
           <li
-            key={label}
+            key={labelKey}
             className="flex items-start gap-3 p-3 rounded-xl bg-surface-muted border border-border"
           >
             <span className="text-primary mt-0.5 flex-shrink-0">
               <Icon className="w-5 h-5" aria-hidden="true" />
             </span>
-            <span className="text-sm text-text">{label}</span>
+            <span className="text-sm text-text">{t(labelKey)}</span>
           </li>
         ))}
       </ul>

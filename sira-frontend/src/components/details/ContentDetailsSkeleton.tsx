@@ -1,12 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../ui/Skeleton';
 
-export const ContentDetailsSkeleton = () => (
-  <div
-    role="status"
-    aria-live="polite"
-    aria-label="Carregando detalhes do material"
-    className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn"
-  >
+export const ContentDetailsSkeleton = () => {
+  const { t } = useTranslation('details');
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label={t('loading.details')}
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn"
+    >
     <Skeleton className="h-5 w-48 mb-6" />
 
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -39,5 +43,6 @@ export const ContentDetailsSkeleton = () => (
         <Skeleton className="h-56 w-full rounded-2xl" />
       </div>
     </div>
-  </div>
-);
+    </div>
+  );
+};

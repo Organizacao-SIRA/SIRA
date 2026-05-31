@@ -21,17 +21,17 @@ export type OnboardingStepId =
 
 export type OnboardingStepMeta = {
   id: OnboardingStepId;
-  label: string;
-  shortLabel: string;
+  labelKey: string;
+  shortLabelKey: string;
 };
 
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
-  { id: 'welcome',              label: 'Boas-vindas',         shortLabel: 'Início'      },
-  { id: 'academic-profile',     label: 'Perfil acadêmico',    shortLabel: 'Perfil'      },
-  { id: 'interest-areas',       label: 'Áreas de interesse',  shortLabel: 'Interesses'  },
-  { id: 'content-preferences',  label: 'Preferências',        shortLabel: 'Preferências'},
-  { id: 'academic-goal',        label: 'Objetivo',            shortLabel: 'Objetivo'    },
-  { id: 'review',               label: 'Revisão',             shortLabel: 'Revisão'     },
+  { id: 'welcome',              labelKey: 'steps.welcome.label',            shortLabelKey: 'steps.welcome.short' },
+  { id: 'academic-profile',     labelKey: 'steps.academicProfile.label',    shortLabelKey: 'steps.academicProfile.short' },
+  { id: 'interest-areas',       labelKey: 'steps.interestAreas.label',      shortLabelKey: 'steps.interestAreas.short' },
+  { id: 'content-preferences',  labelKey: 'steps.contentPreferences.label', shortLabelKey: 'steps.contentPreferences.short' },
+  { id: 'academic-goal',        labelKey: 'steps.academicGoal.label',       shortLabelKey: 'steps.academicGoal.short' },
+  { id: 'review',               labelKey: 'steps.review.label',             shortLabelKey: 'steps.review.short' },
 ];
 
 export type StepFieldErrors = Partial<Record<keyof OnboardingFormData, string>>;

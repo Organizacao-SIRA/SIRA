@@ -1,4 +1,5 @@
 import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ContentBreadcrumbProps {
   previousScreen: string;
@@ -6,19 +7,13 @@ interface ContentBreadcrumbProps {
   onBack: () => void;
 }
 
-const BACK_LABELS: Record<string, string> = {
-  catalog: 'Voltar ao Catálogo',
-  favorites: 'Voltar aos Favoritos',
-  results: 'Voltar aos Resultados',
-  home: 'Voltar ao Início',
-};
-
 export const ContentBreadcrumb = ({ previousScreen, title, onBack }: ContentBreadcrumbProps) => {
-  const label = BACK_LABELS[previousScreen] || 'Voltar';
+  const { t } = useTranslation('details');
+  const label = t(`breadcrumb.${previousScreen}`, { defaultValue: t('breadcrumb.back') });
 
   return (
     <nav
-      aria-label="Navegação de retorno"
+      aria-label={t('breadcrumb.label')}
       className="flex items-center text-sm text-text-muted mb-6 font-medium"
     >
       <button

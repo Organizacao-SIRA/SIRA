@@ -1,0 +1,60 @@
+export const profile = {
+  header: {
+    title: 'Meu Perfil',
+    subtitle: 'Gerencie suas informações e preferências.',
+    edit: 'Editar Perfil',
+    loadErrorTitle: 'Não foi possível carregar o perfil',
+  },
+  sections: {
+    personal: 'Dados Pessoais',
+    academic: 'Perfil Acadêmico',
+    interests: 'Áreas de Interesse',
+    content: 'Preferências de Conteúdo',
+  },
+  fields: {
+    name: 'Nome',
+    email: 'E-mail',
+    course: 'Curso',
+    level: 'Nível',
+    area: 'Área',
+    objective: 'Objetivo',
+    languages: 'Idiomas',
+    formats: 'Formatos',
+    access: 'Acesso',
+  },
+  values: {
+    notInformed: 'Não informado',
+    selectArea: 'Selecione a área',
+  },
+  status: {
+    completed: 'Preferências concluídas',
+    pending: 'Preferências pendentes',
+  },
+  content: {
+    books: 'Livros',
+    articles: 'Artigos',
+    openAccessOnly: 'Apenas acesso aberto',
+    openAccessHint: 'Recomendações incluirão apenas materiais gratuitos.',
+  },
+  avatar: {
+    title: 'Foto de perfil',
+    changePhoto: 'Alterar foto de perfil',
+    changeTitle: 'Alterar foto',
+    selectFile: 'Selecionar arquivo de imagem',
+    chooseImage: 'Escolher imagem',
+    replaceImage: 'Trocar imagem',
+    removePhoto: 'Remover foto',
+    savePhoto: 'Salvar foto',
+    invalidFormat: 'Formato inválido. Use JPG, PNG ou WEBP.',
+    tooLarge: 'Imagem muito grande. O tamanho máximo é 5 MB.',
+    uploadError: 'Erro ao enviar imagem. Tente novamente.',
+    removeError: 'Erro ao remover imagem.',
+    hint: 'Aceitamos JPG, PNG ou WEBP de até 5 MB.<br />A imagem será exibida de forma circular.',
+  },
+  actions: {
+    saveChanges: 'Salvar Alterações',
+  },
+  errors: {
+    save: 'Erro ao salvar perfil. Tente novamente.',
+  },
+};

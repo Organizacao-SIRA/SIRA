@@ -1,6 +1,8 @@
 import { Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Checkbox } from '../ui/Checkbox';
 import { SectionCard } from './SectionCard';
+import { preferenceValueLabel } from '../../i18n/preferenceLabels';
 
 type BoolPreferenceField = 'wantsBooks' | 'wantsArticles' | 'wantsOpenAccessOnly';
 
@@ -41,18 +43,20 @@ export const ContentPreferencesCard = ({
   languagesList,
   materialLevelsList,
 }: ContentPreferencesCardProps) => {
+  const { t } = useTranslation('profile');
+  const { t: tp } = useTranslation('preferences');
   const source = isEditing ? editData : data;
 
   return (
-    <SectionCard icon={Settings} title="Preferências de Conteúdo">
+    <SectionCard icon={Settings} title={t('sections.content')}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
         <div>
-          <GroupTitle>Idiomas</GroupTitle>
+          <GroupTitle>{t('fields.languages')}</GroupTitle>
           <div className="space-y-2">
             {languagesList.map(lang => (
               <Checkbox
                 key={lang}
-                label={lang}
+                label={preferenceValueLabel(lang, tp)}
                 checked={source.languages?.includes(lang)}
                 onChange={(e) => isEditing && onArrayChange('languages', lang, e.target.checked)}
                 disabled={!isEditing}
@@ -62,12 +66,12 @@ export const ContentPreferencesCard = ({
         </div>
 
         <div>
-          <GroupTitle>Nível</GroupTitle>
+          <GroupTitle>{t('fields.level')}</GroupTitle>
           <div className="space-y-2">
             {materialLevelsList.map(level => (
               <Checkbox
                 key={level}
-                label={level}
+                label={preferenceValueLabel(level, tp)}
                 checked={source.materialLevels?.includes(level)}
                 onChange={(e) => isEditing && onArrayChange('materialLevels', level, e.target.checked)}
                 disabled={!isEditing}
@@ -77,33 +81,33 @@ export const ContentPreferencesCard = ({
         </div>
 
         <div>
-          <GroupTitle>Formatos</GroupTitle>
+          <GroupTitle>{t('fields.formats')}</GroupTitle>
           <div className="space-y-2">
             <Checkbox
-              label="Livros"
+              label={t('content.books')}
               checked={source.wantsBooks}
               onChange={(e) => isEditing && onBoolChange('wantsBooks', e.target.checked)}
               disabled={!isEditing}
             />
             <Checkbox
-              label="Artigos"
+              label={t('content.articles')}
               checked={source.wantsArticles}
               onChange={(e) => isEditing && onBoolChange('wantsArticles', e.target.checked)}
               disabled={!isEditing}
             />
           </div>
 
-          <GroupTitle>Acesso</GroupTitle>
+          <GroupTitle>{t('fields.access')}</GroupTitle>
           <div className="space-y-2">
             <Checkbox
-              label="Apenas acesso aberto"
+              label={t('content.openAccessOnly')}
               checked={source.wantsOpenAccessOnly}
               onChange={(e) => isEditing && onBoolChange('wantsOpenAccessOnly', e.target.checked)}
               disabled={!isEditing}
             />
             {source.wantsOpenAccessOnly && (
               <p className="text-[11px] text-text-subtle leading-snug pl-5">
-                Recomendações incluirão apenas materiais gratuitos.
+                {t('content.openAccessHint')}
               </p>
             )}
           </div>

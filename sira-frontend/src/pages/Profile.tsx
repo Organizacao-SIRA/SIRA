@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { updateProfile, getPreferenceOptions } from '../services/api';
 import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
@@ -38,13 +39,16 @@ const DEFAULT_TOPICS: PreferenceTopic[] = [
   { id: 'soc', label: 'Sociologia' },
 ];
 
-const ProfileSkeleton = () => (
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
-    <PageHeader
-      icon={Settings}
-      title="Meu Perfil"
-      subtitle="Gerencie suas informações e preferências."
-    />
+const ProfileSkeleton = () => {
+  const { t } = useTranslation('profile');
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
+      <PageHeader
+        icon={Settings}
+        title={t('header.title')}
+        subtitle={t('header.subtitle')}
+      />
 
     <div className="space-y-6">
       <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
@@ -92,10 +96,12 @@ const ProfileSkeleton = () => (
         </div>
       </div>
     </div>
-  </div>
-);
+    </div>
+  );
+};
 
 export const Profile = ({ profileData, setProfileData, isLoading, loadError, onRetryLoad }: ProfileProps) => {
+  const { t } = useTranslation('profile');
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(profileData || {});
@@ -123,11 +129,11 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
         <PageHeader
           icon={Settings}
-          title="Meu Perfil"
-          subtitle="Gerencie suas informações e preferências."
+          title={t('header.title')}
+          subtitle={t('header.subtitle')}
         />
         <ErrorState
-          title="Não foi possível carregar o perfil"
+          title={t('header.loadErrorTitle')}
           message={loadError}
           onRetry={onRetryLoad}
           className="max-w-2xl mx-auto"
@@ -198,7 +204,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
       });
       setIsEditing(false);
     } catch (err: any) {
-      setSaveError(err.message || 'Erro ao salvar perfil. Tente novamente.');
+      setSaveError(err.message || t('errors.save'));
     } finally {
       setIsSaving(false);
     }
@@ -223,7 +229,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     setEditData((prev: any) => ({ ...prev, uiLocale }));
     updateUser({ uiLocale });
     updateProfile({ uiLocale }).catch((err: any) => {
-      setSaveError(err?.message || 'Erro ao salvar perfil. Tente novamente.');
+      setSaveError(err?.message || t('errors.save'));
     });
   };
 
@@ -238,14 +244,14 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
       <div className="flex flex-col gap-4 mb-0 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           icon={Settings}
-          title="Meu Perfil"
-          subtitle="Gerencie suas informações e preferências."
+          title={t('header.title')}
+          subtitle={t('header.subtitle')}
         />
         {!isEditing && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:mt-1">
             <LanguageToggle onChange={handleLocaleChange} />
             <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
-              <Pencil className="w-4 h-4" /> Editar Perfil
+              <Pencil className="w-4 h-4" /> {t('header.edit')}
             </Button>
           </div>
         )}

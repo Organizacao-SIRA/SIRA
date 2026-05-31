@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { completeOnboarding } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
@@ -60,6 +61,7 @@ interface UseOnboardingFormParams {
 }
 
 export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormParams) {
+  const { t } = useTranslation('onboarding');
   const { updateUser } = useAuth();
   const maxStep = ONBOARDING_STEPS.length - 1;
 
@@ -106,28 +108,28 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     const errors: StepFieldErrors[] = ONBOARDING_STEPS.map(() => ({}));
 
     if (!data.course.trim() || data.course.trim().length < 2) {
-      errors[1].course = 'Informe o curso (mínimo 2 caracteres).';
+      errors[1].course = t('validation.course');
     }
     if (!data.mainArea.trim()) {
-      errors[1].mainArea = 'Selecione a área principal.';
+      errors[1].mainArea = t('validation.mainArea');
     }
 
     if (data.interests.length < 3) {
-      errors[2].interests = 'Selecione pelo menos 3 áreas de interesse.';
+      errors[2].interests = t('validation.interests');
     }
 
     if (data.languages.length === 0) {
-      errors[3].languages = 'Selecione pelo menos 1 idioma.';
+      errors[3].languages = t('validation.languages');
     }
     if (data.materialLevels.length === 0) {
-      errors[3].materialLevels = 'Selecione pelo menos 1 nível de material.';
+      errors[3].materialLevels = t('validation.materialLevels');
     }
     if (!data.wantsBooks && !data.wantsArticles) {
-      errors[3].wantsBooks = 'Selecione pelo menos um formato (livros ou artigos).';
+      errors[3].wantsBooks = t('validation.formats');
     }
 
     return errors;
-  }, [data]);
+  }, [data, t]);
 
   const isStepValid = useCallback(
     (index: number) => Object.keys(stepErrors[index] || {}).length === 0,
@@ -183,12 +185,12 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       sessionStorage.removeItem(STEP_KEY);
       onSuccess(profile);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao salvar preferências. Tente novamente.';
+      const message = err instanceof Error ? err.message : t('validation.submit');
       setSubmitError(message);
     } finally {
       setIsSaving(false);
     }
-  }, [data, isStepValid, updateUser, onSuccess]);
+  }, [data, isStepValid, updateUser, onSuccess, t]);
 
   return {
     data,

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Upload, Trash2, AlertCircle } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { UserAvatar } from '../ui/UserAvatar';
@@ -25,6 +26,7 @@ export const AvatarUploadModal = ({
   currentAvatarUrl,
   onAvatarUpdated,
 }: AvatarUploadModalProps) => {
+  const { t } = useTranslation(['profile', 'common']);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -52,10 +54,10 @@ export const AvatarUploadModal = ({
 
   const validate = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Formato inválido. Use JPG, PNG ou WEBP.';
+      return t('avatar.invalidFormat');
     }
     if (file.size > MAX_BYTES) {
-      return 'Imagem muito grande. O tamanho máximo é 5 MB.';
+      return t('avatar.tooLarge');
     }
     return null;
   };
@@ -83,7 +85,7 @@ export const AvatarUploadModal = ({
       onAvatarUpdated(profile);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Erro ao enviar imagem. Tente novamente.');
+      setError(err.message || t('avatar.uploadError'));
     } finally {
       setIsSaving(false);
     }
@@ -97,7 +99,7 @@ export const AvatarUploadModal = ({
       onAvatarUpdated(profile);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Erro ao remover imagem.');
+      setError(err.message || t('avatar.removeError'));
     } finally {
       setIsRemoving(false);
     }
@@ -111,15 +113,15 @@ export const AvatarUploadModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Foto de perfil"
+      title={t('avatar.title')}
       size="md"
       footer={
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <Button variant="secondary" onClick={onClose} disabled={isSaving || isRemoving}>
-            Cancelar
+            {t('common:actions.cancel')}
           </Button>
           <Button onClick={handleSave} isLoading={isSaving} disabled={!hasSelection || isRemoving}>
-            Salvar foto
+            {t('avatar.savePhoto')}
           </Button>
         </div>
       }
@@ -133,7 +135,7 @@ export const AvatarUploadModal = ({
           accept={ACCEPT}
           onChange={handleFileSelect}
           className="sr-only"
-          aria-label="Selecionar arquivo de imagem"
+          aria-label={t('avatar.selectFile')}
         />
 
         <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -145,7 +147,7 @@ export const AvatarUploadModal = ({
             className="flex-1"
           >
             <Upload className="w-4 h-4" />
-            {hasSelection ? 'Trocar imagem' : 'Escolher imagem'}
+            {hasSelection ? t('avatar.replaceImage') : t('avatar.chooseImage')}
           </Button>
           {hasCurrentAvatar && !hasSelection && (
             <Button
@@ -157,14 +159,13 @@ export const AvatarUploadModal = ({
               className="flex-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <Trash2 className="w-4 h-4" />
-              Remover foto
+              {t('avatar.removePhoto')}
             </Button>
           )}
         </div>
 
         <p className="text-xs text-text-muted text-center max-w-xs">
-          Aceitamos JPG, PNG ou WEBP de até 5 MB.<br />
-          A imagem será exibida de forma circular.
+          <Trans i18nKey="avatar.hint" ns="profile" components={{ br: <br /> }} />
         </p>
 
         {error && (

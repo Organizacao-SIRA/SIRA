@@ -1,4 +1,5 @@
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StatusBadge } from '../ui/StatusBadge';
 import { ProfileAvatar } from './ProfileAvatar';
 import { resolveAvatarUrl } from '../../services/api';
@@ -17,8 +18,11 @@ export const ProfileHeaderCard = ({
   avatarUrl,
   hasCompletedOnboarding,
   onAvatarChangeRequest,
-}: ProfileHeaderCardProps) => (
-  <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+}: ProfileHeaderCardProps) => {
+  const { t } = useTranslation('profile');
+
+  return (
+    <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
     <ProfileAvatar
       name={name}
       avatarUrl={resolveAvatarUrl(avatarUrl)}
@@ -30,12 +34,13 @@ export const ProfileHeaderCard = ({
     </div>
     {hasCompletedOnboarding ? (
       <StatusBadge variant="success" icon={<ShieldCheck className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
-        Preferências concluídas
+        {t('status.completed')}
       </StatusBadge>
     ) : (
       <StatusBadge variant="warning" icon={<AlertTriangle className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
-        Preferências pendentes
+        {t('status.pending')}
       </StatusBadge>
     )}
-  </div>
-);
+    </div>
+  );
+};

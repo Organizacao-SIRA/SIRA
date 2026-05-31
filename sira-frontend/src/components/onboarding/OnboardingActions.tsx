@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 interface OnboardingActionsProps {
@@ -22,6 +23,7 @@ export const OnboardingActions = ({
   onSubmit,
   hint,
 }: OnboardingActionsProps) => {
+  const { t } = useTranslation('onboarding');
   const isFirst = step === 0;
   const isLast = step === totalSteps - 1;
 
@@ -35,7 +37,7 @@ export const OnboardingActions = ({
             className="text-text-muted hover:text-primary text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md px-1 py-1"
           >
             <ChevronLeft className="w-4 h-4" />
-            Voltar
+            {t('actions.back')}
           </button>
         )}
         {hint && <div className="text-[10px] font-bold uppercase tracking-widest text-text-subtle truncate">{hint}</div>}
@@ -49,11 +51,11 @@ export const OnboardingActions = ({
           className="w-full sm:w-auto"
         >
           {isSaving ? (
-            'Salvando...'
+            t('actions.saving')
           ) : (
             <>
               <Check className="w-4 h-4" />
-              Finalizar configuração
+              {t('actions.finish')}
             </>
           )}
         </Button>
@@ -64,7 +66,7 @@ export const OnboardingActions = ({
           disabled={!canAdvance}
           className="w-full sm:w-auto group"
         >
-          {isFirst ? 'Começar' : 'Continuar'}
+          {isFirst ? t('actions.start') : t('actions.continue')}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </Button>
       )}

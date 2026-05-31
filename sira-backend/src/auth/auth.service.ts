@@ -17,6 +17,7 @@ import {
 import { promisify } from 'node:util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { authMessages, normalizeUiLocale } from './auth-i18n';
 
 const scrypt = promisify(_scrypt);
 
@@ -65,13 +66,15 @@ export class AuthService {
 
   // ── Auth flows ──────────────────────────────────────────────────
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, locale?: string) {
+    const uiLocale = normalizeUiLocale(locale);
+    const messages = authMessages[uiLocale];
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new ConflictException('E-mail já cadastrado');
+    if (exists) throw new ConflictException(messages.emailAlreadyRegistered);
 
     const hashedPassword = await this.hashPassword(dto.password);
     const user = await this.prisma.user.create({
-      data: { email: dto.email, password: hashedPassword, name: dto.name },
+      data: { email: dto.email, password: hashedPassword, name: dto.name, uiLocale },
     });
 
     return {
@@ -81,12 +84,13 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, locale?: string) {
+    const messages = authMessages[normalizeUiLocale(locale)];
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Credenciais inválidas');
+    if (!user) throw new UnauthorizedException(messages.invalidCredentials);
 
     const valid = await this.comparePasswords(dto.password, user.password);
-    if (!valid) throw new UnauthorizedException('Credenciais inválidas');
+    if (!valid) throw new UnauthorizedException(messages.invalidCredentials);
 
     return {
       accessToken: this.signAccess(user),
@@ -95,7 +99,8 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string, locale?: string) {
+    const messages = authMessages[normalizeUiLocale(locale)];
     try {
       const payload = this.jwtService.verify(refreshToken);
       if (payload.type !== 'refresh') throw new Error();
@@ -108,7 +113,7 @@ export class AuthService {
         refreshToken: this.signRefresh(user),
       };
     } catch {
-      throw new UnauthorizedException('Token de atualização inválido ou expirado');
+      throw new UnauthorizedException(messages.invalidRefreshToken);
     }
   }
 
@@ -118,7 +123,7 @@ export class AuthService {
    * Solicita recuperação de senha.
    * Resposta é SEMPRE uniforme (anti-enumeração de contas — OWASP).
    */
-  async forgotPassword(email: string): Promise<void> {
+  async forgotPassword(email: string, locale?: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
@@ -150,15 +155,19 @@ export class AuthService {
     // Monta o link de recuperação apontando para o frontend
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendUrl}?screen=reset-password&token=${rawToken}`;
+    const uiLocale = normalizeUiLocale(user.uiLocale || locale);
+    const messages = authMessages[uiLocale];
+    const emailCopy = messages.resetEmail;
 
     // Envia e-mail de recuperação
     try {
       await this.mailerService.sendMail({
         to: user.email,
-        subject: 'SIRA+ — Recuperação de senha',
+        subject: emailCopy.subject,
         template: 'reset-password',
         context: {
-          name: user.name || 'Usuário',
+          ...emailCopy,
+          name: user.name || emailCopy.fallbackName,
           resetLink,
           year: new Date().getFullYear(),
         },
@@ -189,7 +198,7 @@ export class AuthService {
   /**
    * Redefine a senha do usuário usando um token válido.
    */
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(token: string, newPassword: string, locale?: string): Promise<void> {
     const tokenHash = this.sha256(token);
 
     const record = await this.prisma.passwordResetToken.findUnique({
@@ -199,7 +208,7 @@ export class AuthService {
 
     if (!record || record.isUsed || record.expiresAt <= new Date()) {
       this.logger.warn(`[SECURITY] Invalid/expired reset token attempt`);
-      throw new BadRequestException('Token inválido ou expirado. Solicite uma nova recuperação de senha.');
+      throw new BadRequestException(authMessages[normalizeUiLocale(locale)].resetTokenInvalid);
     }
 
     const hashedPassword = await this.hashPassword(newPassword);

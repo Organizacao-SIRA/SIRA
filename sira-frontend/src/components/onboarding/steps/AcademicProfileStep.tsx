@@ -1,6 +1,8 @@
 import { GraduationCap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
+import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
 import type { OnboardingFormData, StepFieldErrors } from '../../../types/onboarding';
 import type { PreferenceOptions } from '../../../types';
 
@@ -11,54 +13,59 @@ interface AcademicProfileStepProps {
   onChange: <K extends keyof OnboardingFormData>(field: K, value: OnboardingFormData[K]) => void;
 }
 
-export const AcademicProfileStep = ({ data, errors, options, onChange }: AcademicProfileStepProps) => (
-  <div className="space-y-6 max-w-2xl mx-auto">
+export const AcademicProfileStep = ({ data, errors, options, onChange }: AcademicProfileStepProps) => {
+  const { t } = useTranslation('onboarding');
+  const { t: tp } = useTranslation('preferences');
+
+  return (
+    <div className="space-y-6 max-w-2xl mx-auto">
     <header className="flex items-start gap-3">
       <div className="p-2 bg-primary-soft rounded-lg text-primary">
         <GraduationCap className="w-5 h-5" aria-hidden="true" />
       </div>
       <div>
-        <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">Seu perfil acadêmico</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">{t('academicProfile.title')}</h2>
         <p className="text-sm text-text-muted mt-0.5">
-          Essas informações ajudam o SIRA+ a recomendar conteúdo no seu nível.
+          {t('academicProfile.description')}
         </p>
       </div>
     </header>
 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Input
-        label="Curso"
+        label={t('academicProfile.course')}
         type="text"
-        placeholder="Ex: Ciência da Computação"
+        placeholder={t('academicProfile.coursePlaceholder')}
         value={data.course}
         onChange={(e) => onChange('course', e.target.value)}
         error={errors.course}
         required
       />
       <Select
-        label="Nível de Escolaridade"
+        label={t('academicProfile.educationLevel')}
         value={data.educationLevel}
         onChange={(e) => onChange('educationLevel', e.target.value)}
-        options={options.educationLevels.map((level) => ({ value: level, label: level }))}
+        options={options.educationLevels.map((level) => ({ value: level, label: preferenceValueLabel(level, tp) }))}
       />
       <Select
-        label="Área Principal"
+        label={t('academicProfile.mainArea')}
         value={data.mainArea}
         onChange={(e) => onChange('mainArea', e.target.value)}
         error={errors.mainArea}
         options={[
-          { value: '', label: 'Selecione a área principal' },
-          ...options.topics.map((topic) => ({ value: topic.id, label: topic.label })),
+          { value: '', label: t('academicProfile.selectMainArea') },
+          ...options.topics.map((topic) => ({ value: topic.id, label: preferenceTopicLabel(topic, tp) })),
         ]}
         required
       />
       <Input
-        label="Subáreas (opcional)"
+        label={t('academicProfile.subAreas')}
         type="text"
-        placeholder="Ex: Machine Learning, NLP"
+        placeholder={t('academicProfile.subAreasPlaceholder')}
         value={data.subAreas}
         onChange={(e) => onChange('subAreas', e.target.value)}
       />
     </div>
-  </div>
-);
+    </div>
+  );
+};

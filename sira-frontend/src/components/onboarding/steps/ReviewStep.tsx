@@ -1,6 +1,8 @@
 import { Pencil, AlertCircle, ClipboardCheck } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
+import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
 import type { OnboardingFormData } from '../../../types/onboarding';
-import type { PreferenceOptions } from '../../../types';
+import type { PreferenceOptions, PreferenceTopic } from '../../../types';
 
 interface ReviewStepProps {
   data: OnboardingFormData;
@@ -13,10 +15,12 @@ const Section = ({
   title,
   onEdit,
   children,
+  editLabel,
 }: {
   title: string;
   onEdit: () => void;
   children: React.ReactNode;
+  editLabel: string;
 }) => (
   <div className="bg-surface-muted border border-border rounded-xl p-4">
     <div className="flex items-start justify-between gap-3 mb-2">
@@ -27,7 +31,7 @@ const Section = ({
         className="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-md px-1.5 py-0.5"
       >
         <Pencil className="w-3 h-3" />
-        Editar
+        {editLabel}
       </button>
     </div>
     <div className="text-sm text-text">{children}</div>
@@ -41,15 +45,22 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 export const ReviewStep = ({ data, options, onEdit, submitError }: ReviewStepProps) => {
+  const { t } = useTranslation('onboarding');
+  const { t: tp } = useTranslation('preferences');
   const mainAreaLabel =
-    options.topics.find((t) => t.id === data.mainArea)?.label || data.mainArea || '—';
+    options.topics.find((topic) => topic.id === data.mainArea)
+      ? preferenceTopicLabel(options.topics.find((topic) => topic.id === data.mainArea) as PreferenceTopic, tp)
+      : data.mainArea || '—';
 
   const interestLabels = data.interests
-    .map((id) => options.topics.find((t) => t.id === id)?.label || id);
+    .map((id) => {
+      const topic = options.topics.find((item) => item.id === id);
+      return topic ? preferenceTopicLabel(topic, tp) : id;
+    });
 
   const formats: string[] = [];
-  if (data.wantsBooks) formats.push('Livros');
-  if (data.wantsArticles) formats.push('Artigos científicos');
+  if (data.wantsBooks) formats.push(t('preferences.books'));
+  if (data.wantsArticles) formats.push(t('preferences.articles'));
 
   return (
     <div className="space-y-5 max-w-2xl mx-auto">
@@ -58,61 +69,65 @@ export const ReviewStep = ({ data, options, onEdit, submitError }: ReviewStepPro
           <ClipboardCheck className="w-5 h-5" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">Revise suas escolhas</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">{t('review.title')}</h2>
           <p className="text-sm text-text-muted mt-0.5">
-            Confira tudo abaixo. Se algo não estiver certo, é só clicar em <span className="font-bold">Editar</span>.
+            <Trans
+              i18nKey="review.description"
+              ns="onboarding"
+              components={{ strong: <span className="font-bold" /> }}
+            />
           </p>
         </div>
       </header>
 
       <div className="space-y-3">
-        <Section title="Perfil acadêmico" onEdit={() => onEdit(1)}>
+        <Section title={t('review.academicProfile')} editLabel={t('review.edit')} onEdit={() => onEdit(1)}>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
             <div>
-              <dt className="text-xs text-text-muted">Curso</dt>
+              <dt className="text-xs text-text-muted">{t('review.course')}</dt>
               <dd className="font-semibold">{data.course || '—'}</dd>
             </div>
             <div>
-              <dt className="text-xs text-text-muted">Nível</dt>
-              <dd className="font-semibold">{data.educationLevel}</dd>
+              <dt className="text-xs text-text-muted">{t('review.level')}</dt>
+              <dd className="font-semibold">{preferenceValueLabel(data.educationLevel, tp)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-text-muted">Área principal</dt>
+              <dt className="text-xs text-text-muted">{t('review.mainArea')}</dt>
               <dd className="font-semibold">{mainAreaLabel}</dd>
             </div>
             {data.subAreas && (
               <div>
-                <dt className="text-xs text-text-muted">Subáreas</dt>
+                <dt className="text-xs text-text-muted">{t('review.subAreas')}</dt>
                 <dd className="font-semibold">{data.subAreas}</dd>
               </div>
             )}
           </dl>
         </Section>
 
-        <Section title="Áreas de interesse" onEdit={() => onEdit(2)}>
+        <Section title={t('review.interestAreas')} editLabel={t('review.edit')} onEdit={() => onEdit(2)}>
           <div className="flex flex-wrap gap-1.5">
             {interestLabels.length === 0
-              ? <span className="text-text-muted">Nenhuma selecionada</span>
+              ? <span className="text-text-muted">{t('review.noneSelected')}</span>
               : interestLabels.map((label) => <Chip key={label}>{label}</Chip>)}
           </div>
         </Section>
 
-        <Section title="Preferências de conteúdo" onEdit={() => onEdit(3)}>
+        <Section title={t('review.contentPreferences')} editLabel={t('review.edit')} onEdit={() => onEdit(3)}>
           <div className="space-y-2">
             <div>
-              <span className="text-xs text-text-muted block mb-1">Idiomas</span>
+              <span className="text-xs text-text-muted block mb-1">{t('review.languages')}</span>
               <div className="flex flex-wrap gap-1.5">
-                {data.languages.map((l) => <Chip key={l}>{l}</Chip>)}
+                {data.languages.map((l) => <Chip key={l}>{preferenceValueLabel(l, tp)}</Chip>)}
               </div>
             </div>
             <div>
-              <span className="text-xs text-text-muted block mb-1">Nível</span>
+              <span className="text-xs text-text-muted block mb-1">{t('review.level')}</span>
               <div className="flex flex-wrap gap-1.5">
-                {data.materialLevels.map((l) => <Chip key={l}>{l}</Chip>)}
+                {data.materialLevels.map((l) => <Chip key={l}>{preferenceValueLabel(l, tp)}</Chip>)}
               </div>
             </div>
             <div>
-              <span className="text-xs text-text-muted block mb-1">Formatos</span>
+              <span className="text-xs text-text-muted block mb-1">{t('review.formats')}</span>
               <div className="flex flex-wrap gap-1.5">
                 {formats.map((f) => <Chip key={f}>{f}</Chip>)}
               </div>
@@ -120,10 +135,10 @@ export const ReviewStep = ({ data, options, onEdit, submitError }: ReviewStepPro
           </div>
         </Section>
 
-        <Section title="Objetivo acadêmico" onEdit={() => onEdit(4)}>
+        <Section title={t('review.academicGoal')} editLabel={t('review.edit')} onEdit={() => onEdit(4)}>
           {data.academicGoal
-            ? <span className="font-semibold">{data.academicGoal}</span>
-            : <span className="text-text-muted">Não informado</span>}
+            ? <span className="font-semibold">{preferenceValueLabel(data.academicGoal, tp)}</span>
+            : <span className="text-text-muted">{t('review.notInformed')}</span>}
         </Section>
       </div>
 

@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ONBOARDING_STEPS } from '../../types/onboarding';
 
 interface OnboardingProgressProps {
@@ -7,19 +8,21 @@ interface OnboardingProgressProps {
 }
 
 export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgressProps) => {
+  const { t } = useTranslation('onboarding');
   const total = ONBOARDING_STEPS.length;
   const percent = Math.round(((currentStep + 1) / total) * 100);
   const meta = ONBOARDING_STEPS[currentStep];
+  const currentLabel = t(meta.labelKey);
 
   return (
-    <div className="space-y-3" aria-label={`Etapa ${currentStep + 1} de ${total}`}>
+    <div className="space-y-3" aria-label={t('progress.label', { current: currentStep + 1, total })}>
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold text-text-subtle uppercase tracking-widest">
-            Etapa {currentStep + 1} de {total}
+            {t('progress.step', { current: currentStep + 1, total })}
           </p>
           <h2 className="text-base sm:text-lg font-bold text-primary-dark dark:text-text truncate">
-            {meta.label}
+            {currentLabel}
           </h2>
         </div>
         <span className="text-xs font-bold text-primary whitespace-nowrap">{percent}%</span>
@@ -40,7 +43,7 @@ export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgress
                 type="button"
                 onClick={() => interactive && onJumpTo!(index)}
                 disabled={!interactive}
-                aria-label={`Ir para ${stepMeta.label}`}
+                aria-label={t('progress.goTo', { step: t(stepMeta.labelKey) })}
                 className={`flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold flex-shrink-0 transition-all ${
                   isCurrent
                     ? 'bg-primary text-white ring-2 ring-primary/30'

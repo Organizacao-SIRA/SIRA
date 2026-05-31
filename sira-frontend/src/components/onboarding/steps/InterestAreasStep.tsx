@@ -1,6 +1,8 @@
 import { Globe, Sparkles } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { InterestCard } from '../InterestCard';
 import { TOPIC_ICONS } from '../../../constants/topicIcons';
+import { preferenceTopicDescription, preferenceTopicLabel } from '../../../i18n/preferenceLabels';
 import type { PreferenceTopic } from '../../../types';
 
 interface InterestAreasStepProps {
@@ -18,6 +20,8 @@ export const InterestAreasStep = ({
   error,
   minSelected = 3,
 }: InterestAreasStepProps) => {
+  const { t } = useTranslation('onboarding');
+  const { t: tp } = useTranslation('preferences');
   const remaining = Math.max(0, minSelected - selected.length);
   const reachedMin = selected.length >= minSelected;
 
@@ -28,24 +32,28 @@ export const InterestAreasStep = ({
           <Sparkles className="w-5 h-5" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">Quais temas te interessam?</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">{t('interests.title')}</h2>
           <p className="text-sm text-text-muted mt-0.5">
-            Selecione pelo menos <span className="font-bold text-primary">{minSelected} áreas</span>.
-            Você poderá ajustar isso a qualquer momento no perfil.
+            <Trans
+              i18nKey="interests.description"
+              ns="onboarding"
+              values={{ count: minSelected }}
+              components={{ strong: <span className="font-bold text-primary" /> }}
+            />
           </p>
         </div>
       </header>
 
       <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-muted border border-border">
         <span className="text-xs font-bold text-text-muted">
-          {selected.length} de {minSelected} mín. selecionado{selected.length === 1 ? '' : 's'}
+          {t('interests.selected', { selected: selected.length, min: minSelected, count: selected.length })}
         </span>
         <span
           className={`text-[10px] font-bold uppercase tracking-widest ${
             reachedMin ? 'text-success-strong' : 'text-text-subtle'
           }`}
         >
-          {reachedMin ? 'Tudo certo!' : `Faltam ${remaining}`}
+          {reachedMin ? t('interests.done') : t('interests.missing', { count: remaining })}
         </span>
       </div>
 
@@ -56,8 +64,8 @@ export const InterestAreasStep = ({
             <InterestCard
               key={topic.id}
               icon={Icon}
-              label={topic.label}
-              description={topic.description}
+              label={preferenceTopicLabel(topic, tp)}
+              description={preferenceTopicDescription(topic, tp)}
               selected={selected.includes(topic.id)}
               onToggle={() => onToggle(topic.id)}
             />
