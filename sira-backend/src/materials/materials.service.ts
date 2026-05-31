@@ -191,9 +191,14 @@ export class MaterialsService {
       }
     }) : null;
 
-    const uiLocale = normalizeUiLocale(user?.uiLocale ?? options.locale);
+    // Accept-Language tem precedência sobre user.uiLocale porque o save do perfil é
+    // fire-and-forget (useUiLocaleSync): logo após o usuário trocar de idioma, o
+    // banco ainda pode estar com o valor anterior enquanto a request atual já carrega
+    // o cabeçalho atualizado. O perfil entra apenas como fallback.
+    const uiLocale = normalizeUiLocale(options.locale ?? user?.uiLocale);
     const outputLanguage = aiOutputLanguageLabel(uiLocale);
     const outputInstruction = aiOutputInstruction(uiLocale);
+    this.logger.log(`chatSearch uiLocale=${uiLocale} (header=${options.locale ?? 'none'}, profile=${user?.uiLocale ?? 'none'})`);
 
     if (userId) {
       this.saveSearchHistory(userId, prompt.trim()).catch(() => {});
@@ -305,20 +310,22 @@ export class MaterialsService {
 
     try {
       const rawSynthesis = await this.ai.complete({
-        system: `Você é um assistente de recomendação acadêmica senior.
+        system: `${outputInstruction}
+
+            Você é um assistente de recomendação acadêmica senior.
             Considere o PERFIL DO USUÁRIO abaixo para selecionar e justificar os materiais:
             ${userProfileText}
 
             Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
             ${diversify ? 'Esta é uma nova rodada de sugestões. Priorize materiais úteis que tragam diversidade de subtemas, métodos, autores, anos, tipos e fontes. Evite escolhas óbvias ou muito parecidas entre si.' : ''}
             Retorne um JSON com:
-            - "aiMessage": Uma síntese geral em ${outputLanguage} (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
+            - "aiMessage": Uma síntese geral (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
             - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
               - "id": o ID exato do candidato
-              - "explanation": UMA frase curta em ${outputLanguage} explicando por que este material específico é relevante para o pedido e o perfil do usuário.
+              - "explanation": UMA frase curta explicando por que este material específico é relevante para o pedido e o perfil do usuário.
 
-            ${outputInstruction}`,
-        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}`,
+            REGRA DE IDIOMA (obrigatória): aiMessage e cada explanation devem ser escritos exclusivamente em ${outputLanguage}. Não misture idiomas. Não traduza títulos, autores ou metadados externos — mantenha-os no idioma original.`,
+        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}\n\nLembre-se: aiMessage e explanation em ${outputLanguage}.`,
         maxTokens: 1500,
       });
       const text = rawSynthesis.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
