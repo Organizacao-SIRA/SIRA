@@ -288,15 +288,15 @@ export class RecommendationsService {
   ): Promise<RecommendationItem[]> {
     const favoritesText = favorites
       .map(f => `- "${f.material.title}" (${f.material.authors}, ${f.material.year}) [${f.material.type}]`)
-      .join('\n') || 'Nenhum favorito ainda';
+      .join('\n') || 'No favorites yet';
 
     const searchesText = searches
       .map(s => `- "${s.query}"`)
-      .join('\n') || 'Nenhuma busca recente';
+      .join('\n') || 'No recent searches';
 
     const candidatesText = candidates
       .map(c =>
-        `ID:${c.id} | ${c.type} | nivel:${c.level || '?'} | "${c.title}" | ${c.authors} | ${c.year || 'N/A'} | ${(c.abstract || '').substring(0, 250)}`,
+        `ID:${c.id} | ${c.type} | level:${c.level || '?'} | "${c.title}" | ${c.authors} | ${c.year || 'N/A'} | ${(c.abstract || '').substring(0, 250)}`,
       )
       .join('\n');
 
@@ -304,15 +304,15 @@ export class RecommendationsService {
     const uiLocale = normalizeUiLocale(user.uiLocale);
     const outputLanguage = aiOutputLanguageLabel(uiLocale);
 
-    // Perfil no system: muda só quando o usuário edita o onboarding — cacheado pela Anthropic entre gerações.
-    // Favoritos/buscas/candidatos no user: mudam a cada geração — não cacheáveis.
-    // O suffix de instrução de locale fica no final para não quebrar o prefixo cacheável quando o usuário troca de idioma.
-    const systemPrompt = `Você é um sistema de recomendação acadêmica. Retorne APENAS JSON válido, sem markdown, sem texto extra fora do JSON.\n\nPERFIL DO USUÁRIO:\n${this.buildPreferencesText(user)}\n\n${aiOutputInstruction(uiLocale)}`;
+    // Profile in system: changes only when the user edits onboarding — cached by Anthropic across generations.
+    // Favorites/searches/candidates in user: change every generation — not cacheable.
+    // The locale instruction suffix stays at the end so the cacheable prefix is preserved when the user switches language.
+    const systemPrompt = `You are an academic recommendation system. Return ONLY valid JSON, no markdown, no extra text outside the JSON.\n\nUSER PROFILE (values preserved in their original language):\n${this.buildPreferencesText(user)}\n\n${aiOutputInstruction(uiLocale)}`;
 
     try {
       const raw = await this.ai.complete({
         system: systemPrompt,
-        user: `FAVORITOS DO USUÁRIO:\n${favoritesText}\n\nBUSCAS RECENTES:\n${searchesText}\n\nCANDIDATOS:\n${candidatesText}\n\nSelecione os TOP ${topN} materiais mais relevantes para este usuário. Priorize, nesta ordem: favoritos, buscas recentes, interesses declarados, área principal/subáreas, idioma/nível/formato e objetivo acadêmico. Para cada um:\n- Escreva UMA frase curta explicando por que é relevante\n- Atribua um score de relevância de 0 a 100\n- Para o campo "level": se o candidato já tem nivel diferente de "?", use exatamente esse valor. Caso seja "?", determine: "Introdutório", "Intermediário" ou "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}\n\nREGRA DE IDIOMA (obrigatória): cada explanation deve ser escrita exclusivamente em ${outputLanguage}. Não misture idiomas. Não traduza títulos, autores ou metadados externos — mantenha-os no idioma original.`,
+        user: `USER FAVORITES:\n${favoritesText}\n\nRECENT SEARCHES:\n${searchesText}\n\nCANDIDATES:\n${candidatesText}\n\nSelect the TOP ${topN} materials most relevant to this user. Prioritize, in this order: favorites, recent searches, declared interests, main area/subareas, language/level/format, and academic goal. For each one:\n- Write ONE short sentence explaining why it is relevant\n- Assign a relevance score from 0 to 100\n- For the "level" field: if the candidate already has a level different from "?", use exactly that value. If it is "?", determine one of these Portuguese strings (stored values, do NOT translate): "Introdutório", "Intermediário", or "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}\n\nLANGUAGE RULE (mandatory): every explanation must be written exclusively in ${outputLanguage}. Do not mix languages. Do not translate titles, authors, or external metadata — keep them in their original language.`,
         maxTokens: 1024,
       });
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
@@ -350,20 +350,20 @@ export class RecommendationsService {
   private buildPreferencesText(user: RecommendationUser) {
     const interestLabels = getPreferenceTopicLabels(user.interests || []);
     const formats = [
-      user.wantsBooks ? 'livros' : null,
-      user.wantsArticles ? 'artigos' : null,
+      user.wantsBooks ? 'books' : null,
+      user.wantsArticles ? 'articles' : null,
     ].filter(Boolean);
 
     return [
-      `- Curso: ${user.course || 'Nao informado'}`,
-      `- Nivel: ${user.educationLevel || 'Nao informado'}`,
-      `- Area principal: ${user.mainArea || 'Nao informada'}`,
-      `- Subareas: ${user.subAreas || 'Nao informadas'}`,
-      `- Interesses: ${interestLabels.join(', ') || 'Nao informados'}`,
-      `- Idiomas preferidos: ${(user.languages || []).join(', ') || 'Nao informados'}`,
-      `- Nivel dos materiais: ${(user.materialLevels || []).join(', ') || 'Nao informado'}`,
-      `- Formatos desejados: ${formats.join(', ') || 'Nao informados'}`,
-      `- Objetivo academico: ${user.academicGoal || 'Nao informado'}`,
+      `- Course: ${user.course || 'Not informed'}`,
+      `- Education level: ${user.educationLevel || 'Not informed'}`,
+      `- Main area: ${user.mainArea || 'Not informed'}`,
+      `- Subareas: ${user.subAreas || 'Not informed'}`,
+      `- Interests: ${interestLabels.join(', ') || 'Not informed'}`,
+      `- Preferred languages: ${(user.languages || []).join(', ') || 'Not informed'}`,
+      `- Material level: ${(user.materialLevels || []).join(', ') || 'Not informed'}`,
+      `- Desired formats: ${formats.join(', ') || 'Not informed'}`,
+      `- Academic goal: ${user.academicGoal || 'Not informed'}`,
     ].join('\n');
   }
 }

@@ -205,39 +205,39 @@ export class MaterialsService {
     }
 
     const userProfileText = user ? `
-      PERFIL DO USUÁRIO:
-      - Curso: ${user.course}
-      - Nível: ${user.educationLevel}
-      - Área: ${user.mainArea}
-      - Interesses: ${user.interests?.join(', ')}
-      - Objetivo: ${user.academicGoal}
-      - Nível de material pref: ${user.materialLevels?.join(', ')}
-      - Idiomas: ${user.languages?.join(', ')}
-    ` : 'Perfil não disponível.';
+      USER PROFILE (values preserved in their original language):
+      - Course: ${user.course}
+      - Education level: ${user.educationLevel}
+      - Main area: ${user.mainArea}
+      - Interests: ${user.interests?.join(', ')}
+      - Academic goal: ${user.academicGoal}
+      - Preferred material level: ${user.materialLevels?.join(', ')}
+      - Languages: ${user.languages?.join(', ')}
+    ` : 'User profile not available.';
 
     // Fase 1: Interpretação de Intenção
     let queries: string[] = [];
     try {
       const rawKeywords = await this.ai.complete({
-        system: diversify ? `Você é um especialista em pesquisa bibliográfica acadêmica.
-            Perfil do usuário: ${userProfileText}
-            Sua tarefa: extrair 4 a 6 termos de busca EM INGLÊS para encontrar materiais alternativos ao pedido.
-            Regras:
-            - Cada termo deve ter 1 a 4 palavras
-            - Use inglês, pois as APIs retornam mais resultados em inglês
-            - Cubra subtemas diferentes, abordagens, métodos ou aplicações relacionadas ao pedido principal
-            - Evite termos genéricos demais e evite repetir o termo principal sem complemento
-            - Retorne APENAS os termos separados por vírgula, sem explicações, sem pontuação extra
-            Exemplo de resposta: "requirements engineering, software architecture, agile software development, software testing"` :
-          `Você é um especialista em pesquisa bibliográfica acadêmica.
-            Perfil do usuário: ${userProfileText}
-            Sua tarefa: extrair 2 a 3 termos de busca EM INGLÊS para usar nas APIs Google Books e Semantic Scholar.
-            Regras:
-            - Cada termo deve ter 1 a 4 palavras
-            - Use inglês, pois as APIs retornam mais resultados em inglês
-            - Seja específico ao tópico principal do pedido
-            - Retorne APENAS os termos separados por vírgula, sem explicações, sem pontuação extra
-            Exemplo de resposta: "data mining, machine learning, pattern recognition"`,
+        system: diversify ? `You are an academic bibliographic research specialist.
+            User profile: ${userProfileText}
+            Your task: extract 4 to 6 ENGLISH search terms to find alternative materials for the request.
+            Rules:
+            - Each term must have 1 to 4 words
+            - Use English, since the APIs return more results in English
+            - Cover different subtopics, approaches, methods, or applications related to the main request
+            - Avoid overly generic terms and avoid repeating the main term without a complement
+            - Return ONLY the terms separated by commas, no explanations, no extra punctuation
+            Example response: "requirements engineering, software architecture, agile software development, software testing"` :
+          `You are an academic bibliographic research specialist.
+            User profile: ${userProfileText}
+            Your task: extract 2 to 3 ENGLISH search terms to use with the Google Books and Semantic Scholar APIs.
+            Rules:
+            - Each term must have 1 to 4 words
+            - Use English, since the APIs return more results in English
+            - Be specific to the main topic of the request
+            - Return ONLY the terms separated by commas, no explanations, no extra punctuation
+            Example response: "data mining, machine learning, pattern recognition"`,
         user: prompt,
         maxTokens: diversify ? 160 : 100,
       });
@@ -312,20 +312,20 @@ export class MaterialsService {
       const rawSynthesis = await this.ai.complete({
         system: `${outputInstruction}
 
-            Você é um assistente de recomendação acadêmica senior.
-            Considere o PERFIL DO USUÁRIO abaixo para selecionar e justificar os materiais:
+            You are a senior academic recommendation assistant.
+            Use the USER PROFILE below to select and justify the materials:
             ${userProfileText}
 
-            Seu objetivo é analisar os candidatos e selecionar os mais relevantes tanto para o PEDIDO quanto para o PERFIL.
-            ${diversify ? 'Esta é uma nova rodada de sugestões. Priorize materiais úteis que tragam diversidade de subtemas, métodos, autores, anos, tipos e fontes. Evite escolhas óbvias ou muito parecidas entre si.' : ''}
-            Retorne um JSON com:
-            - "aiMessage": Uma síntese geral (2-3 frases) explicando o conjunto de materiais selecionados${diversify ? ' e o que há de novo nessa rodada' : ''}.
-            - "recommendations": Array com os top 10 materiais (misture livros e artigos quando disponíveis). Para cada um:
-              - "id": o ID exato do candidato
-              - "explanation": UMA frase curta explicando por que este material específico é relevante para o pedido e o perfil do usuário.
+            Your goal is to analyze the candidates and select the most relevant ones for both the REQUEST and the PROFILE.
+            ${diversify ? 'This is a new round of suggestions. Prioritize useful materials that bring diversity of subtopics, methods, authors, years, types, and sources. Avoid obvious or very similar choices.' : ''}
+            Return a JSON object with:
+            - "aiMessage": a general synthesis (2-3 sentences) explaining the selected set of materials${diversify ? ' and what is new in this round' : ''}.
+            - "recommendations": array with the top 10 materials (mix books and articles when available). For each item:
+              - "id": the exact ID of the candidate
+              - "explanation": ONE short sentence explaining why this specific material is relevant to the request and the user profile.
 
-            REGRA DE IDIOMA (obrigatória): aiMessage e cada explanation devem ser escritos exclusivamente em ${outputLanguage}. Não misture idiomas. Não traduza títulos, autores ou metadados externos — mantenha-os no idioma original.`,
-        user: `PEDIDO DO USUÁRIO: "${prompt}"\n\nCANDIDATOS:\n${candidatesText}\n\nRetorne APENAS JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}\n\nLembre-se: aiMessage e explanation em ${outputLanguage}.`,
+            LANGUAGE RULE (mandatory): aiMessage and every explanation must be written exclusively in ${outputLanguage}. Do not mix languages. Do not translate titles, authors, or external metadata — keep them in their original language.`,
+        user: `USER REQUEST: "${prompt}"\n\nCANDIDATES:\n${candidatesText}\n\nReturn ONLY JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}\n\nReminder: aiMessage and explanation in ${outputLanguage}.`,
         maxTokens: 1500,
       });
       const text = rawSynthesis.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
