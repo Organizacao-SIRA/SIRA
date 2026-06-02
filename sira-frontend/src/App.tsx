@@ -18,6 +18,8 @@ import { Details } from './pages/Details';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Spinner } from './components/ui/Spinner';
+import { ErrorState } from './components/ui/ErrorState';
+import { PageErrorBoundary } from './components/ui/PageErrorBoundary';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Onboarding } from './pages/Onboarding';
@@ -714,62 +716,75 @@ export default function App() {
             </div>
           )}
 
-          {currentScreen === 'home' && (
-            <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} filters={searchFilters} setFilters={setSearchFilters} user={user} />
-          )}
-          {currentScreen === 'results' && (
-            <Recommendations
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              handleSearch={handleSearch}
-              setCurrentScreen={setCurrentScreen}
-              results={results}
-              aiMessage={aiMessage}
-              viewDetails={viewDetails}
-              toggleFavorite={toggleFavorite}
-              isFavorite={isFavorite}
-              isLoading={isLoading}
-              isRegenerating={isRegenerating}
-              onRegenerate={regenerateSearchResults}
-              isSidebarOpen={isSidebarOpen}
-              user={user}
-            />
-          )}
-          {currentScreen === 'details' && (
-            <Details item={selectedItem} onBack={handleDetailsBack} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
-          )}
-          {currentScreen === 'catalog' && (
-            <Catalog
-              viewDetails={viewDetails}
-              toggleFavorite={toggleFavorite}
-              isFavorite={isFavorite}
-              homeResetKey={catalogHomeResetKey}
-            />
-          )}
-          {currentScreen === 'favorites' && (
-            <Favorites
-              toggleFavorite={toggleFavorite}
-              viewDetails={viewDetails}
-              setCurrentScreen={setCurrentScreen}
-              homeResetKey={favoritesHomeResetKey}
-            />
-          )}
-          {currentScreen === 'profile' && (
-            <Profile
-              profileData={profileData}
-              setProfileData={setProfileData}
-              isLoading={isProfileLoading}
-              loadError={profileError}
-              onRetryLoad={loadSessionData}
-            />
-          )}
-          {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'forgot-password' && <ForgotPassword setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'reset-password' && <ResetPassword token={resetToken} setCurrentScreen={setCurrentScreen} />}
-          {currentScreen === 'onboarding' && (
-            <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
-          )}
+          <PageErrorBoundary
+            resetKey={currentScreen}
+            fallback={
+              <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-68px)] flex items-center">
+                <ErrorState
+                  title={t('states.errorTitle')}
+                  message={t('states.errorDescription')}
+                  onRetry={() => window.location.reload()}
+                />
+              </div>
+            }
+          >
+            {currentScreen === 'home' && (
+              <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} filters={searchFilters} setFilters={setSearchFilters} user={user} />
+            )}
+            {currentScreen === 'results' && (
+              <Recommendations
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleSearch={handleSearch}
+                setCurrentScreen={setCurrentScreen}
+                results={results}
+                aiMessage={aiMessage}
+                viewDetails={viewDetails}
+                toggleFavorite={toggleFavorite}
+                isFavorite={isFavorite}
+                isLoading={isLoading}
+                isRegenerating={isRegenerating}
+                onRegenerate={regenerateSearchResults}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+              />
+            )}
+            {currentScreen === 'details' && (
+              <Details item={selectedItem} onBack={handleDetailsBack} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
+            )}
+            {currentScreen === 'catalog' && (
+              <Catalog
+                viewDetails={viewDetails}
+                toggleFavorite={toggleFavorite}
+                isFavorite={isFavorite}
+                homeResetKey={catalogHomeResetKey}
+              />
+            )}
+            {currentScreen === 'favorites' && (
+              <Favorites
+                toggleFavorite={toggleFavorite}
+                viewDetails={viewDetails}
+                setCurrentScreen={setCurrentScreen}
+                homeResetKey={favoritesHomeResetKey}
+              />
+            )}
+            {currentScreen === 'profile' && (
+              <Profile
+                profileData={profileData}
+                setProfileData={setProfileData}
+                isLoading={isProfileLoading}
+                loadError={profileError}
+                onRetryLoad={loadSessionData}
+              />
+            )}
+            {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
+            {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
+            {currentScreen === 'forgot-password' && <ForgotPassword setCurrentScreen={setCurrentScreen} />}
+            {currentScreen === 'reset-password' && <ResetPassword token={resetToken} setCurrentScreen={setCurrentScreen} />}
+            {currentScreen === 'onboarding' && (
+              <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
+            )}
+          </PageErrorBoundary>
         </main>
       </div>
     </div>

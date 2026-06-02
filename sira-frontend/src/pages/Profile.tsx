@@ -121,6 +121,10 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     }
   }, [isEditing, preferenceOptions]);
 
+  const { setUiLocale } = useUiLocaleSync({
+    onError: () => setSaveError(t('errors.localeSave')),
+  });
+
   if (isLoading) {
     return <ProfileSkeleton />;
   }
@@ -224,10 +228,6 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     }));
     updateUser({ avatarUrl: updated.avatarUrl });
   };
-
-  const { setUiLocale } = useUiLocaleSync({
-    onError: () => setSaveError(t('errors.localeSave')),
-  });
 
   const handleLocaleChange = (uiLocale: UiLocale) => {
     setProfileData(prev => ({ ...prev, uiLocale }));
