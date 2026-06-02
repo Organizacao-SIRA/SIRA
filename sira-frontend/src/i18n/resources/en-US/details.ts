@@ -16,6 +16,8 @@ export const details = {
   summary: {
     title: 'Summary',
     unavailable: 'Summary is not available for this material.',
+    showMore: 'Show more',
+    showLess: 'Show less',
     keywords: 'Keywords',
     keywordsLabel: 'Material keywords',
   },

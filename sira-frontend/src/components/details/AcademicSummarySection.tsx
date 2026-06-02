@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { CollapsibleAbstract } from './CollapsibleAbstract';
 
 interface AcademicSummarySectionProps {
   abstract?: string;
@@ -14,23 +15,24 @@ export const AcademicSummarySection = ({ abstract, keywords }: AcademicSummarySe
 
   return (
     <section aria-labelledby="academic-summary-heading" className="space-y-8">
-      <div className="space-y-3">
-        <h2
-          id="academic-summary-heading"
-          className="text-xs font-bold uppercase tracking-widest text-text-subtle"
-        >
-          {t('summary.title')}
-        </h2>
-        {hasAbstract ? (
-          <p className="text-text leading-[1.75] text-[17px] text-justify">
-            {abstract}
-          </p>
-        ) : (
+      {hasAbstract ? (
+        <CollapsibleAbstract
+          abstract={abstract}
+          headingId="academic-summary-heading"
+        />
+      ) : (
+        <div className="space-y-3">
+          <h2
+            id="academic-summary-heading"
+            className="text-xs font-bold uppercase tracking-widest text-text-subtle"
+          >
+            {t('summary.title')}
+          </h2>
           <p className="text-sm text-text-subtle italic">
             {t('summary.unavailable')}
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {hasKeywords && (
         <div className="space-y-3">

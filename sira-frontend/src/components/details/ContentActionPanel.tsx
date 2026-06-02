@@ -12,26 +12,33 @@ interface ContentActionPanelProps {
   onToggleFavorite: () => void;
 }
 
-const ContentCoverPreview = ({ item }: { item: CatalogItem }) => {
+export const ContentCoverPreview = ({
+  item,
+  variant = 'panel',
+}: {
+  item: CatalogItem;
+  variant?: 'panel' | 'compact';
+}) => {
   const { t } = useTranslation('details');
   const [imageError, setImageError] = useState(false);
   const showImage = Boolean(item.image) && !imageError;
+  const isCompact = variant === 'compact';
 
   return (
-    <div className="flex h-52 items-center justify-center pb-1">
+    <div className={isCompact ? 'flex w-24 shrink-0 items-start justify-center' : 'flex h-52 items-center justify-center pb-1'}>
       {showImage ? (
         <img
           src={item.image!}
           alt={t('actions.coverAlt', { title: item.title })}
           loading="lazy"
           onError={() => setImageError(true)}
-          className="h-48 w-32 object-contain rounded-lg shadow-md border border-border bg-surface-subtle"
+          className={`${isCompact ? 'h-32 w-20' : 'h-48 w-32'} object-contain rounded-lg shadow-md border border-border bg-surface-subtle`}
         />
       ) : (
         <MaterialPlaceholder
           type={item.type}
-          className="h-48 w-32 shadow-md"
-          iconClassName="w-12 h-12"
+          className={`${isCompact ? 'h-32 w-20' : 'h-48 w-32'} shadow-md`}
+          iconClassName={isCompact ? 'w-8 h-8' : 'w-12 h-12'}
         />
       )}
     </div>
@@ -127,6 +134,28 @@ const ShareActionsDivider = () => {
   );
 };
 
+export const ContentPrimaryActions = ({ item, isFavorite, onToggleFavorite }: ContentActionPanelProps) => (
+  <div className="space-y-3">
+    <AccessMaterialAction item={item} />
+    <FavoriteDetailsButton isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
+  </div>
+);
+
+export const ContentSecondaryActions = ({ item }: { item: CatalogItem }) => (
+  <>
+    <ShareActionsDivider />
+
+    <div className="space-y-3">
+      <div className="min-h-[52px]">
+        <CitationActionButton item={item} />
+      </div>
+      <div className="min-h-[52px]">
+        <CopyLinkButton url={item.url} doi={item.doi} />
+      </div>
+    </div>
+  </>
+);
+
 export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: ContentActionPanelProps) => {
   const { t } = useTranslation('details');
 
@@ -137,21 +166,13 @@ export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: Conte
     >
       <ContentCoverPreview item={item} />
 
-      <div className="space-y-3">
-        <AccessMaterialAction item={item} />
-        <FavoriteDetailsButton isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
-      </div>
+      <ContentPrimaryActions
+        item={item}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+      />
 
-      <ShareActionsDivider />
-
-      <div className="space-y-3">
-        <div className="min-h-[52px]">
-          <CitationActionButton item={item} />
-        </div>
-        <div className="min-h-[52px]">
-          <CopyLinkButton url={item.url} doi={item.doi} />
-        </div>
-      </div>
+      <ContentSecondaryActions item={item} />
     </aside>
   );
 };
