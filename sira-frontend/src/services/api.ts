@@ -159,7 +159,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
   const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
     method: 'POST',
     headers: withLocaleHeader({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ token, newPassword }),
+    body: JSON.stringify({ token, newPassword, confirmNewPassword: newPassword }),
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));

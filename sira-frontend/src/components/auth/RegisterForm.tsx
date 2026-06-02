@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Input } from '../ui/Input';
 import { PasswordInput } from '../ui/PasswordInput';
 import { Button } from '../ui/Button';
+import { PasswordStrengthMeter } from './PasswordStrengthMeter';
 
 interface RegisterFormProps {
   onSuccess: () => void;
@@ -16,27 +17,35 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
+    if (password !== confirmPassword) {
+      setError(t('register.passwordMismatch'));
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const response = await registerUser({ name, email, password });
+      const response = await registerUser({ name, email, password, confirmPassword });
       login(response.user);
-    } catch (err: any) {
-      setError(err.message || t('register.error'));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t('register.error');
+      setError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form className="space-y-5" onSubmit={handleRegister} noValidate>
+    <form className="space-y-3.5" onSubmit={handleRegister} noValidate>
       {error && (
         <div role="alert" className="p-3 bg-danger-soft text-danger-strong text-sm rounded-xl border border-danger-border font-medium">
           {error}
@@ -65,12 +74,29 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         required
       />
 
+      <div className="space-y-3">
+        <PasswordInput
+          label={t('register.passwordLabel')}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={t('register.passwordPlaceholder')}
+          autoComplete="new-password"
+          required
+        />
+        <PasswordStrengthMeter password={password} />
+      </div>
+
       <PasswordInput
-        label={t('register.passwordLabel')}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder={t('register.passwordPlaceholder')}
+        label={t('register.confirmPasswordLabel')}
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder={t('register.confirmPasswordPlaceholder')}
         autoComplete="new-password"
+        error={
+          confirmPassword && confirmPassword !== password
+            ? t('register.passwordMismatchInline')
+            : undefined
+        }
         required
       />
 
@@ -78,6 +104,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         type="submit"
         isLoading={isLoading}
         className="w-full mt-1"
+        disabled={!password || !confirmPassword || password !== confirmPassword}
       >
         {t('register.submit')}
         {!isLoading && <UserPlus className="w-4 h-4" />}

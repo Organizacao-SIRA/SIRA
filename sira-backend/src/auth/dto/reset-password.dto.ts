@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import { Match } from '../../common/validators/match.validator';
 
 export class ResetPasswordDto {
   @ApiProperty({ description: 'Token de recuperação recebido por e-mail' })
@@ -19,4 +20,9 @@ export class ResetPasswordDto {
   @Matches(/\d/, { message: 'A senha deve conter pelo menos um número' })
   @Matches(/[^A-Za-z0-9]/, { message: 'A senha deve conter pelo menos um caractere especial' })
   newPassword: string;
+
+  @ApiProperty({ description: 'Deve ser idêntica ao campo newPassword' })
+  @IsString()
+  @Match('newPassword', { message: 'A confirmação de senha não confere' })
+  confirmNewPassword: string;
 }

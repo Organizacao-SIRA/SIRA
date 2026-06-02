@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
+import { Match } from '../../common/validators/match.validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'usuario@email.com' })
@@ -19,6 +20,11 @@ export class RegisterDto {
   @Matches(/\d/, { message: 'A senha deve conter pelo menos um número' })
   @Matches(/[^A-Za-z0-9]/, { message: 'A senha deve conter pelo menos um caractere especial' })
   password: string;
+
+  @ApiProperty({ example: 'Senha@123', description: 'Deve ser idêntica ao campo password' })
+  @IsString()
+  @Match('password', { message: 'A confirmação de senha não confere' })
+  confirmPassword: string;
 
   @ApiProperty({ example: 'João Silva', required: false })
   @IsString()
