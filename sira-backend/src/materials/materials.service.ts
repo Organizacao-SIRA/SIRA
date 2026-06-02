@@ -650,10 +650,10 @@ JSON: {"results": [{"id": "...", "explanation": "...", "relevance": 0, "level": 
             provider: 'OpenAlex',
             relevance: this.positionScore(index, filtered.length) + this.citationBoost(item.cited_by_count ?? 0),
             abstract: this.reconstructAbstract(item.abstract_inverted_index),
-            image: null,
+            image: undefined,
             url,
             isOpenAccess: item.open_access?.is_oa === true || !!item.open_access?.oa_url,
-            doi: item.doi || null,
+            doi: item.doi || undefined,
             language: item.language ?? undefined,
           };
         });
