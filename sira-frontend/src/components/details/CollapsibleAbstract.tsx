@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../ui/Button';
 
 interface CollapsibleAbstractProps {
   abstract: string;
@@ -27,25 +28,22 @@ export const CollapsibleAbstract = ({ abstract, headingId }: CollapsibleAbstract
         </h2>
 
         {canCollapseOnMobile && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="icon"
             aria-controls={contentId}
             aria-expanded={isExpanded}
+            aria-label={isExpanded ? t('summary.showLess') : t('summary.showMore')}
             onClick={() => setIsExpanded(value => !value)}
-            className="lg:hidden inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-full border border-border-strong bg-surface px-3 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]"
+            className="lg:hidden h-10 w-10 shrink-0"
           >
             {isExpanded ? (
-              <>
-                <span>{t('summary.showLess')}</span>
-                <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
-              </>
+              <ChevronUp className="h-5 w-5" aria-hidden="true" />
             ) : (
-              <>
-                <span>{t('summary.showMore')}</span>
-                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
-              </>
+              <ChevronDown className="h-5 w-5" aria-hidden="true" />
             )}
-          </button>
+          </Button>
         )}
       </div>
 
