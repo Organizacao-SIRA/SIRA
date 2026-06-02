@@ -31,7 +31,7 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
   if (!password) return null;
 
   return (
-    <div className="space-y-3 animate-fadeIn">
+    <div className="space-y-2 animate-fadeIn">
       {/* Barra de força */}
       <div className="space-y-1.5">
         <div className="flex gap-1">
@@ -51,12 +51,12 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
         )}
       </div>
 
-      {/* Checklist de requisitos */}
-      <ul className="space-y-1">
+      {/* Checklist de requisitos — 2 colunas para reduzir a altura vertical */}
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1">
         {RULES.map((rule, i) => (
           <li
             key={i}
-            className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
+            className={`flex items-center gap-1.5 text-xs leading-tight transition-colors duration-200 ${
               passed[i] ? 'text-success-strong' : 'text-text-muted'
             }`}
           >
@@ -65,7 +65,7 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
             ) : (
               <X className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />
             )}
-            <span>{t(rule.labelKey)}</span>
+            <span className="min-w-0">{t(rule.labelKey)}</span>
           </li>
         ))}
       </ul>
