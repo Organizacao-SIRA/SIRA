@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { completeOnboarding } from '../services/api';
+import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
 import { ONBOARDING_STEPS } from '../types/onboarding';
@@ -68,7 +69,6 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   const [data, setData] = useState<OnboardingFormData>(() => hydrate(initialData));
   const [step, setStep] = useState<number>(() => readStep(maxStep));
   const [isSaving, setIsSaving] = useState(false);
-  const [submitError, setSubmitError] = useState<string>('');
 
   const hydratedFromProps = useRef(false);
   useEffect(() => {
@@ -164,7 +164,6 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     }
 
     setIsSaving(true);
-    setSubmitError('');
 
     try {
       const profile = await completeOnboarding({
@@ -185,8 +184,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       sessionStorage.removeItem(STEP_KEY);
       onSuccess(profile);
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('validation.submit');
-      setSubmitError(message);
+      toast.error(err instanceof Error ? err.message : t('validation.submit'));
     } finally {
       setIsSaving(false);
     }
@@ -204,7 +202,6 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     isStepValid,
     stepErrors,
     isSaving,
-    submitError,
     submit,
     totalSteps: ONBOARDING_STEPS.length,
   };

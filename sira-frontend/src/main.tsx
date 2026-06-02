@@ -5,12 +5,14 @@ import './i18n'
 import App from './App.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { Toaster } from './toast'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
       <AuthProvider>
         <App />
+        <Toaster />
       </AuthProvider>
     </ThemeProvider>
   </StrictMode>,

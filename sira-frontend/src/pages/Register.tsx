@@ -31,7 +31,7 @@ export const Register = ({ setCurrentScreen }: RegisterProps) => {
           </p>
         }
       >
-        <RegisterForm onSuccess={() => setCurrentScreen('login')} />
+        <RegisterForm />
       </AuthFormCard>
     </AuthLayout>
   );

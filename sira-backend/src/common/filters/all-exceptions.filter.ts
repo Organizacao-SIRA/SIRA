@@ -28,6 +28,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return;
       }
 
+      // Rate limiting (ThrottlerException) — código estável p/ o frontend traduzir
+      if (statusCode === HttpStatus.TOO_MANY_REQUESTS) {
+        response.status(statusCode).json({
+          statusCode,
+          code: ERROR_CODES.RATE_LIMITED,
+          message: 'Muitas requisições em pouco tempo. Aguarde um momento e tente novamente.',
+        });
+        return;
+      }
+
       // HttpException padrão do NestJS (ValidationPipe, NotFoundException, etc.)
       const rawMessage = typeof body === 'string' ? body : (body as Record<string, unknown>).message;
       const message = Array.isArray(rawMessage)

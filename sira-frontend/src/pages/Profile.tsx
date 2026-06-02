@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { updateProfile, getPreferenceOptions } from '../services/api';
+import { toast } from '../toast';
 import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -108,7 +109,6 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   const [editData, setEditData] = useState(profileData || {});
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   }, [isEditing, preferenceOptions]);
 
   const { setUiLocale } = useUiLocaleSync({
-    onError: () => setSaveError(t('errors.localeSave')),
+    onError: () => toast.error(t('errors.localeSave')),
   });
 
   if (isLoading) {
@@ -166,7 +166,6 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
 
   const handleSave = async () => {
     setIsSaving(true);
-    setSaveError('');
     try {
       const payload = {
         name: editData.name || undefined,
@@ -208,8 +207,8 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
         ...(saved.uiLocale !== undefined ? { uiLocale: saved.uiLocale } : {}),
       });
       setIsEditing(false);
-    } catch (err: any) {
-      setSaveError(err.message || t('errors.save'));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('errors.save'));
     } finally {
       setIsSaving(false);
     }
@@ -217,7 +216,6 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
 
   const handleCancel = () => {
     setIsEditing(false);
-    setSaveError('');
     setEditData(profileData);
   };
 
@@ -321,7 +319,6 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
         {isEditing && (
           <EditActionBar
             isSaving={isSaving}
-            error={saveError}
             onCancel={handleCancel}
             onSave={handleSave}
           />

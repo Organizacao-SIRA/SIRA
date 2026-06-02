@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen, ChevronDown, ChevronUp, Sparkles, Search } from 'lucide-react';
+import { toast } from '../toast';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
 import type { AuthUser } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
@@ -63,7 +64,6 @@ export const AiRecommendations = ({
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    setError('');
     setColdStart(false);
     try {
       const data = await refreshAiRecommendations();
@@ -71,8 +71,9 @@ export const AiRecommendations = ({
       setRecommendations(data.recommendations);
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar recomendações');
+    } catch (err: unknown) {
+      // Refresh falhou: mantém a lista atual visível e notifica via toast.
+      toast.error(err instanceof Error ? err.message : 'Erro ao atualizar recomendações');
     } finally {
       setIsRefreshing(false);
     }

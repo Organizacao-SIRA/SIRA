@@ -3,14 +3,18 @@ import React, { type InputHTMLAttributes, useId } from 'react';
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  /** Marca o campo como inválido (borda de erro) SEM renderizar texto — útil
+   *  quando a mensagem é exibida por outro meio (ex.: toast), sem alterar a altura. */
+  invalid?: boolean;
   icon?: React.ReactNode;
   rightSlot?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, icon, rightSlot, className = '', id, ...props }, ref) => {
+  ({ label, error, invalid, icon, rightSlot, className = '', id, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id || generatedId;
+    const hasError = Boolean(error) || invalid;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -33,7 +37,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             } ${
               rightSlot ? 'pr-11' : 'pr-4'
             } ${
-              error
+              hasError
                 ? 'border-danger-border focus:border-danger-strong focus:ring-1 focus:ring-danger-strong'
                 : 'border-border-strong focus:border-primary focus:ring-1 focus:ring-primary'
             } disabled:opacity-60 disabled:bg-surface-subtle disabled:cursor-not-allowed ${className}`}

@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Upload, Trash2, AlertCircle } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { UserAvatar } from '../ui/UserAvatar';
 import { uploadAvatar, removeAvatar, resolveAvatarUrl } from '../../services/api';
+import { toast } from '../../toast';
 import type { UserProfile } from '../../types';
 
 interface AvatarUploadModalProps {
@@ -29,7 +30,6 @@ export const AvatarUploadModal = ({
   const { t } = useTranslation(['profile', 'common']);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +38,6 @@ export const AvatarUploadModal = ({
     if (!isOpen) {
       setSelectedFile(null);
       setPreviewUrl(null);
-      setError('');
     }
   }, [isOpen]);
 
@@ -68,24 +67,22 @@ export const AvatarUploadModal = ({
     if (!file) return;
     const errMsg = validate(file);
     if (errMsg) {
-      setError(errMsg);
+      toast.error(errMsg);
       setSelectedFile(null);
       return;
     }
-    setError('');
     setSelectedFile(file);
   };
 
   const handleSave = async () => {
     if (!selectedFile) return;
     setIsSaving(true);
-    setError('');
     try {
       const profile = await uploadAvatar(selectedFile);
       onAvatarUpdated(profile);
       onClose();
-    } catch (err: any) {
-      setError(err.message || t('avatar.uploadError'));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('avatar.uploadError'));
     } finally {
       setIsSaving(false);
     }
@@ -93,13 +90,12 @@ export const AvatarUploadModal = ({
 
   const handleRemove = async () => {
     setIsRemoving(true);
-    setError('');
     try {
       const profile = await removeAvatar();
       onAvatarUpdated(profile);
       onClose();
-    } catch (err: any) {
-      setError(err.message || t('avatar.removeError'));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('avatar.removeError'));
     } finally {
       setIsRemoving(false);
     }
@@ -167,13 +163,6 @@ export const AvatarUploadModal = ({
         <p className="text-xs text-text-muted text-center max-w-xs">
           <Trans i18nKey="avatar.hint" ns="profile" components={{ br: <br /> }} />
         </p>
-
-        {error && (
-          <div role="alert" className="w-full p-3 bg-danger-soft text-danger-strong text-sm rounded-xl border border-danger-border font-medium flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
       </div>
     </Modal>
   );

@@ -22,8 +22,6 @@ export const auth = {
     passwordPlaceholder: 'Crie uma senha',
     confirmPasswordLabel: 'Confirmar senha',
     confirmPasswordPlaceholder: 'Repita a senha',
-    passwordMismatch: 'As senhas não coincidem.',
-    passwordMismatchInline: 'As senhas não coincidem',
     submit: 'Finalizar cadastro',
     hasAccount: 'Já possui uma conta?',
     signIn: 'Faça login',
@@ -62,7 +60,6 @@ export const auth = {
     confirmPasswordPlaceholder: 'Repita a nova senha',
     submit: 'Redefinir senha',
     passwordMismatch: 'As senhas não coincidem.',
-    passwordMismatchInline: 'As senhas não coincidem',
     error: 'Erro ao redefinir a senha. Tente novamente.',
   },
   visual: {

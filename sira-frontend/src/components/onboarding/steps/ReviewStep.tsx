@@ -1,4 +1,4 @@
-import { Pencil, AlertCircle, ClipboardCheck } from 'lucide-react';
+import { Pencil, ClipboardCheck } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
 import type { OnboardingFormData } from '../../../types/onboarding';
@@ -8,7 +8,6 @@ interface ReviewStepProps {
   data: OnboardingFormData;
   options: PreferenceOptions;
   onEdit: (step: number) => void;
-  submitError?: string;
 }
 
 const Section = ({
@@ -44,7 +43,7 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-export const ReviewStep = ({ data, options, onEdit, submitError }: ReviewStepProps) => {
+export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
   const { t } = useTranslation('onboarding');
   const { t: tp } = useTranslation('preferences');
   const mainAreaLabel =
@@ -141,13 +140,6 @@ export const ReviewStep = ({ data, options, onEdit, submitError }: ReviewStepPro
             : <span className="text-text-muted">{t('review.notInformed')}</span>}
         </Section>
       </div>
-
-      {submitError && (
-        <div className="p-3 bg-danger-soft border border-danger-border rounded-xl flex items-start gap-2" role="alert">
-          <AlertCircle className="w-4 h-4 text-danger-strong mt-0.5 flex-shrink-0" />
-          <p className="text-danger-strong text-xs font-medium">{submitError}</p>
-        </div>
-      )}
     </div>
   );
 };

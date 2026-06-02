@@ -8,6 +8,18 @@ export const common = {
     signIn: 'Sign in',
     backToLogin: 'Back to sign in',
   },
+  toast: {
+    linkCopied: 'Link copied',
+    citationCopied: 'Citation copied',
+  },
+  validation: {
+    emailRequired: 'Enter your email.',
+    emailInvalid: 'Invalid email.',
+    passwordRequired: 'Enter your password.',
+    passwordWeak: 'Password does not meet the security requirements.',
+    confirmRequired: 'Confirm your password.',
+    passwordMismatch: 'Passwords do not match.',
+  },
   states: {
     emptyTitle: 'No data found',
     emptyDescription: 'There is no information available to display right now.',

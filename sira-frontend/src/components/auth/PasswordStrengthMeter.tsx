@@ -1,18 +1,11 @@
 import { useMemo } from 'react';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { PASSWORD_RULES as RULES } from '../../utils/validation';
 
 interface PasswordStrengthMeterProps {
   password: string;
 }
-
-const RULES = [
-  { labelKey: 'password.rules.minLength', test: (p: string) => p.length >= 8 },
-  { labelKey: 'password.rules.uppercase', test: (p: string) => /[A-Z]/.test(p) },
-  { labelKey: 'password.rules.lowercase', test: (p: string) => /[a-z]/.test(p) },
-  { labelKey: 'password.rules.number', test: (p: string) => /\d/.test(p) },
-  { labelKey: 'password.rules.special', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
-];
 
 const LEVELS = [
   { labelKey: 'password.strength.veryWeak', color: 'bg-red-500', textColor: 'text-red-500' },

@@ -27,6 +27,7 @@ export const ERROR_CODES = {
   // Generic
   UNHANDLED_HTTP_ERROR: 'UNHANDLED_HTTP_ERROR',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  RATE_LIMITED: 'RATE_LIMITED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

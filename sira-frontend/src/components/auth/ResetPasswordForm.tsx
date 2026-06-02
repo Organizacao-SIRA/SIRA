@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { resetPassword, validateResetToken } from '../../services/api';
+import { toast } from '../../toast';
 import { PasswordInput } from '../ui/PasswordInput';
 import { Button } from '../ui/Button';
 import { PasswordStrengthMeter } from './PasswordStrengthMeter';
@@ -18,7 +19,6 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [formState, setFormState] = useState<FormState>('validating');
 
   // Validação antecipada do token ao carregar
@@ -35,10 +35,9 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (newPassword !== confirmPassword) {
-      setError(t('resetPassword.passwordMismatch'));
+      toast.error(t('resetPassword.passwordMismatch'));
       return;
     }
 
@@ -47,10 +46,8 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
     try {
       await resetPassword(token, newPassword);
       setFormState('success');
-    } catch (err: any) {
-      // Se o backend retorna array de mensagens (validação), junta
-      const msg = err.message || t('resetPassword.error');
-      setError(msg);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('resetPassword.error'));
     } finally {
       setIsLoading(false);
     }
@@ -124,12 +121,6 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
         {t('resetPassword.instructions')}
       </p>
 
-      {error && (
-        <div role="alert" className="p-3 bg-danger-soft text-danger-strong text-sm rounded-xl border border-danger-border font-medium">
-          {error}
-        </div>
-      )}
-
       <div className="space-y-3">
         <PasswordInput
           label={t('resetPassword.newPasswordLabel')}
@@ -148,11 +139,6 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
         onChange={(e) => setConfirmPassword(e.target.value)}
         placeholder={t('resetPassword.confirmPasswordPlaceholder')}
         autoComplete="new-password"
-        error={
-          confirmPassword && confirmPassword !== newPassword
-            ? t('resetPassword.passwordMismatchInline')
-            : undefined
-        }
         required
       />
 
@@ -160,7 +146,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
         type="submit"
         isLoading={isLoading}
         className="w-full mt-1"
-        disabled={!newPassword || !confirmPassword || newPassword !== confirmPassword}
+        disabled={isLoading}
       >
         {t('resetPassword.submit')}
         {!isLoading && <ArrowRight className="w-4 h-4" />}

@@ -48,6 +48,20 @@
   --color-info-soft: #eff6ff;
   --color-info-strong: #1d4ed8;
   --color-info-border: #bfdbfe;
+
+  /* Animação de entrada dos toasts */
+  --animate-toast-in: toast-in 200ms ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dark {

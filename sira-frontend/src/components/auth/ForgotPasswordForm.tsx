@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { forgotPassword } from '../../services/api';
+import { toast } from '../../toast';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
@@ -13,19 +14,17 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
   const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [isSent, setIsSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
     try {
       await forgotPassword(email);
       setIsSent(true);
-    } catch (err: any) {
-      setError(err.message || t('forgotPassword.error'));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('forgotPassword.error'));
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +68,6 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
       <p className="text-sm text-text-muted leading-relaxed">
         {t('forgotPassword.instructions')}
       </p>
-
-      {error && (
-        <div role="alert" className="p-3 bg-danger-soft text-danger-strong text-sm rounded-xl border border-danger-border font-medium">
-          {error}
-        </div>
-      )}
 
       <Input
         label={t('forgotPassword.emailLabel')}

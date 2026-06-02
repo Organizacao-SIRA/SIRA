@@ -22,8 +22,6 @@ export const auth = {
     passwordPlaceholder: 'Create a password',
     confirmPasswordLabel: 'Confirm password',
     confirmPasswordPlaceholder: 'Repeat your password',
-    passwordMismatch: 'Passwords do not match.',
-    passwordMismatchInline: 'Passwords do not match',
     submit: 'Create account',
     hasAccount: 'Already have an account?',
     signIn: 'Sign in',
@@ -62,7 +60,6 @@ export const auth = {
     confirmPasswordPlaceholder: 'Repeat the new password',
     submit: 'Reset password',
     passwordMismatch: 'Passwords do not match.',
-    passwordMismatchInline: 'Passwords do not match',
     error: 'Unable to reset your password. Please try again.',
   },
   visual: {

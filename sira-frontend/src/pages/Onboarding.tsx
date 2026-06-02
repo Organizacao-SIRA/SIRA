@@ -155,7 +155,6 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
             data={onboarding.data}
             options={preferenceOptions}
             onEdit={onboarding.goTo}
-            submitError={onboarding.submitError}
           />
         );
       default:
