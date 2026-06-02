@@ -31,8 +31,8 @@ export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarN
         <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary dark:text-white' : 'text-text-subtle dark:text-text-muted'}`} />
 
         <span className={`
-          whitespace-nowrap overflow-hidden transition-all duration-300
-          ${isExpanded ? 'opacity-100 max-w-xs ml-3' : 'opacity-0 max-w-0 ml-0'}
+          whitespace-nowrap overflow-hidden transition-[opacity,max-width,margin] duration-200
+          ${isExpanded ? 'opacity-100 max-w-xs ml-3' : 'opacity-100 max-w-xs ml-3 md:opacity-0 md:max-w-0 md:ml-0'}
         `}>
           {label}
         </span>
