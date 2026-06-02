@@ -6,10 +6,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { join } from 'node:path';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
 
   app.setGlobalPrefix('api/v1');
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
@@ -17,6 +20,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(helmet({ contentSecurityPolicy: process.env.NODE_ENV === 'production' }));
 
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -46,7 +50,8 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`\n🚀 SIRA+ Backend running on: http://localhost:${port}/api/v1`);
-  console.log(`📖 Swagger documentation available at: http://localhost:${port}/api/docs`);
+  const logger = app.get(Logger);
+  logger.log(`SIRA+ Backend running on: http://localhost:${port}/api/v1`, 'Bootstrap');
+  logger.log(`Swagger docs available at: http://localhost:${port}/api/docs`, 'Bootstrap');
 }
 bootstrap();
