@@ -94,6 +94,7 @@ export const common = {
     AVATAR_FORMAT_INVALID: 'Only JPG, PNG, or WEBP images are allowed.',
     FAVORITE_ALREADY_EXISTS: 'This material is already in your favorites.',
     FAVORITE_NOT_FOUND: 'Favorite not found.',
+    RATE_LIMITED: 'Too many attempts in a short time. Please wait a moment and try again.',
   },
   errors: {
     generic: 'Unable to complete the action. Please try again.',

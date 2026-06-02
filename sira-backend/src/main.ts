@@ -13,6 +13,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
+  app.set('trust proxy', 1);
 
   app.setGlobalPrefix('api/v1');
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
