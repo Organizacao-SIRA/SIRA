@@ -243,16 +243,20 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] animate-fadeIn">
-      <div className="flex flex-col gap-4 mb-0 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 mb-6 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           icon={Settings}
           title={t('header.title')}
           subtitle={t('header.subtitle')}
+          className="mb-0"
         />
         {!isEditing && (
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:mt-1">
+          <div className="flex w-full flex-row items-center justify-between gap-3 sm:w-auto sm:justify-end sm:mt-1">
             <LanguageToggle onChange={handleLocaleChange} />
-            <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="h-11 px-5 py-0 text-sm leading-none sm:h-auto sm:px-6 sm:py-2.5 sm:text-base sm:leading-normal"
+            >
               <Pencil className="w-4 h-4" /> {t('header.edit')}
             </Button>
           </div>

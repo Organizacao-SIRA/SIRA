@@ -5,10 +5,11 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   badge?: React.ReactNode;
+  className?: string;
 }
 
-export const PageHeader = ({ icon: Icon, title, subtitle, badge }: PageHeaderProps) => (
-  <div className="mb-6 sm:mb-8">
+export const PageHeader = ({ icon: Icon, title, subtitle, badge, className = 'mb-6 sm:mb-8' }: PageHeaderProps) => (
+  <div className={className}>
     <div className="flex items-center gap-3">
       <div className="p-2 sm:p-2.5 bg-primary rounded-lg flex-shrink-0 shadow-sm">
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
