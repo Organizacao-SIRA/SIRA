@@ -43,12 +43,12 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn"
     >
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-overlay backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className={`relative bg-surface shadow-2xl border border-border w-full ${sizeClasses[size]} max-h-[95vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl`}>
+      <div className={`relative bg-surface border border-border w-full ${sizeClasses[size]} max-h-[95vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl shadow-[var(--shadow-elevated)]`}>
         <div className="flex items-start justify-between px-5 sm:px-6 pt-5 pb-4 border-b border-border">
           <h2 id="modal-title" className="text-base sm:text-lg font-bold text-primary-dark dark:text-text">
             {title}
@@ -56,7 +56,7 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
           <button
             onClick={onClose}
             aria-label={t('actions.close')}
-            className="p-1.5 -m-1.5 rounded-lg text-text-subtle hover:text-text hover:bg-surface-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="p-1.5 -m-1.5 rounded-lg text-text-subtle hover:text-text hover:bg-surface-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40"
           >
             <X className="w-5 h-5" />
           </button>

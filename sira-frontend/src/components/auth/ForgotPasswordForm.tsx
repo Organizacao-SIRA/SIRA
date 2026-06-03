@@ -93,7 +93,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) =
         <button
           type="button"
           onClick={onBackToLogin}
-          className="text-xs font-semibold text-primary hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 inline-flex items-center gap-1"
+          className="text-xs font-semibold text-link hover:text-link-hover hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1 inline-flex items-center gap-1"
         >
           <ArrowLeft className="w-3 h-3" />
           {t('common:actions.backToLogin')}

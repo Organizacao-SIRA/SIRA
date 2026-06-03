@@ -22,7 +22,7 @@ export const ProfileHeaderCard = ({
   const { t } = useTranslation('profile');
 
   return (
-    <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+    <div className="sira-card p-5 sm:p-6 rounded-2xl flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
     <ProfileAvatar
       name={name}
       avatarUrl={resolveAvatarUrl(avatarUrl)}

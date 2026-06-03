@@ -53,7 +53,7 @@ const ProfileSkeleton = () => {
       />
 
     <div className="space-y-6">
-      <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-border shadow-sm flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+      <div className="sira-card p-5 sm:p-6 rounded-2xl flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
         <Skeleton className="w-24 h-24 rounded-full shrink-0" />
         <div className="flex-1 min-w-0 w-full space-y-3">
           <Skeleton className="h-7 w-56 max-w-full mx-auto sm:mx-0" />
@@ -64,7 +64,7 @@ const ProfileSkeleton = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {Array.from({ length: 2 }).map((_, index) => (
-          <div key={index} className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div key={index} className="sira-card rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-border bg-surface-muted/30 flex items-center gap-2.5">
               <Skeleton className="w-9 h-9 rounded-md" />
               <Skeleton className="h-5 w-40" />
@@ -81,7 +81,7 @@ const ProfileSkeleton = () => {
         ))}
       </div>
 
-      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+      <div className="sira-card rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-border bg-surface-muted/30 flex items-center gap-2.5">
           <Skeleton className="w-9 h-9 rounded-md" />
           <Skeleton className="h-5 w-48" />
@@ -207,6 +207,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
         ...(saved.uiLocale !== undefined ? { uiLocale: saved.uiLocale } : {}),
       });
       setIsEditing(false);
+      toast.success(t('toast.saved'));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('errors.save'));
     } finally {

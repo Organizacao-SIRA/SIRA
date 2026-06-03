@@ -3,7 +3,7 @@ import { Skeleton } from './ui/Skeleton';
 
 export const RecommendationCardSkeleton = () => {
   return (
-    <div className="bg-surface p-6 rounded-lg shadow-sm border border-border-strong">
+    <div className="sira-card-strong p-6 rounded-lg">
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-2">
           <Skeleton className="w-16 h-6 rounded" />

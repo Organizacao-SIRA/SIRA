@@ -51,7 +51,7 @@ export const MaterialsSection = ({
       </div>
 
       {results.length === 0 ? (
-        <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-dashed border-border-strong text-center space-y-4">
+        <div className="sira-card p-6 sm:p-8 rounded-2xl border-dashed border-border-strong text-center space-y-4">
           <p className="text-text-subtle text-sm font-medium">
             {t('materials.empty')}
           </p>

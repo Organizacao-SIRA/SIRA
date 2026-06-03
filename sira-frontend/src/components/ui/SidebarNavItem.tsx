@@ -23,12 +23,12 @@ export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarN
           w-full flex items-center pl-5 pr-2 py-3 text-sm font-medium
           transition-colors cursor-pointer border-l-4
           ${isActive
-            ? 'bg-primary-soft dark:bg-primary/30 text-primary dark:text-white border-primary dark:border-blue-300'
-            : 'text-text hover:bg-surface-subtle dark:hover:bg-white/5 border-transparent'
+            ? 'bg-selected text-link border-selected-border'
+            : 'text-text hover:bg-surface-subtle hover:text-link border-transparent'
           }
         `}
       >
-        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary dark:text-white' : 'text-text-subtle dark:text-text-muted'}`} />
+        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-link' : 'text-text-subtle'}`} />
 
         <span className={`
           whitespace-nowrap overflow-hidden transition-[opacity,max-width,margin] duration-200

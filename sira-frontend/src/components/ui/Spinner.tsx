@@ -29,14 +29,14 @@ export const Spinner = ({ size = 'md', fullScreen = false, className = '' }: Spi
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center text-primary">
+      <div className="fixed inset-0 bg-surface/85 z-50 flex flex-col items-center justify-center text-link backdrop-blur-sm">
         {spinnerElement}
       </div>
     );
   }
 
   return (
-    <div className={`text-primary inline-flex ${className}`}>
+    <div className={`text-link inline-flex ${className}`}>
        {spinnerElement}
     </div>
   );

@@ -90,7 +90,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-xs font-semibold text-primary hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1"
+            className="text-xs font-semibold text-link hover:text-link-hover hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1"
           >
             {t('login.forgotPassword')}
           </button>

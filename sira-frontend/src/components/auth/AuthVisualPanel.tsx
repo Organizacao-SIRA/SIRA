@@ -43,7 +43,7 @@ export const AuthVisualPanel = () => {
                 components={{ highlight: <span className="text-accent" /> }}
               />
             </h1>
-            <p className="text-blue-100 text-sm xl:text-base leading-relaxed">
+            <p className="text-white/80 text-sm xl:text-base leading-relaxed">
               {t('visual.description')}
             </p>
           </div>
@@ -57,7 +57,7 @@ export const AuthVisualPanel = () => {
               </div>
               <div className="space-y-0.5">
                 <p className="text-sm font-semibold text-white">{t(titleKey)}</p>
-                <p className="text-xs text-blue-100/80 leading-relaxed">{t(descriptionKey)}</p>
+                <p className="text-xs text-white/70 leading-relaxed">{t(descriptionKey)}</p>
               </div>
             </li>
           ))}

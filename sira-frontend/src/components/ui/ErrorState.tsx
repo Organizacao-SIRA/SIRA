@@ -21,12 +21,12 @@ export const ErrorState = ({
   const resolvedMessage = message ?? t('states.errorDescription');
 
   return (
-    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-danger-soft rounded-2xl border border-danger-border ${className}`}>
-      <div className="w-14 h-14 text-danger-strong mb-4 flex items-center justify-center">
-        <AlertTriangle className="w-full h-full" />
+    <div className={`w-full flex flex-col items-center justify-center p-8 text-center bg-surface rounded-2xl border border-danger-border border-l-4 ${className}`}>
+      <div className="w-14 h-14 text-danger-strong bg-danger-soft border border-danger-border rounded-2xl mb-4 flex items-center justify-center">
+        <AlertTriangle className="w-8 h-8" />
       </div>
-      <h3 className="text-xl font-bold text-danger-strong mb-2">{resolvedTitle}</h3>
-      <p className="text-sm text-danger-strong max-w-md mb-6 leading-relaxed">
+      <h3 className="text-xl font-bold text-text mb-2">{resolvedTitle}</h3>
+      <p className="text-sm text-text-muted max-w-md mb-6 leading-relaxed">
         {resolvedMessage}
       </p>
       {onRetry && (

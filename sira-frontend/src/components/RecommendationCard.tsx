@@ -275,7 +275,7 @@ export const RecommendationCard = ({
         e.preventDefault();
         handleCardClick(e);
       }}
-      className={`bg-surface rounded-2xl border border-border hover:border-primary/40 hover:shadow-md hover:scale-[1.015] transition-[border-color,box-shadow,transform] duration-200 animate-fadeIn cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary overflow-hidden min-w-0 ${
+      className={`sira-card sira-card-hover rounded-2xl hover:scale-[1.015] animate-fadeIn cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus overflow-hidden min-w-0 ${
         isVertical ? `flex flex-col ${stretch ? 'h-full' : ''}` : 'p-3.5 sm:p-5'
       }`}
     >

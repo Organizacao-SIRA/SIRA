@@ -88,9 +88,9 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
             onClick={() => setActiveTab(id)}
             aria-selected={activeTab === id}
             role="tab"
-            className={`pb-3 sm:pb-4 px-1 border-b-2 font-bold text-sm transition-all duration-150 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-sm ${
+            className={`pb-3 sm:pb-4 px-1 border-b-2 font-bold text-sm transition-all duration-150 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/30 rounded-sm ${
               activeTab === id
-                ? 'border-primary text-primary'
+                ? 'border-selected-border text-link'
                 : 'border-transparent text-text-subtle hover:text-text-muted'
             }`}
           >
@@ -120,7 +120,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
 
       {/* Empty state — sem nenhum favorito */}
       {isEmpty && (
-        <div className="text-center py-12 sm:py-20 px-4 bg-surface rounded-3xl border-2 border-dashed border-border">
+        <div className="text-center py-12 sm:py-20 px-4 sira-card rounded-2xl border-dashed border-border-strong">
           <Bookmark className="h-12 w-12 text-text-subtle mx-auto mb-4" />
           <h3 className="text-lg sm:text-xl font-bold text-primary-dark dark:text-text">{t('states.emptyTitle')}</h3>
           <p className="text-text-muted mb-6 sm:mb-8 max-w-xs mx-auto text-sm sm:text-base">
@@ -134,7 +134,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
 
       {/* Empty state — aba filtrada vazia */}
       {isFilteredEmpty && (
-        <div className="text-center py-12 sm:py-20 px-4 bg-surface rounded-3xl border-2 border-dashed border-border">
+        <div className="text-center py-12 sm:py-20 px-4 sira-card rounded-2xl border-dashed border-border-strong">
           {activeTab === 'book'
             ? <BookOpen className="h-12 w-12 text-text-subtle mx-auto mb-4" />
             : <FileText className="h-12 w-12 text-text-subtle mx-auto mb-4" />
@@ -168,7 +168,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
       )}
 
       {error && !isInitialLoading && (
-        <div className="bg-surface border border-danger-border rounded-2xl p-8 text-center space-y-4">
+        <div className="bg-surface border border-danger-border border-l-4 rounded-2xl p-8 text-center space-y-4">
           <p className="text-sm text-danger-strong font-medium">{error}</p>
           <Button variant="secondary" size="sm" onClick={() => loadFavoritesPage(activeTab, 0)}>
             {t('common:actions.retry')}

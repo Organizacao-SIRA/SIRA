@@ -41,12 +41,12 @@ export const LanguageToggle = ({ variant = 'default', onChange }: LanguageToggle
             className={`min-w-9 rounded-md px-2 text-xs font-bold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 ${
               isNavbar
                 ? 'focus-visible:ring-white/60'
-                : 'focus-visible:ring-primary/40'
+                : 'focus-visible:ring-focus/40'
             } ${
               selected
                 ? isNavbar
                   ? 'bg-white text-primary shadow-sm'
-                  : 'bg-primary text-white shadow-sm'
+                  : 'bg-selected text-link shadow-sm'
                 : isNavbar
                   ? 'text-white/80 hover:bg-white/10 hover:text-white'
                   : 'text-text-muted hover:bg-surface-subtle hover:text-text'

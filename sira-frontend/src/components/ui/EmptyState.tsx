@@ -29,8 +29,8 @@ export const EmptyState = ({
       <div className="w-16 h-16 text-text-subtle mb-4 flex items-center justify-center">
         {icon || <PackageOpen className="w-full h-full" />}
       </div>
-      <h3 className="text-lg font-bold text-text-muted uppercase tracking-wide mb-2">{resolvedTitle}</h3>
-      <p className="text-sm text-text-subtle max-w-sm mb-6 leading-relaxed">
+      <h3 className="text-lg font-bold text-text mb-2">{resolvedTitle}</h3>
+      <p className="text-sm text-text-muted max-w-sm mb-6 leading-relaxed">
         {resolvedDescription}
       </p>
       {actionLabel && onAction && (

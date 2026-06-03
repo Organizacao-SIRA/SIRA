@@ -45,14 +45,14 @@ export const Recommendations = ({
         <button
           type="button"
           onClick={handleClearSearch}
-          className="flex items-center gap-2 text-primary-dark dark:text-text hover:text-primary transition-colors font-semibold group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md px-1 py-1"
+          className="flex items-center gap-2 text-text hover:text-link transition-colors font-semibold group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded-md px-1 py-1"
         >
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
           <span className="text-sm">{t('header.newSearch')}</span>
         </button>
         <div className="flex items-center gap-2 min-w-0">
           <div className="p-2 bg-primary-soft rounded-lg flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <Sparkles className="w-5 h-5 text-link" />
           </div>
           <h1 className="text-base sm:text-xl font-bold text-primary-dark dark:text-text hidden sm:block truncate">{t('header.intelligentSearch')}</h1>
         </div>

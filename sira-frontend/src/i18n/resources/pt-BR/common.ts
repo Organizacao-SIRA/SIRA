@@ -11,6 +11,8 @@ export const common = {
   toast: {
     linkCopied: 'Link copiado',
     citationCopied: 'Citação copiada',
+    favoriteAdded: 'Adicionado aos favoritos.',
+    favoriteRemoved: 'Removido dos favoritos.',
   },
   validation: {
     emailRequired: 'Informe seu e-mail.',
@@ -132,6 +134,5 @@ export const common = {
     regenerateSearch: 'Não consegui gerar novas sugestões agora. Tente novamente em instantes.',
     unknownFavorite: 'Erro desconhecido ao favoritar',
     favoriteAlert: 'Erro ao favoritar: {{message}}',
-    closeErrorAlert: 'Fechar alerta de erro',
   },
 };

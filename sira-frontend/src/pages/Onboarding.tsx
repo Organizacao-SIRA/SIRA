@@ -97,7 +97,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   if (optionsError || !preferenceOptions) {
     return (
       <div className="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 bg-surface-muted animate-fadeIn">
-        <div className="bg-surface rounded-2xl shadow-sm border border-border p-6 sm:p-8 max-w-md w-full text-center">
+        <div className="sira-card rounded-2xl p-6 sm:p-8 max-w-md w-full text-center">
           <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
           <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">{t('loading.errorTitle')}</h3>
           <p className="text-text-muted text-sm mb-4">{optionsError || t('loading.unavailable')}</p>

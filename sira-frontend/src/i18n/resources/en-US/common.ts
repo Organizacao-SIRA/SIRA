@@ -11,6 +11,8 @@ export const common = {
   toast: {
     linkCopied: 'Link copied',
     citationCopied: 'Citation copied',
+    favoriteAdded: 'Added to favorites.',
+    favoriteRemoved: 'Removed from favorites.',
   },
   validation: {
     emailRequired: 'Enter your email.',
@@ -132,6 +134,5 @@ export const common = {
     regenerateSearch: 'I could not generate new suggestions right now. Try again in a moment.',
     unknownFavorite: 'Unknown error while updating favorite',
     favoriteAlert: 'Favorite error: {{message}}',
-    closeErrorAlert: 'Close error alert',
   },
 };

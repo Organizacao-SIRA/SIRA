@@ -25,7 +25,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             className={`w-full bg-surface-muted text-text border rounded-xl px-4 py-2.5 text-sm outline-none appearance-none cursor-pointer transition-all ${
               error
                 ? 'border-danger-border focus:border-danger-strong focus:ring-1 focus:ring-danger-strong'
-                : 'border-border-strong focus:border-primary focus:ring-1 focus:ring-primary'
+                : 'border-border-strong focus:border-focus focus:ring-1 focus:ring-focus'
             } disabled:opacity-60 disabled:bg-surface-subtle disabled:cursor-not-allowed ${className}`}
             {...props}
           >

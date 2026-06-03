@@ -52,7 +52,7 @@ export const ContentHero = ({ type, title, authors, year, source, provider, isOp
           <button
             type="button"
             onClick={() => setExpanded(v => !v)}
-            className="block text-xs text-primary hover:text-primary-dark dark:hover:text-primary transition-colors mt-1 cursor-pointer font-semibold"
+            className="block text-xs text-link hover:text-link-hover transition-colors mt-1 cursor-pointer font-semibold"
           >
             {expanded ? t('hero.showLess') : t('hero.showAll')}
           </button>

@@ -19,7 +19,7 @@ export const ContentBreadcrumb = ({ previousScreen, title, onBack }: ContentBrea
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-2 text-primary hover:text-primary-dark dark:hover:text-primary hover:underline font-bold flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1 py-0.5 cursor-pointer"
+        className="flex items-center gap-2 text-link hover:text-link-hover hover:underline font-bold flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-md px-1 py-0.5 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         <span>{label}</span>

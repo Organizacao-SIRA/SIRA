@@ -27,7 +27,7 @@ const Section = ({
       <button
         type="button"
         onClick={onEdit}
-        className="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-md px-1.5 py-0.5"
+        className="text-xs font-bold text-link hover:text-link-hover inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/30 rounded-md px-1.5 py-0.5"
       >
         <Pencil className="w-3 h-3" />
         {editLabel}
@@ -64,7 +64,7 @@ export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
   return (
     <div className="space-y-5 max-w-2xl mx-auto">
       <header className="flex items-start gap-3">
-        <div className="p-2 bg-primary-soft rounded-lg text-primary">
+        <div className="p-2 bg-primary-soft rounded-lg text-link">
           <ClipboardCheck className="w-5 h-5" aria-hidden="true" />
         </div>
         <div>

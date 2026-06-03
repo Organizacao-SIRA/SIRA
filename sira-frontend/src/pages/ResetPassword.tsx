@@ -25,7 +25,7 @@ export const ResetPassword = ({ token, setCurrentScreen }: ResetPasswordProps) =
             {t('resetPassword.requestNewLink')}{' '}
             <button
               onClick={() => setCurrentScreen('forgot-password')}
-              className="text-primary font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1"
+              className="text-link hover:text-link-hover font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1"
             >
               {t('resetPassword.requestAgain')}
             </button>

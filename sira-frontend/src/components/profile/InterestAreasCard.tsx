@@ -41,18 +41,18 @@ export const InterestAreasCard = ({ isEditing, topicsList, selectedIds, onToggle
             onClick={() => isEditing && onToggle(topic.id)}
             disabled={!isEditing}
             aria-pressed={isSelected}
-            className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.97] ${
+            className={`relative p-4 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 active:scale-[0.97] ${
               isSelected
-                ? 'border-primary bg-primary text-white shadow-sm'
+                ? 'border-selected-border bg-selected text-link shadow-sm'
                 : 'border-border bg-surface-muted text-text-muted'
-            } ${isEditing ? 'cursor-pointer hover:border-primary hover:bg-primary/10 shadow-sm' : 'cursor-default'}`}
+            } ${isEditing ? 'cursor-pointer hover:border-link hover:bg-primary-soft shadow-sm' : 'cursor-default'}`}
             title={preferenceTopicDescription(topic, tp)}
           >
             {isSelected && (
-              <CheckCircle2 className={`absolute top-2 right-2 w-4 h-4 ${isEditing ? 'text-white/80' : 'text-white/60'}`} />
+              <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-link" />
             )}
-            <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-white' : 'text-text-subtle dark:text-text-muted'}`} />
-            <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-text-muted'}`}>
+            <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-link' : 'text-text-subtle dark:text-text-muted'}`} />
+            <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-link' : 'text-text-muted'}`}>
               {preferenceTopicLabel(topic, tp)}
             </span>
           </button>

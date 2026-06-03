@@ -9,7 +9,7 @@ interface AuthFormCardProps {
 }
 
 export const AuthFormCard = ({ title, subtitle, children, footer, mobileLogo }: AuthFormCardProps) => (
-  <div className="bg-surface rounded-2xl shadow-lg border border-border overflow-hidden">
+  <div className="sira-card rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
     <div className="p-6 sm:p-7">
       {mobileLogo && (
         <div className="lg:hidden flex justify-center mb-5">

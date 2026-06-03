@@ -14,7 +14,7 @@ export const SiraAnalysisCard = ({ explanation, size = 'full' }: SiraAnalysisCar
   return (
     <aside
       aria-label={label}
-      className={`bg-accent-light dark:bg-accent/10 border-l-4 border-accent min-w-0 ${
+      className={`bg-accent-light dark:bg-accent/15 border-l-4 border-accent min-w-0 ${
         isCompact
           ? 'rounded-r-md px-2.5 py-1.5 sm:px-3 sm:py-2 min-h-[4.75rem]'
           : 'rounded-r-xl px-5 py-4 sm:px-6 sm:py-5'

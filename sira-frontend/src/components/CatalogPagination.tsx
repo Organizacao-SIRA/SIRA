@@ -19,7 +19,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
         type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={page === 0}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-link hover:border-link disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40"
         aria-label={t('pagination.previous')}
       >
         <ChevronLeft className="w-4 h-4" />
@@ -33,10 +33,10 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
             onClick={() => onPageChange(i)}
             aria-label={t('pagination.goToPage', { page: i + 1 })}
             aria-current={i === page ? 'page' : undefined}
-            className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+            className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
               i === page
                 ? 'bg-primary text-white shadow-sm'
-                : 'border border-border-strong text-text-muted hover:border-primary hover:text-primary hover:bg-primary-soft'
+                : 'border border-border-strong text-text-muted hover:border-link hover:text-link hover:bg-primary-soft'
             }`}
           >
             {i + 1}
@@ -48,7 +48,7 @@ export const CatalogPagination = ({ page, totalPages, total, onPageChange }: Cat
         type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages - 1}
-        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-primary hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="p-2 rounded-lg border border-border-strong text-text-muted hover:text-link hover:border-link disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40"
         aria-label={t('pagination.next')}
       >
         <ChevronRight className="w-4 h-4" />

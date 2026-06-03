@@ -68,7 +68,7 @@ const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={t('actions.accessFreeLabel', { title: item.title })}
-        className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark dark:hover:bg-primary text-white font-bold transition-all flex items-center justify-center gap-2 text-center shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
+        className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold transition-all flex items-center justify-center gap-2 text-center shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.98]"
       >
         <Unlock className="w-5 h-5" aria-hidden="true" />
         <span>{t('actions.accessFree')}</span>
@@ -82,7 +82,7 @@ const AccessMaterialAction = ({ item }: { item: CatalogItem }) => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t('actions.viewRestrictedLabel', { title: item.title })}
-      className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-warning-soft border border-warning-border text-warning-strong font-bold transition-all flex items-center justify-center gap-2 text-center shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-border focus-visible:ring-offset-2 active:scale-[0.98]"
+      className="w-full min-h-[52px] px-4 py-3 rounded-xl bg-warning-soft border border-warning-border text-warning-strong font-bold transition-all flex items-center justify-center gap-2 text-center shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.98]"
     >
       <ExternalLink className="w-5 h-5 shrink-0" aria-hidden="true" />
       <span>{t('actions.viewRestricted')}</span>
@@ -107,8 +107,8 @@ const FavoriteDetailsButton = ({
       aria-label={isFavorite ? t('actions.removeFavoriteLabel') : t('actions.saveFavoriteLabel')}
       className={`w-full min-h-[52px] px-4 py-3 rounded-xl border-2 font-bold transition-all flex items-center justify-center gap-2 text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] ${
         isFavorite
-          ? 'bg-primary border-primary text-white shadow-sm hover:bg-primary-dark hover:border-primary-dark dark:hover:bg-primary dark:hover:border-primary focus-visible:ring-primary'
-          : 'bg-surface border-border-strong text-text hover:border-primary hover:text-primary focus-visible:ring-border-strong'
+          ? 'bg-primary border-primary text-white shadow-sm hover:bg-primary-dark hover:border-primary-dark focus-visible:ring-focus'
+          : 'bg-surface border-border-strong text-text hover:border-link hover:text-link focus-visible:ring-focus'
       }`}
     >
       <Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -162,7 +162,7 @@ export const ContentActionPanel = ({ item, isFavorite, onToggleFavorite }: Conte
   return (
     <aside
       aria-label={t('actions.panelLabel')}
-      className="bg-surface rounded-2xl border border-border shadow-sm p-5 space-y-4 lg:min-h-[496px]"
+      className="sira-card rounded-2xl p-5 space-y-4 lg:min-h-[496px]"
     >
       <ContentCoverPreview item={item} />
 

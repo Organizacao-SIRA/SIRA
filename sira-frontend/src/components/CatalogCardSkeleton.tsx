@@ -3,7 +3,7 @@ import { Skeleton } from './ui/Skeleton';
 
 export const CatalogCardSkeleton = () => {
   return (
-    <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden flex flex-col min-h-[380px]">
+    <div className="sira-card rounded-xl overflow-hidden flex flex-col min-h-[380px]">
       <div className="h-40 w-full relative bg-surface-subtle">
         <Skeleton className="w-full h-full rounded-none opacity-50" />
         <div className="absolute top-2 left-2">

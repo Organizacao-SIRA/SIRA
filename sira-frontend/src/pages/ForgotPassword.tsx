@@ -24,7 +24,7 @@ export const ForgotPassword = ({ setCurrentScreen }: ForgotPasswordProps) => {
             {t('forgotPassword.rememberPassword')}{' '}
             <button
               onClick={() => setCurrentScreen('login')}
-              className="text-primary font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1"
+              className="text-link hover:text-link-hover font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1"
             >
               {t('forgotPassword.signIn')}
             </button>

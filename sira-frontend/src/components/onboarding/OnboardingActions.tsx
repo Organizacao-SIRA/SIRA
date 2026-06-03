@@ -34,7 +34,7 @@ export const OnboardingActions = ({
           <button
             type="button"
             onClick={onBack}
-            className="text-text-muted hover:text-primary text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md px-1 py-1"
+            className="text-text-muted hover:text-link text-sm font-bold flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded-md px-1 py-1"
           >
             <ChevronLeft className="w-4 h-4" />
             {t('actions.back')}

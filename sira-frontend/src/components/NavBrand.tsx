@@ -32,7 +32,7 @@ export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick }: NavBrand
         className="flex items-center min-w-0 group bg-transparent border-none p-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg"
       >
         <SiraLogo size="sm" tone="light" className="flex-shrink-0" />
-        <span className="ml-3 border-l border-blue-400 pl-3 text-sm hidden lg:block font-light text-blue-100 leading-tight group-hover:text-white transition-colors text-left truncate">
+        <span className="ml-3 border-l border-white/30 pl-3 text-sm hidden lg:block font-light text-white/80 leading-tight group-hover:text-white transition-colors text-left truncate">
           {t('brand.taglineLine1')}<br />{t('brand.taglineLine2')}
         </span>
       </button>

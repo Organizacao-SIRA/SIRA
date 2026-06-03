@@ -8,13 +8,13 @@ interface UserAvatarProps {
 }
 
 const AVATAR_COLORS = [
-  { bg: 'bg-blue-500',    text: 'text-white' },
-  { bg: 'bg-violet-500',  text: 'text-white' },
-  { bg: 'bg-emerald-500', text: 'text-white' },
-  { bg: 'bg-amber-400',   text: 'text-white' },
-  { bg: 'bg-rose-500',    text: 'text-white' },
-  { bg: 'bg-cyan-500',    text: 'text-white' },
-  { bg: 'bg-pink-500',    text: 'text-white' },
+  'border-sky-200 bg-sky-100 text-sky-800 dark:border-sky-400/30 dark:bg-sky-500/20 dark:text-sky-100',
+  'border-violet-200 bg-violet-100 text-violet-800 dark:border-violet-400/30 dark:bg-violet-500/20 dark:text-violet-100',
+  'border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-100',
+  'border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-100',
+  'border-rose-200 bg-rose-100 text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/20 dark:text-rose-100',
+  'border-cyan-200 bg-cyan-100 text-cyan-800 dark:border-cyan-400/30 dark:bg-cyan-500/20 dark:text-cyan-100',
+  'border-pink-200 bg-pink-100 text-pink-800 dark:border-pink-400/30 dark:bg-pink-500/20 dark:text-pink-100',
 ];
 
 const getAvatarColor = (name: string) => {
@@ -42,7 +42,7 @@ export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: User
   const showImage = !!imageUrl && !hasErrored;
 
   return (
-    <div className={`${container} rounded-full flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden ${showImage ? 'bg-surface-muted' : color.bg} ${className}`}>
+    <div className={`${container} rounded-full border flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden ${showImage ? 'border-border bg-surface-muted' : color} ${className}`}>
       {showImage ? (
         <img
           src={imageUrl!}
@@ -51,7 +51,7 @@ export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: User
           onError={() => setHasErrored(true)}
         />
       ) : (
-        <span className={`${text} font-black ${color.text} leading-none`}>{letter}</span>
+        <span className={`${text} font-black leading-none`}>{letter}</span>
       )}
     </div>
   );

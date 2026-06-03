@@ -2,6 +2,7 @@ import { Check, Quote } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { useClipboard } from '../../hooks/useClipboard';
+import { toast } from '../../toast';
 import type { CatalogItem } from '../../types';
 
 interface CitationActionButtonProps {
@@ -25,12 +26,15 @@ const hasEnoughData = (item: CatalogItem) =>
 
 export const CitationActionButton = ({ item }: CitationActionButtonProps) => {
   const { t } = useTranslation('details');
+  const { t: tCommon } = useTranslation('common');
   const { copied, copy } = useClipboard();
 
   if (!hasEnoughData(item)) return null;
 
-  const handleClick = () => {
-    void copy(buildCitation(item, t));
+  const handleClick = async () => {
+    if (await copy(buildCitation(item, t))) {
+      toast.success(tCommon('toast.citationCopied'));
+    }
   };
 
   return (
@@ -39,7 +43,7 @@ export const CitationActionButton = ({ item }: CitationActionButtonProps) => {
       onClick={handleClick}
       aria-label={copied ? t('citation.copiedLabel') : t('citation.copyLabel')}
       aria-live="polite"
-      className="w-full min-h-[52px] px-4 py-3 rounded-xl border-2 border-border-strong bg-surface hover:border-primary hover:bg-primary-soft text-text hover:text-primary font-semibold transition-all flex items-center justify-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98] cursor-pointer"
+      className="w-full min-h-[52px] px-4 py-3 rounded-xl border-2 border-border-strong bg-surface hover:border-link hover:bg-primary-soft text-text hover:text-link font-semibold transition-all flex items-center justify-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.98] cursor-pointer"
     >
       {copied ? (
         <>

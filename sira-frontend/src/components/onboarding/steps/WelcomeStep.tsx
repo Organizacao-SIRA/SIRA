@@ -17,7 +17,7 @@ export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
 
   return (
     <div className="text-center max-w-xl mx-auto">
-      <div className="w-16 h-16 bg-primary-soft text-primary rounded-full flex items-center justify-center mx-auto mb-5">
+      <div className="w-16 h-16 bg-primary-soft text-link rounded-full flex items-center justify-center mx-auto mb-5">
         <Sparkles className="w-8 h-8" aria-hidden="true" />
       </div>
 
@@ -34,7 +34,7 @@ export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
             key={labelKey}
             className="flex items-start gap-3 p-3 rounded-xl bg-surface-muted border border-border"
           >
-            <span className="text-primary mt-0.5 flex-shrink-0">
+            <span className="text-link mt-0.5 flex-shrink-0">
               <Icon className="w-5 h-5" aria-hidden="true" />
             </span>
             <span className="text-sm text-text">{t(labelKey)}</span>

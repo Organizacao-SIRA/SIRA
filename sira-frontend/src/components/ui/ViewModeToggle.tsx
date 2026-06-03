@@ -34,9 +34,9 @@ export const ViewModeToggle = ({ mode, onChange, className = '' }: ViewModeToggl
             aria-label={label}
             title={label}
             onClick={() => onChange(value)}
-            className={`p-1.5 rounded-md transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            className={`p-1.5 rounded-md transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50 ${
               active
-                ? 'bg-surface text-primary shadow-sm'
+                ? 'bg-surface text-link shadow-sm'
                 : 'text-text-subtle hover:text-text-muted'
             }`}
           >

@@ -20,7 +20,7 @@ export const AcademicProfileStep = ({ data, errors, options, onChange }: Academi
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
     <header className="flex items-start gap-3">
-      <div className="p-2 bg-primary-soft rounded-lg text-primary">
+      <div className="p-2 bg-primary-soft rounded-lg text-link">
         <GraduationCap className="w-5 h-5" aria-hidden="true" />
       </div>
       <div>

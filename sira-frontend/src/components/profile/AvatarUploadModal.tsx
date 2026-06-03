@@ -80,6 +80,7 @@ export const AvatarUploadModal = ({
     try {
       const profile = await uploadAvatar(selectedFile);
       onAvatarUpdated(profile);
+      toast.success(t('toast.avatarUpdated'));
       onClose();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('avatar.uploadError'));
@@ -93,6 +94,7 @@ export const AvatarUploadModal = ({
     try {
       const profile = await removeAvatar();
       onAvatarUpdated(profile);
+      toast.success(t('toast.avatarRemoved'));
       onClose();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('avatar.removeError'));
@@ -152,7 +154,7 @@ export const AvatarUploadModal = ({
               onClick={handleRemove}
               isLoading={isRemoving}
               disabled={isSaving}
-              className="flex-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="flex-1 text-danger-strong hover:bg-danger-soft"
             >
               <Trash2 className="w-4 h-4" />
               {t('avatar.removePhoto')}

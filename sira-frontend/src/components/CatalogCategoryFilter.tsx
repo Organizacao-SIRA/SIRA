@@ -20,10 +20,10 @@ const CategoryPill = ({ id, label, selected, onSelect }: PillProps) => (
     type="button"
     onClick={() => onSelect(id)}
     aria-pressed={selected}
-    className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+    className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
       selected
         ? 'bg-primary text-white border-primary shadow-sm'
-        : 'bg-surface border-border-strong text-text-muted hover:border-primary hover:text-primary'
+        : 'bg-surface border-border-strong text-text-muted hover:border-link hover:text-link'
     }`}
   >
     {label}

@@ -25,7 +25,7 @@ export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgress
             {currentLabel}
           </h2>
         </div>
-        <span className="text-xs font-bold text-primary whitespace-nowrap">{percent}%</span>
+        <span className="text-xs font-bold text-link whitespace-nowrap">{percent}%</span>
       </div>
 
       <ol className="hidden sm:flex items-center gap-1.5">
@@ -50,7 +50,7 @@ export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgress
                     : isCompleted
                       ? 'bg-primary text-white cursor-pointer hover:bg-primary-dark'
                       : 'bg-surface-muted text-text-subtle border border-border'
-                } ${!interactive ? 'cursor-default' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
+                } ${!interactive ? 'cursor-default' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40`}
               >
                 {isCompleted ? <Check className="w-3.5 h-3.5" /> : index + 1}
               </button>

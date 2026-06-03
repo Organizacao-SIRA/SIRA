@@ -8,11 +8,11 @@ interface PasswordStrengthMeterProps {
 }
 
 const LEVELS = [
-  { labelKey: 'password.strength.veryWeak', color: 'bg-red-500', textColor: 'text-red-500' },
-  { labelKey: 'password.strength.weak', color: 'bg-orange-500', textColor: 'text-orange-500' },
-  { labelKey: 'password.strength.fair', color: 'bg-amber-500', textColor: 'text-amber-500' },
-  { labelKey: 'password.strength.strong', color: 'bg-lime-500', textColor: 'text-lime-500' },
-  { labelKey: 'password.strength.veryStrong', color: 'bg-emerald-500', textColor: 'text-emerald-500' },
+  { labelKey: 'password.strength.veryWeak', color: 'bg-danger-fill', textColor: 'text-danger-strong' },
+  { labelKey: 'password.strength.weak', color: 'bg-danger-strong', textColor: 'text-danger-strong' },
+  { labelKey: 'password.strength.fair', color: 'bg-warning-strong', textColor: 'text-warning-strong' },
+  { labelKey: 'password.strength.strong', color: 'bg-success-strong', textColor: 'text-success-strong' },
+  { labelKey: 'password.strength.veryStrong', color: 'bg-success-strong', textColor: 'text-success-strong' },
 ];
 
 export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) => {

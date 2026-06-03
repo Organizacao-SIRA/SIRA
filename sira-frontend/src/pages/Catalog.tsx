@@ -53,7 +53,7 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey 
         subtitle={t('header.subtitle')}
       />
 
-      <div className="bg-surface p-3 sm:p-4 rounded-xl border border-border-strong shadow-sm mb-6 flex flex-col gap-3">
+      <div className="sira-card-strong p-3 sm:p-4 rounded-xl mb-6 flex flex-col gap-3">
         <CatalogSearchBar
           value={searchQuery}
           onChange={setSearchQuery}

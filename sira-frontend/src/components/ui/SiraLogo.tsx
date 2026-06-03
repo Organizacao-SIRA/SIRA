@@ -24,7 +24,7 @@ const TONE_CLASSES = {
   light: {
     text: 'text-white',
     plus: 'text-accent',
-    tagline: 'text-blue-100',
+    tagline: 'text-white/80',
   },
   inherit: {
     text: 'text-current',

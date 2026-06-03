@@ -25,12 +25,26 @@
   --color-text-subtle: #9ca3af;
   --color-text-inverse: #f9fafb;
 
+  /* Tokens de interação */
+  --color-link: #1351B4;
+  --color-link-hover: #003157;
+  --color-focus: #1351B4;
+  --color-focus-soft: rgba(19, 81, 180, 0.24);
+
   /* Tokens de borda */
   --color-border: #f3f4f6;
   --color-border-strong: #e5e7eb;
 
+  /* Tokens de overlay e sombras */
+  --color-overlay: rgba(15, 23, 42, 0.48);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-card-hover: 0 14px 32px rgba(15, 23, 42, 0.10);
+  --shadow-elevated: 0 22px 55px rgba(15, 23, 42, 0.18);
+
   /* Variante suave de primary (estado ativo, seleção) */
   --color-primary-soft: #F2F5FD;
+  --color-selected: #F2F5FD;
+  --color-selected-border: #1351B4;
 
   /* Status semânticos — soft/strong/border */
   --color-success-soft: #f0fdf4;
@@ -44,6 +58,8 @@
   --color-danger-soft: #fef2f2;
   --color-danger-strong: #b91c1c;
   --color-danger-border: #fecaca;
+  --color-danger-fill: #dc2626;
+  --color-danger-fill-hover: #b91c1c;
 
   --color-info-soft: #eff6ff;
   --color-info-strong: #1d4ed8;
@@ -75,10 +91,22 @@
   --color-text-subtle: #6b7280;
   --color-text-inverse: #1f2937;
 
+  --color-link: #93c5fd;
+  --color-link-hover: #bfdbfe;
+  --color-focus: #93c5fd;
+  --color-focus-soft: rgba(147, 197, 253, 0.24);
+
   --color-border: #2d3548;
   --color-border-strong: #3b4256;
 
+  --color-overlay: rgba(0, 0, 0, 0.62);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-card-hover: 0 18px 42px rgba(0, 0, 0, 0.34);
+  --shadow-elevated: 0 24px 70px rgba(0, 0, 0, 0.46);
+
   --color-primary-soft: rgba(19, 81, 180, 0.18);
+  --color-selected: rgba(59, 130, 246, 0.16);
+  --color-selected-border: #93c5fd;
 
   --color-success-soft: rgba(34, 197, 94, 0.15);
   --color-success-strong: #86efac;
@@ -91,6 +119,8 @@
   --color-danger-soft: rgba(239, 68, 68, 0.15);
   --color-danger-strong: #fca5a5;
   --color-danger-border: rgba(239, 68, 68, 0.3);
+  --color-danger-fill: #991b1b;
+  --color-danger-fill-hover: #b91c1c;
 
   --color-info-soft: rgba(59, 130, 246, 0.15);
   --color-info-strong: #93c5fd;
@@ -118,6 +148,48 @@
 }
 
 @layer utilities {
+  .sira-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .sira-card-strong {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    box-shadow: var(--shadow-card);
+  }
+
+  .sira-card-muted {
+    background-color: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .sira-card-hover {
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background-color 150ms ease;
+  }
+
+  .sira-card-hover:hover {
+    border-color: color-mix(in srgb, var(--color-link) 42%, var(--color-border-strong));
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .sira-link {
+    color: var(--color-link);
+  }
+
+  .sira-link:hover {
+    color: var(--color-link-hover);
+  }
+
+  .sira-focus {
+    outline: none;
+  }
+
+  .sira-focus:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-focus-soft);
+  }
+
   .sira-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--color-text-muted) 58%, transparent) transparent;

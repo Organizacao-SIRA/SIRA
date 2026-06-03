@@ -28,7 +28,7 @@ export const InterestAreasStep = ({
   return (
     <div className="space-y-5 max-w-2xl mx-auto">
       <header className="flex items-start gap-3">
-        <div className="p-2 bg-primary-soft rounded-lg text-primary">
+        <div className="p-2 bg-primary-soft rounded-lg text-link">
           <Sparkles className="w-5 h-5" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
@@ -38,7 +38,7 @@ export const InterestAreasStep = ({
               i18nKey="interests.description"
               ns="onboarding"
               values={{ count: minSelected }}
-              components={{ strong: <span className="font-bold text-primary" /> }}
+              components={{ strong: <span className="font-bold text-link" /> }}
             />
           </p>
         </div>

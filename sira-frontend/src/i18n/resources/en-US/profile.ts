@@ -54,6 +54,11 @@ export const profile = {
   actions: {
     saveChanges: 'Save Changes',
   },
+  toast: {
+    saved: 'Profile updated successfully.',
+    avatarUpdated: 'Profile photo updated.',
+    avatarRemoved: 'Profile photo removed.',
+  },
   errors: {
     save: 'Unable to save profile. Please try again.',
     localeSave: 'Unable to save the interface language. The choice remains active on this device.',

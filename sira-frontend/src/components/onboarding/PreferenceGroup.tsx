@@ -11,7 +11,7 @@ interface PreferenceGroupProps {
 export const PreferenceGroup = ({ title, description, error, icon, children }: PreferenceGroupProps) => (
   <section className="space-y-3">
     <div className="flex items-start gap-2">
-      {icon && <span className="text-primary mt-0.5">{icon}</span>}
+      {icon && <span className="text-link mt-0.5">{icon}</span>}
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-bold text-primary-dark dark:text-text">{title}</h3>
         {description && <p className="text-xs text-text-muted mt-0.5">{description}</p>}

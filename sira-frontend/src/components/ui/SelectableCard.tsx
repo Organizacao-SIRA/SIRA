@@ -14,9 +14,9 @@ export const SelectableCard = ({ selected, onClick, children, className = '' }: 
     aria-pressed={selected}
     className={`p-4 rounded-xl border-2 transition-all text-left w-full ${
       selected
-        ? 'border-primary bg-primary-soft'
+        ? 'border-selected-border bg-selected'
         : 'border-border bg-surface-muted hover:bg-surface hover:border-border-strong'
-    } ${className}`}
+    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${className}`}
   >
     {children}
   </button>

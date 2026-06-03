@@ -25,13 +25,13 @@ export const CatalogSearchBar = ({ value, onChange, onSubmit, onClear }: Catalog
           onChange={e => onChange(e.target.value)}
           placeholder={t('search.placeholder')}
           aria-label={t('search.label')}
-          className="w-full pl-4 pr-9 py-2.5 bg-surface-muted text-text border border-border-strong rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-sm"
+          className="w-full pl-4 pr-9 py-2.5 bg-surface-muted text-text border border-border-strong rounded-lg outline-none focus:border-focus focus:ring-1 focus:ring-focus transition-colors text-sm"
         />
         {value && (
           <button
             type="button"
             onClick={onClear}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text transition-colors duration-150 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text transition-colors duration-150 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus/50"
             aria-label={t('search.clear')}
           >
             <X className="w-4 h-4" />

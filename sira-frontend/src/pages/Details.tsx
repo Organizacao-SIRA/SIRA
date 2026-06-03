@@ -58,7 +58,7 @@ export const Details = ({
 
           <section
             aria-label={t('actions.panelLabel')}
-            className="lg:hidden bg-surface rounded-2xl border border-border shadow-sm p-4"
+            className="lg:hidden sira-card rounded-2xl p-4"
           >
             <div className="flex items-start gap-4">
               <ContentCoverPreview item={item} variant="compact" />
@@ -83,7 +83,7 @@ export const Details = ({
 
           <section
             aria-label={t('actions.share')}
-            className="lg:hidden bg-surface rounded-2xl border border-border shadow-sm p-4 space-y-4"
+            className="lg:hidden sira-card rounded-2xl p-4 space-y-4"
           >
             <ContentSecondaryActions item={item} />
           </section>

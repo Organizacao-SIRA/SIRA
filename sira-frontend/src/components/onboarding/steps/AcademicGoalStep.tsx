@@ -30,7 +30,7 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
   return (
     <div className="space-y-5 max-w-2xl mx-auto">
     <header className="flex items-start gap-3">
-      <div className="p-2 bg-primary-soft rounded-lg text-primary">
+      <div className="p-2 bg-primary-soft rounded-lg text-link">
         <Target className="w-5 h-5" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
@@ -53,9 +53,9 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
             type="button"
             onClick={() => onSelect(isSelected ? '' : goal)}
             aria-pressed={isSelected}
-            className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+            className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
               isSelected
-                ? 'border-primary bg-primary-soft'
+                ? 'border-selected-border bg-selected'
                 : 'border-border bg-surface-muted hover:border-border-strong hover:bg-surface'
             }`}
           >
@@ -68,7 +68,7 @@ export const AcademicGoalStep = ({ goals, selected, onSelect }: AcademicGoalStep
             </span>
             <span
               className={`text-sm font-semibold flex-1 ${
-                isSelected ? 'text-primary' : 'text-text'
+                isSelected ? 'text-link' : 'text-text'
               }`}
             >
               {preferenceValueLabel(goal, tp)}

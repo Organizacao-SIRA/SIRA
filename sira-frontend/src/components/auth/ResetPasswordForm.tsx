@@ -57,7 +57,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
   if (formState === 'validating') {
     return (
       <div className="text-center space-y-4 py-4 animate-fadeIn">
-        <Loader2 className="w-8 h-8 text-primary mx-auto animate-spin" />
+        <Loader2 className="w-8 h-8 text-link mx-auto animate-spin" />
         <p className="text-sm text-text-muted font-medium">{t('resetPassword.validating')}</p>
       </div>
     );

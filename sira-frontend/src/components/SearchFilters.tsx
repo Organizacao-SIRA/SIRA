@@ -74,7 +74,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
           <button
             type="button"
             onClick={reset}
-            className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-primary/70 font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded px-1 py-0.5"
+            className="ml-auto flex items-center gap-1 text-xs text-link hover:text-link-hover font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1 py-0.5"
           >
             <X className="w-3 h-3" />
             {t('filters.clear')}
@@ -94,7 +94,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
                 type="button"
                 onClick={() => setType(opt.value)}
                 aria-pressed={active}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
                   active
                     ? 'bg-primary text-white shadow-sm'
                     : 'text-text-muted hover:text-text hover:bg-surface-muted'
@@ -112,10 +112,10 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
           <select
             value={filters.area ?? ''}
             onChange={e => setArea(e.target.value || null)}
-            className={`h-9 pl-3 pr-8 text-xs font-medium rounded-xl border shadow-sm appearance-none bg-surface cursor-pointer transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+            className={`h-9 pl-3 pr-8 text-xs font-medium rounded-xl border shadow-sm appearance-none bg-surface cursor-pointer transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-focus/30 ${
               filters.area
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-border text-text-muted hover:border-primary/50'
+                ? 'border-selected-border text-link bg-selected'
+                : 'border-border text-text-muted hover:border-link/50'
             }`}
           >
             <option value="">{t('filters.allAreas')}</option>
@@ -135,10 +135,10 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
           type="button"
           onClick={toggleOpenAccess}
           aria-pressed={filters.openAccessOnly}
-          className={`flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-xl border shadow-sm transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+          className={`flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-xl border shadow-sm transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
             filters.openAccessOnly
               ? 'bg-success-soft border-success-border text-success-strong'
-              : 'bg-surface border-border text-text-muted hover:border-primary/50 hover:text-text'
+              : 'bg-surface border-border text-text-muted hover:border-link/50 hover:text-text'
           }`}
         >
           <Unlock className="w-3.5 h-3.5" />
@@ -155,7 +155,7 @@ export const SearchFilters = ({ filters, onChange }: SearchFiltersProps) => {
                 type="button"
                 onClick={() => setPeriod(opt.value)}
                 aria-pressed={active}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 ${
                   active
                     ? 'bg-primary text-white shadow-sm'
                     : 'text-text-muted hover:text-text hover:bg-surface-muted'

@@ -28,6 +28,7 @@ import { ResetPassword } from './pages/ResetPassword';
 import { useAuth } from './contexts/AuthContext';
 import { useScreenScrollRestoration } from './hooks/useScreenScrollRestoration';
 import { DEFAULT_LOCALE } from './i18n/locales';
+import { toast } from './toast';
 
 const SCREEN_SCROLL_KEYS: Record<string, string> = {
   results: '@sira:resultsScrollY',
@@ -135,7 +136,6 @@ export default function App() {
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const [catalogHomeResetKey, setCatalogHomeResetKey] = useState(0);
   const [favoritesHomeResetKey, setFavoritesHomeResetKey] = useState(0);
   const searchRequestInFlightRef = useRef(false);
@@ -473,15 +473,15 @@ export default function App() {
     try {
       if (isFav) {
         await removeFavoriteApi(item.id);
+        toast.success(t('toast.favoriteRemoved'));
       } else {
         await addFavorite(item);
+        toast.success(t('toast.favoriteAdded'));
       }
-      setFavoriteError(null);
       return true;
     } catch (error: any) {
       console.error('Erro ao alternar favorito:', error);
-      setFavoriteError(error?.message || t('errors.unknownFavorite'));
-      setTimeout(() => setFavoriteError(null), 5000);
+      toast.error(t('errors.favoriteAlert', { message: error?.message || t('errors.unknownFavorite') }));
       // Rollback em caso de falha
       setFavoriteIds(prev => {
         const next = new Set(prev);
@@ -664,23 +664,10 @@ export default function App() {
     <div className="h-screen flex flex-col overflow-hidden bg-surface-muted">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-link focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus"
       >
         {t('states.skipToContent')}
       </a>
-      {favoriteError && (
-        <div className="fixed top-4 right-4 z-50 bg-danger-soft border border-danger-border text-danger-strong px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3 animate-fadeIn">
-          <span>{t('errors.favoriteAlert', { message: favoriteError })}</span>
-          <button
-            type="button"
-            onClick={() => setFavoriteError(null)}
-            aria-label={t('errors.closeErrorAlert')}
-            className="text-danger-strong hover:opacity-70 font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-strong/40 rounded px-1"
-          >
-            ×
-          </button>
-        </div>
-      )}
       <Navbar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
