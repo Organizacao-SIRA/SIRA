@@ -1,18 +1,19 @@
 import { lazy, Suspense, type Dispatch, type FormEvent, type SetStateAction } from 'react';
 import type { AuthUser, CatalogItem, ProfileData, SearchFilters } from '../types';
 import { Spinner } from '../components/ui/Spinner';
+import { screenLoaders } from './screenLoaders';
 
-const Home = lazy(() => import('../pages/Home').then(module => ({ default: module.Home })));
-const Recommendations = lazy(() => import('../pages/Recommendations').then(module => ({ default: module.Recommendations })));
-const Favorites = lazy(() => import('../pages/Favorites').then(module => ({ default: module.Favorites })));
-const Profile = lazy(() => import('../pages/Profile').then(module => ({ default: module.Profile })));
-const Catalog = lazy(() => import('../pages/Catalog').then(module => ({ default: module.Catalog })));
-const Details = lazy(() => import('../pages/Details').then(module => ({ default: module.Details })));
-const Login = lazy(() => import('../pages/Login').then(module => ({ default: module.Login })));
-const Register = lazy(() => import('../pages/Register').then(module => ({ default: module.Register })));
-const Onboarding = lazy(() => import('../pages/Onboarding').then(module => ({ default: module.Onboarding })));
-const ForgotPassword = lazy(() => import('../pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
-const ResetPassword = lazy(() => import('../pages/ResetPassword').then(module => ({ default: module.ResetPassword })));
+const Home = lazy(screenLoaders.home);
+const Recommendations = lazy(screenLoaders.results);
+const Favorites = lazy(screenLoaders.favorites);
+const Profile = lazy(screenLoaders.profile);
+const Catalog = lazy(screenLoaders.catalog);
+const Details = lazy(screenLoaders.details);
+const Login = lazy(screenLoaders.login);
+const Register = lazy(screenLoaders.register);
+const Onboarding = lazy(screenLoaders.onboarding);
+const ForgotPassword = lazy(screenLoaders['forgot-password']);
+const ResetPassword = lazy(screenLoaders['reset-password']);
 
 const PageLoadingFallback = () => (
   <div className="min-h-[calc(100vh-68px)] flex items-center justify-center">

@@ -6,6 +6,7 @@ import { RecommendationCardSkeleton } from '../components/RecommendationCardSkel
 import { RecommendationCard } from '../components/RecommendationCard';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
+import { ErrorState } from '../components/ui/ErrorState';
 import { ViewModeToggle } from '../components/ui/ViewModeToggle';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useViewMode } from '../hooks/useViewMode';
@@ -168,12 +169,10 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
       )}
 
       {error && !isInitialLoading && (
-        <div className="bg-surface border border-danger-border border-l-4 rounded-2xl p-8 text-center space-y-4">
-          <p className="text-sm text-danger-strong font-medium">{error}</p>
-          <Button variant="secondary" size="sm" onClick={() => loadFavoritesPage(activeTab, 0)}>
-            {t('common:actions.retry')}
-          </Button>
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={() => loadFavoritesPage(activeTab, 0)}
+        />
       )}
 
       {items.length > 0 && (

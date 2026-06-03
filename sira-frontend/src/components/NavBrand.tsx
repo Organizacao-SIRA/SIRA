@@ -7,9 +7,10 @@ interface NavBrandProps {
   showMenuButton: boolean;
   onMenuToggle: () => void;
   onLogoClick: () => void;
+  onLogoPrefetch?: () => void;
 }
 
-export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick }: NavBrandProps) => {
+export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick, onLogoPrefetch }: NavBrandProps) => {
   const { t } = useTranslation('navigation');
 
   return (
@@ -29,6 +30,8 @@ export const NavBrand = ({ showMenuButton, onMenuToggle, onLogoClick }: NavBrand
       <button
         aria-label={t('brand.home')}
         onClick={onLogoClick}
+        onMouseEnter={onLogoPrefetch}
+        onFocus={onLogoPrefetch}
         className="flex items-center min-w-0 group bg-transparent border-none p-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg"
       >
         <SiraLogo size="sm" tone="light" className="flex-shrink-0" />

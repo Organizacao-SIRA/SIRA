@@ -7,6 +7,7 @@ import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
 import { NavLogoutButton } from './NavLogoutButton';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { prefetchScreen } from '../app/screenLoaders';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
@@ -32,6 +33,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
             showMenuButton={showMenuButton}
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             onLogoClick={() => setCurrentScreen('home')}
+            onLogoPrefetch={() => prefetchScreen('home')}
           />
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -42,12 +44,15 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
                   name={displayName}
                   avatarUrl={resolveAvatarUrl(user.avatarUrl)}
                   onClick={() => setCurrentScreen('profile')}
+                  onPrefetch={() => prefetchScreen('profile')}
                 />
                 <NavLogoutButton onLogout={onLogout} />
               </>
             ) : (
               <Button
                 onClick={() => setCurrentScreen('login')}
+                onMouseEnter={() => prefetchScreen('login')}
+                onFocus={() => prefetchScreen('login')}
                 variant="navbarAction"
                 size="sm"
                 disabled={currentScreen === 'login'}

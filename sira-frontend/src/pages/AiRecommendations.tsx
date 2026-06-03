@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen, ChevronDown, ChevronUp, Sparkles, Search } from 'lucide-react';
+import { Brain, LogIn, RefreshCw, Clock, BookOpen, ChevronDown, ChevronUp, Sparkles, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../toast';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
@@ -8,6 +8,7 @@ import { RecommendationCardSkeleton } from '../components/RecommendationCardSkel
 import { RecommendationCard } from '../components/RecommendationCard';
 import { Button } from '../components/ui/Button';
 import { ViewModeToggle } from '../components/ui/ViewModeToggle';
+import { ErrorState } from '../components/ui/ErrorState';
 import { useViewMode } from '../hooks/useViewMode';
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -164,11 +165,11 @@ export const AiRecommendations = ({
 
   if (error) {
     return (
-      <div className="bg-surface rounded-2xl border border-danger-border border-l-4 p-8 text-center">
-        <AlertCircle className="h-8 w-8 text-danger-strong mx-auto mb-3" />
-        <p className="text-text-muted text-xs mb-4">{error}</p>
-        <Button onClick={loadRecommendations} size="sm" variant="secondary">{t('actions.retry')}</Button>
-      </div>
+      <ErrorState
+        message={error}
+        onRetry={loadRecommendations}
+        className="rounded-2xl"
+      />
     );
   }
 

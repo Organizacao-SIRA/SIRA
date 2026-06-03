@@ -49,14 +49,24 @@ export const readLastFavoritesScreen = (): FavoritesSectionScreen => {
   return stored && isFavoritesSectionScreen(stored) ? stored : 'favorites';
 };
 
-export const readCatalogItemArray = (key: string): CatalogItem[] => {
+export const readSessionJson = <T,>(key: string, fallback: T): T => {
   const saved = sessionStorage.getItem(key);
-  return saved ? JSON.parse(saved) as CatalogItem[] : [];
+  if (!saved) return fallback;
+
+  try {
+    return JSON.parse(saved) as T;
+  } catch {
+    sessionStorage.removeItem(key);
+    return fallback;
+  }
+};
+
+export const readCatalogItemArray = (key: string): CatalogItem[] => {
+  return readSessionJson<CatalogItem[]>(key, []);
 };
 
 export const readCatalogItem = (key: string): CatalogItem | null => {
-  const saved = sessionStorage.getItem(key);
-  return saved ? JSON.parse(saved) as CatalogItem : null;
+  return readSessionJson<CatalogItem | null>(key, null);
 };
 
 export const createEmptyProfileData = (): ProfileData => ({

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { AuthUser } from '../types';
 import { SidebarNavItem } from './ui/SidebarNavItem';
 import { SIDEBAR_ITEMS } from './sidebar/sidebarItems';
+import { prefetchScreen } from '../app/screenLoaders';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -99,6 +100,7 @@ export const Sidebar = ({
                 isActive={isActive(item.id)}
                 isExpanded={isSidebarOpen}
                 onClick={() => handleItemClick(item.id)}
+                onPrefetch={() => prefetchScreen(item.id)}
               />
             ))}
           </ul>

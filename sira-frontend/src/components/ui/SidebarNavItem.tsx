@@ -6,9 +6,10 @@ interface SidebarNavItemProps {
   isActive: boolean;
   isExpanded: boolean;
   onClick: () => void;
+  onPrefetch?: () => void;
 }
 
-export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ item, isActive, isExpanded, onClick, onPrefetch }: SidebarNavItemProps) => {
   const { t } = useTranslation('navigation');
   const Icon = item.icon;
   const label = t(item.labelKey);
@@ -17,6 +18,8 @@ export const SidebarNavItem = ({ item, isActive, isExpanded, onClick }: SidebarN
     <li>
       <button
         onClick={onClick}
+        onMouseEnter={onPrefetch}
+        onFocus={onPrefetch}
         aria-label={label}
         title={!isExpanded ? label : undefined}
         className={`
