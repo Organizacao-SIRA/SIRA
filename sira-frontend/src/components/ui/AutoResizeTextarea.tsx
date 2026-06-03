@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
@@ -8,7 +8,7 @@ interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextA
 export const AutoResizeTextarea = ({ value, maxHeight = 200, ...props }: AutoResizeTextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const adjustHeight = () => {
+  const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
@@ -18,11 +18,11 @@ export const AutoResizeTextarea = ({ value, maxHeight = 200, ...props }: AutoRes
       // Ativa scroll apenas se atingir o maxHeight
       textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
     }
-  };
+  }, [maxHeight]);
 
   useEffect(() => {
     adjustHeight();
-  }, [value]);
+  }, [adjustHeight, value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Permite enviar com Enter, mas Shift+Enter pula linha

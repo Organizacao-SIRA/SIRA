@@ -74,8 +74,11 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   useEffect(() => {
     if (!initialData || hydratedFromProps.current) return;
     if (initialData.course || initialData.mainArea || initialData.interests?.length) {
-      setData((prev) => ({ ...prev, ...initialData }));
-      hydratedFromProps.current = true;
+      queueMicrotask(() => {
+        if (hydratedFromProps.current) return;
+        setData((prev) => ({ ...prev, ...initialData }));
+        hydratedFromProps.current = true;
+      });
     }
   }, [initialData]);
 

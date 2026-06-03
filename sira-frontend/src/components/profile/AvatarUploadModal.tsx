@@ -36,19 +36,34 @@ export const AvatarUploadModal = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedFile(null);
-      setPreviewUrl(null);
+      queueMicrotask(() => {
+        setSelectedFile(null);
+        setPreviewUrl(null);
+      });
     }
   }, [isOpen]);
 
   useEffect(() => {
+    let isActive = true;
+
     if (!selectedFile) {
-      setPreviewUrl(null);
-      return;
+      queueMicrotask(() => {
+        if (isActive) setPreviewUrl(null);
+      });
+      return () => {
+        isActive = false;
+      };
     }
+
     const url = URL.createObjectURL(selectedFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
+    queueMicrotask(() => {
+      if (isActive) setPreviewUrl(url);
+    });
+
+    return () => {
+      isActive = false;
+      URL.revokeObjectURL(url);
+    };
   }, [selectedFile]);
 
   const validate = (file: File): string | null => {

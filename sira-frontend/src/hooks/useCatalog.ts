@@ -44,12 +44,22 @@ const catalogCache = createSessionCache<CatalogResult>({
   maxEntries: 50,
 });
 
-const normalizeFilters = (filters: any): SearchFilters => ({
-  types: Array.isArray(filters?.types) ? filters.types : [],
-  area: typeof filters?.area === 'string' ? filters.area : null,
-  openAccessOnly: Boolean(filters?.openAccessOnly),
-  yearFrom: typeof filters?.yearFrom === 'number' ? filters.yearFrom : null,
-});
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const normalizeFilters = (filters: unknown): SearchFilters => {
+  const parsed = isRecord(filters) ? filters : {};
+  const types = Array.isArray(parsed.types)
+    ? parsed.types.filter((type): type is 'book' | 'article' => type === 'book' || type === 'article')
+    : [];
+
+  return {
+    types,
+    area: typeof parsed.area === 'string' ? parsed.area : null,
+    openAccessOnly: Boolean(parsed.openAccessOnly),
+    yearFrom: typeof parsed.yearFrom === 'number' ? parsed.yearFrom : null,
+  };
+};
 
 const validateCatalogState = (value: unknown): CatalogStoredState => {
   const parsed = value as Partial<CatalogStoredState>;
@@ -111,10 +121,13 @@ export const useCatalog = () => {
   const submittedQueryRef = useRef(submittedQuery);
   const categoryRef = useRef(category);
   const filtersRef = useRef(filters);
-  searchRef.current = searchQuery;
-  submittedQueryRef.current = submittedQuery;
-  categoryRef.current = category;
-  filtersRef.current = filters;
+
+  useEffect(() => {
+    searchRef.current = searchQuery;
+    submittedQueryRef.current = submittedQuery;
+    categoryRef.current = category;
+    filtersRef.current = filters;
+  }, [category, filters, searchQuery, submittedQuery]);
 
   const doFetch = useCallback(async (query: string, catId: string, pg: number, activeFilters: SearchFilters) => {
     abortRef.current?.abort();
@@ -143,9 +156,9 @@ export const useCatalog = () => {
       setItems(result.items);
       setTotal(result.total);
       catalogCache.set(cacheKey, result);
-    } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      setError(err.message ?? 'Erro ao carregar materiais');
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setError(err instanceof Error ? err.message : 'Erro ao carregar materiais');
       setItems([]);
       setTotal(0);
     } finally {
@@ -154,13 +167,24 @@ export const useCatalog = () => {
   }, []);
 
   useEffect(() => {
+    let isActive = true;
+
     getPreferenceOptions()
       .then(opts => setTopics(opts.topics))
       .catch(() => {});
     // Se o cache já populou o estado inicial, não busca novamente.
-    if (!initialSnapshot.loading) return;
-    doFetch(initialSnapshot.submittedQuery, initialSnapshot.category, initialSnapshot.page, initialSnapshot.filters);
-  }, [doFetch]);
+    if (initialSnapshot.loading) {
+      queueMicrotask(() => {
+        if (isActive) {
+          void doFetch(initialSnapshot.submittedQuery, initialSnapshot.category, initialSnapshot.page, initialSnapshot.filters);
+        }
+      });
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [doFetch, initialSnapshot.category, initialSnapshot.filters, initialSnapshot.loading, initialSnapshot.page, initialSnapshot.submittedQuery]);
 
   useEffect(() => {
     setStoredState({

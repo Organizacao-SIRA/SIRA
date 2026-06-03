@@ -28,7 +28,9 @@ export const createSessionCache = <T>({
   const remove = (key: string) => {
     try {
       sessionStorage.removeItem(keyFor(key));
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
   };
 
   const get = (key: string): T | null => {
@@ -74,7 +76,9 @@ export const createSessionCache = <T>({
       validEntries
         .slice(maxEntries)
         .forEach(entry => sessionStorage.removeItem(entry.key));
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
   };
 
   const set = (key: string, value: T) => {
@@ -87,7 +91,9 @@ export const createSessionCache = <T>({
       };
       sessionStorage.setItem(keyFor(key), JSON.stringify(entry));
       prune();
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
   };
 
   return { get, set, remove };

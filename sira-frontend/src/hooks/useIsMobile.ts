@@ -11,7 +11,7 @@ export const useIsMobile = (breakpoint: number = DEFAULT_BREAKPOINT): boolean =>
     const query = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
     const handleChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
 
-    setIsMobile(query.matches);
+    queueMicrotask(() => setIsMobile(query.matches));
     query.addEventListener('change', handleChange);
     return () => query.removeEventListener('change', handleChange);
   }, [breakpoint]);

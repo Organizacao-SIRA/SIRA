@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [optionsError, setOptionsError] = useState('');
 
-  const loadPreferenceOptions = async () => {
+  const loadPreferenceOptions = useCallback(async () => {
     setIsLoadingOptions(true);
     setOptionsError('');
     try {
@@ -43,11 +43,17 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     } finally {
       setIsLoadingOptions(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
-    loadPreferenceOptions();
-  }, []);
+    let isActive = true;
+    queueMicrotask(() => {
+      if (isActive) void loadPreferenceOptions();
+    });
+    return () => {
+      isActive = false;
+    };
+  }, [loadPreferenceOptions]);
 
   const handleSuccess = (profile: UserProfile) => {
     setProfileData({
@@ -77,9 +83,19 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
     onSuccess: handleSuccess,
   });
 
-  const prevStep = useRef(onboarding.step);
-  const direction = onboarding.step >= prevStep.current ? 1 : -1;
-  useEffect(() => { prevStep.current = onboarding.step; });
+  const [direction, setDirection] = useState(1);
+  const goToStep = (target: number) => {
+    setDirection(target >= onboarding.step ? 1 : -1);
+    onboarding.goTo(target);
+  };
+  const goNext = () => {
+    setDirection(1);
+    onboarding.next();
+  };
+  const goBack = () => {
+    setDirection(-1);
+    onboarding.back();
+  };
 
   if (isLoadingOptions) {
     return (
@@ -175,7 +191,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       progress={
         <OnboardingProgress
           currentStep={onboarding.step}
-          onJumpTo={onboarding.goTo}
+          onJumpTo={goToStep}
         />
       }
       actions={
@@ -184,8 +200,8 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
           totalSteps={onboarding.totalSteps}
           canAdvance={onboarding.canAdvance}
           isSaving={onboarding.isSaving}
-          onBack={onboarding.back}
-          onNext={onboarding.next}
+          onBack={goBack}
+          onNext={goNext}
           onSubmit={onboarding.submit}
           hint={stepHint}
         />

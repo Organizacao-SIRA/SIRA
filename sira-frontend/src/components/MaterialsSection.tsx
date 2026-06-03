@@ -6,14 +6,15 @@ import { Button } from './ui/Button';
 import { ViewModeToggle } from './ui/ViewModeToggle';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useViewMode } from '../hooks/useViewMode';
+import type { CatalogItem } from '../types';
 
 interface MaterialsSectionProps {
-  results: any[];
+  results: CatalogItem[];
   onRetry: () => void;
   isRegenerating?: boolean;
-  viewDetails: (item: any) => void;
-  toggleFavorite: (item: any) => void;
-  isFavorite: (id: any) => boolean;
+  viewDetails: (item: CatalogItem) => void;
+  toggleFavorite: (item: CatalogItem) => void;
+  isFavorite: (id: string) => boolean;
 }
 
 export const MaterialsSection = ({
@@ -69,7 +70,7 @@ export const MaterialsSection = ({
         </div>
       ) : (
         <div className={containerClasses}>
-          {results.map((item: any) => (
+          {results.map((item) => (
             <RecommendationCard
               key={item.id}
               item={item}

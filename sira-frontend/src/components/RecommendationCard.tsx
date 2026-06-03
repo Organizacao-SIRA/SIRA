@@ -8,6 +8,7 @@ import { FavoriteButton } from './ui/FavoriteButton';
 import { MaterialPlaceholder } from './ui/MaterialPlaceholder';
 import { SiraAnalysisCard } from './ui/SiraAnalysisCard';
 import { trackRecommendationEvent } from '../services/api';
+import type { CatalogItem } from '../types';
 
 // -------------------------------------------------------------------------
 // Access indicator — derives all visual config from a single source of truth
@@ -86,9 +87,9 @@ type Variant = 'horizontal' | 'vertical';
 type AnalysisSlot = 'auto' | 'reserved';
 
 interface RecommendationCardProps {
-  item: any;
-  viewDetails: (item: any) => void;
-  toggleFavorite: (item: any) => void;
+  item: CatalogItem;
+  viewDetails: (item: CatalogItem) => void;
+  toggleFavorite: (item: CatalogItem) => void;
   isFavorite: boolean;
   variant?: Variant;
   trackEvents?: boolean;
@@ -110,7 +111,8 @@ export const RecommendationCard = ({
   const [imageError, setImageError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const impressionFired = useRef(false);
-  const showImage = Boolean(item.image) && !imageError;
+  const imageSrc = item.image ?? undefined;
+  const showImage = Boolean(imageSrc) && !imageError;
   const isVertical = variant === 'vertical';
   const hasAccessInfo = item.isOpenAccess !== undefined;
   const shouldShowAnalysisSlot = Boolean(item.aiExplanation) || analysisSlot === 'reserved';
@@ -151,7 +153,7 @@ export const RecommendationCard = ({
   // owns rounded corners, border and shadow so the access strip can sit flush.
   const cover = showImage ? (
     <img
-      src={item.image}
+      src={imageSrc}
       alt={t('materialCard.coverAlt', { title: item.title })}
       loading="lazy"
       onError={() => setImageError(true)}

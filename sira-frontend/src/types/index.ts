@@ -5,6 +5,7 @@ export interface AuthUser {
   email: string;
   name: string | null;
   avatarUrl?: string | null;
+  hasCompletedOnboarding?: boolean;
   uiLocale?: UiLocale;
 }
 
@@ -103,4 +104,58 @@ export type CatalogItem = {
   aiJustification?: string | null;
   aiExplanation?: string | null;
   keywords?: string[];
+};
+
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export type AuthResponse = {
+  user: AuthUser;
+  accessToken?: string;
+  refreshToken?: string;
+};
+
+export type SearchResultsResponse = {
+  items: CatalogItem[];
+  total: number;
+};
+
+export type ChatSearchResponse = {
+  aiMessage: string;
+  results: CatalogItem[];
+};
+
+export type UpdateProfilePayload = Partial<
+  Pick<
+    ProfileData,
+    | 'name'
+    | 'course'
+    | 'educationLevel'
+    | 'mainArea'
+    | 'subAreas'
+    | 'languages'
+    | 'materialLevels'
+    | 'wantsBooks'
+    | 'wantsArticles'
+    | 'wantsOpenAccessOnly'
+    | 'interests'
+    | 'academicGoal'
+    | 'uiLocale'
+  >
+>;
+
+export type RecommendationsResponse = {
+  recommendations: CatalogItem[];
+  basedOn: { favorites: number; searches: number; preferences: boolean };
+  generatedAt: string;
+  coldStart?: boolean;
 };

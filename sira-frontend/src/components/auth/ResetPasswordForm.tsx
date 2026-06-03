@@ -24,7 +24,7 @@ export const ResetPasswordForm = ({ token, onBackToLogin }: ResetPasswordFormPro
   // Validação antecipada do token ao carregar
   useEffect(() => {
     if (!token) {
-      setFormState('invalid');
+      queueMicrotask(() => setFormState('invalid'));
       return;
     }
 

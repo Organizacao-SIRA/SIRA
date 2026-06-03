@@ -6,6 +6,8 @@ import { SectionCard } from './SectionCard';
 import { preferenceTopicLabel, preferenceValueLabel } from '../../i18n/preferenceLabels';
 import type { PreferenceTopic } from '../../types';
 
+type AcademicProfileField = 'course' | 'educationLevel' | 'mainArea' | 'academicGoal';
+
 interface AcademicProfileCardProps {
   isEditing: boolean;
   data: {
@@ -20,7 +22,7 @@ interface AcademicProfileCardProps {
     mainArea: string;
     academicGoal: string;
   };
-  onChange: (field: string, value: string) => void;
+  onChange: (field: AcademicProfileField, value: string) => void;
   topicsList: PreferenceTopic[];
   educationLevelsList: string[];
   academicGoalsList: string[];

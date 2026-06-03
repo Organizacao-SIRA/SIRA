@@ -7,18 +7,18 @@ import { ChatLoadingSkeleton } from '../components/ChatLoadingSkeleton';
 import { MaterialsSection } from '../components/MaterialsSection';
 import { RegenerateResultsButton } from '../components/RegenerateResultsButton';
 import { PageFooter } from '../components/ui/PageFooter';
-import type { AuthUser } from '../types';
+import type { AuthUser, CatalogItem } from '../types';
 
 interface RecommendationsProps {
-  results: any[];
+  results: CatalogItem[];
   aiMessage: string;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   handleSearch: (e: React.FormEvent) => void;
   setCurrentScreen: (screen: string) => void;
-  viewDetails: (item: any) => void;
-  toggleFavorite: (item: any) => void;
-  isFavorite: (id: any) => boolean;
+  viewDetails: (item: CatalogItem) => void;
+  toggleFavorite: (item: CatalogItem) => void;
+  isFavorite: (id: string) => boolean;
   isLoading?: boolean;
   isRegenerating?: boolean;
   onRegenerate?: () => void;

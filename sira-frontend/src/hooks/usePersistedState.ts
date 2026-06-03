@@ -34,13 +34,17 @@ export const usePersistedState = <T,>(
   useEffect(() => {
     try {
       sessionStorage.setItem(key, JSON.stringify(value));
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
   }, [key, value]);
 
   const clear = useCallback(() => {
     try {
       sessionStorage.removeItem(key);
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
     setValue(typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue);
   }, [initialValue, key]);
 

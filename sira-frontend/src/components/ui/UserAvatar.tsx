@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface UserAvatarProps {
   name: string;
@@ -33,13 +33,9 @@ export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: User
   const letter = (name || '?').charAt(0).toUpperCase();
   const { container, text } = sizes[size];
   const color = getAvatarColor(name);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    setHasErrored(false);
-  }, [imageUrl]);
-
-  const showImage = !!imageUrl && !hasErrored;
+  const showImage = !!imageUrl && failedImageUrl !== imageUrl;
 
   return (
     <div className={`${container} rounded-full border flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden ${showImage ? 'border-border bg-surface-muted' : color} ${className}`}>
@@ -48,7 +44,7 @@ export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: User
           src={imageUrl!}
           alt={`Foto de perfil de ${name || 'usuário'}`}
           className="w-full h-full object-cover"
-          onError={() => setHasErrored(true)}
+          onError={() => setFailedImageUrl(imageUrl)}
         />
       ) : (
         <span className={`${text} font-black leading-none`}>{letter}</span>

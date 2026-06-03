@@ -16,6 +16,7 @@ import { normalizeLocale, type UiLocale } from '../i18n/locales';
 export const useUiLocaleSync = (options?: { onError?: (error: Error) => void }) => {
   const { i18n } = useTranslation();
   const { user, updateUser } = useAuth();
+  const userId = user?.id;
 
   const setUiLocale = useCallback(
     (next: UiLocale) => {
@@ -24,7 +25,7 @@ export const useUiLocaleSync = (options?: { onError?: (error: Error) => void }) 
 
       void i18n.changeLanguage(locale);
 
-      if (!user) return;
+      if (!userId) return;
 
       updateUser({ uiLocale: locale });
       updateProfile({ uiLocale: locale }).catch((err: unknown) => {
@@ -33,7 +34,7 @@ export const useUiLocaleSync = (options?: { onError?: (error: Error) => void }) 
         else console.warn('[i18n] Falha ao persistir uiLocale no perfil:', error);
       });
     },
-    [i18n, user, updateUser, options],
+    [i18n, userId, updateUser, options],
   );
 
   return { setUiLocale };

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ProfileData, SearchFilters } from './types';
+import type { CatalogItem, ProfileData, SearchFilters } from './types';
 import { 
-  searchAcademicContent, 
   chatSearchMaterials, 
   fetchFavoriteIds, 
   addFavorite, 
@@ -36,6 +36,8 @@ const SCREEN_SCROLL_KEYS: Record<string, string> = {
   favorites: '@sira:favoritesScrollY',
 };
 const RESET_SCROLL_SCREENS = ['details'];
+const AUTH_SCREENS = ['login', 'register', 'onboarding', 'forgot-password', 'reset-password'];
+const PUBLIC_SCREENS = ['register', 'forgot-password', 'reset-password'];
 const SCREENS_WITHOUT_SIDEBAR = new Set(['login', 'register', 'onboarding', 'forgot-password', 'reset-password']);
 type SearchSectionScreen = 'home' | 'results' | 'details';
 type SearchDetailOrigin = 'home' | 'results';
@@ -69,6 +71,36 @@ const readLastFavoritesScreen = (): FavoritesSectionScreen => {
   return isFavoritesSectionScreen(stored ?? '') ? stored as FavoritesSectionScreen : 'favorites';
 };
 
+const readCatalogItemArray = (key: string): CatalogItem[] => {
+  const saved = sessionStorage.getItem(key);
+  return saved ? JSON.parse(saved) as CatalogItem[] : [];
+};
+
+const readCatalogItem = (key: string): CatalogItem | null => {
+  const saved = sessionStorage.getItem(key);
+  return saved ? JSON.parse(saved) as CatalogItem : null;
+};
+
+const createEmptyProfileData = (): ProfileData => ({
+  name: '',
+  email: '',
+  course: '',
+  educationLevel: 'Graduação',
+  mainArea: '',
+  subAreas: '',
+  languages: ['Português'],
+  materialLevels: ['Intermediário'],
+  wantsBooks: true,
+  wantsArticles: true,
+  wantsOpenAccessOnly: false,
+  interests: [],
+  academicGoal: '',
+  avatarUrl: null,
+  uiLocale: DEFAULT_LOCALE,
+  hasCompletedOnboarding: false,
+  onboardingCompletedAt: null,
+});
+
 export default function App() {
   const { t } = useTranslation('common');
   const { isAuthenticated, user, logout, updateUser } = useAuth();
@@ -85,10 +117,7 @@ export default function App() {
   });
   const [previousScreen, setPreviousScreen] = useState(() => sessionStorage.getItem('@sira:previousScreen') || 'home');
   const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('@sira:searchQuery') || '');
-  const [results, setResults] = useState<any[]>(() => {
-    const saved = sessionStorage.getItem('@sira:results');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [results, setResults] = useState<CatalogItem[]>(() => readCatalogItemArray('@sira:results'));
   const [searchTotal, setSearchTotal] = useState(() => {
     const saved = sessionStorage.getItem('@sira:searchTotal');
     return saved ? parseInt(saved, 10) : 0;
@@ -102,24 +131,12 @@ export default function App() {
     const saved = sessionStorage.getItem('@sira:searchPage');
     return saved ? parseInt(saved, 10) : 0;
   });
-  const [selectedItem, setSelectedItem] = useState<any>(() => {
-    const saved = sessionStorage.getItem('@sira:selectedItem');
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [searchDetailItem, setSearchDetailItem] = useState<any>(() => {
-    const saved = sessionStorage.getItem('@sira:searchDetailItem');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(() => readCatalogItem('@sira:selectedItem'));
+  const [searchDetailItem, setSearchDetailItem] = useState<CatalogItem | null>(() => readCatalogItem('@sira:searchDetailItem'));
   const [searchDetailOrigin, setSearchDetailOrigin] = useState<SearchDetailOrigin>(readSearchDetailOrigin);
   const [lastSearchScreen, setLastSearchScreen] = useState<SearchSectionScreen>(readLastSearchScreen);
-  const [catalogDetailItem, setCatalogDetailItem] = useState<any>(() => {
-    const saved = sessionStorage.getItem('@sira:catalogDetailItem');
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [favoritesDetailItem, setFavoritesDetailItem] = useState<any>(() => {
-    const saved = sessionStorage.getItem('@sira:favoritesDetailItem');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [catalogDetailItem, setCatalogDetailItem] = useState<CatalogItem | null>(() => readCatalogItem('@sira:catalogDetailItem'));
+  const [favoritesDetailItem, setFavoritesDetailItem] = useState<CatalogItem | null>(() => readCatalogItem('@sira:favoritesDetailItem'));
   const [lastCatalogScreen, setLastCatalogScreen] = useState<CatalogSectionScreen>(readLastCatalogScreen);
   const [lastFavoritesScreen, setLastFavoritesScreen] = useState<FavoritesSectionScreen>(readLastFavoritesScreen);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>(() => {
@@ -134,13 +151,12 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
-  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [catalogHomeResetKey, setCatalogHomeResetKey] = useState(0);
   const [favoritesHomeResetKey, setFavoritesHomeResetKey] = useState(0);
   const searchRequestInFlightRef = useRef(false);
   const regenerateRequestInFlightRef = useRef(false);
-  const [resetToken, setResetToken] = useState<string>(() => {
+  const [resetToken] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     const urlScreen = params.get('screen');
     const urlToken = params.get('token');
@@ -218,7 +234,6 @@ export default function App() {
   }, []);
 
   // Integração com History API do browser (habilita o botão voltar do navegador)
-  const AUTH_SCREENS = ['login', 'register', 'onboarding', 'forgot-password', 'reset-password'];
   useEffect(() => {
     if (AUTH_SCREENS.includes(currentScreen)) return;
     if (!window.history.state?.screen) {
@@ -238,86 +253,20 @@ export default function App() {
   }, []);
 
   const [profileData, setProfileData] = useState<ProfileData>({
-    name: user?.name || '',
-    email: user?.email || '',
-    course: '',
-    educationLevel: 'Graduação',
-    mainArea: '',
-    subAreas: '',
-    languages: ['Português'],
-    materialLevels: ['Intermediário'],
-    wantsBooks: true,
-    wantsArticles: true,
-    wantsOpenAccessOnly: false,
-    interests: [],
-    academicGoal: '',
+    ...createEmptyProfileData(),
+    name: user?.name ?? '',
+    email: user?.email ?? '',
     avatarUrl: user?.avatarUrl ?? null,
     uiLocale: user?.uiLocale ?? DEFAULT_LOCALE,
     hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
-    onboardingCompletedAt: null,
   });
+  const authUserId = user?.id;
+  const authUserName = user?.name;
+  const authUserEmail = user?.email;
+  const authUserHasCompletedOnboarding = user?.hasCompletedOnboarding;
+  const authUserUiLocale = user?.uiLocale;
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Sincroniza dados básicos do auth imediatamente
-      setProfileData(prev => ({
-        ...prev,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-        hasCompletedOnboarding: user.hasCompletedOnboarding ?? prev.hasCompletedOnboarding,
-        uiLocale: user.uiLocale ?? prev.uiLocale,
-      }));
-
-      loadSessionData();
-    } else if (!isAuthenticated) {
-      setFavoriteIds(new Set());
-      setProfileData({
-        name: '', email: '', course: '', educationLevel: 'Graduação',
-        mainArea: '', subAreas: '', languages: ['Português'],
-        materialLevels: ['Intermediário'], wantsBooks: true, wantsArticles: true, wantsOpenAccessOnly: false,
-        interests: [], academicGoal: '', avatarUrl: null, uiLocale: DEFAULT_LOCALE,
-        hasCompletedOnboarding: false, onboardingCompletedAt: null,
-      });
-      setIsProfileLoading(false);
-      setIsProfileLoaded(false);
-      setProfileError(null);
-      // Estado de busca pertence à sessão do usuário — limpa ao deslogar
-      setSearchQuery('');
-      setResults([]);
-      setAiMessage('');
-      setSeenResultIds([]);
-      setSearchTotal(0);
-      setSearchPage(0);
-      setSelectedItem(null);
-      setLastSearchScreen('home');
-      setPreviousScreen('home');
-      setSearchFilters({ types: [], area: null, openAccessOnly: false, yearFrom: null });
-    }
-  }, [isAuthenticated, user?.id, user?.hasCompletedOnboarding]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      const publicScreens = ['register', 'forgot-password', 'reset-password'];
-      if (!publicScreens.includes(currentScreen)) setCurrentScreen('login');
-      return;
-    }
-
-    if (isProfileLoading) return;
-    // profileData ainda não sincronizou com o usuário recém-logado
-    if (user && !profileData.email) return;
-
-    // Lógica de redirecionamento baseada em fatos (profileData finalizado)
-    const authScreens = ['login', 'register', 'onboarding'];
-    if (authScreens.includes(currentScreen)) {
-      if (profileData.hasCompletedOnboarding) {
-        setCurrentScreen('home');
-      } else if (currentScreen !== 'onboarding') {
-        setCurrentScreen('onboarding');
-      }
-    }
-  }, [isAuthenticated, isProfileLoading, profileData.hasCompletedOnboarding, profileData.email, currentScreen, user]);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const data = await getProfile();
       setProfileData(prev => ({
@@ -340,7 +289,6 @@ export default function App() {
         hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,
         onboardingCompletedAt: data.onboardingCompletedAt || null,
       }));
-      setIsProfileLoaded(true);
       setProfileError(null);
       if (data.avatarUrl !== undefined || data.uiLocale !== undefined) {
         updateUser({
@@ -351,30 +299,108 @@ export default function App() {
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
       const message = error instanceof Error ? error.message : 'Erro ao carregar perfil';
-      setIsProfileLoaded(false);
       setProfileError(message);
     }
-  };
+  }, [updateUser]);
 
-  const loadFavoriteIds = async () => {
+  const loadFavoriteIds = useCallback(async () => {
     try {
       const data = await fetchFavoriteIds();
       setFavoriteIds(new Set(data));
     } catch (error) {
       console.error('Erro ao carregar favoritos:', error);
     }
-  };
+  }, []);
 
-  const loadSessionData = () => {
+  const loadSessionData = useCallback(() => {
     setIsProfileLoading(true);
     setProfileError(null);
     Promise.all([loadFavoriteIds(), loadProfile()])
       .finally(() => {
         setIsProfileLoading(false);
       });
-  };
+  }, [loadFavoriteIds, loadProfile]);
 
-  const handleSearch = async (e: any) => {
+  useEffect(() => {
+    let isActive = true;
+
+    queueMicrotask(() => {
+      if (!isActive) return;
+
+      if (isAuthenticated && authUserId) {
+        // Sincroniza dados básicos do auth imediatamente
+        setProfileData(prev => ({
+          ...prev,
+          name: authUserName || prev.name,
+          email: authUserEmail || prev.email,
+          hasCompletedOnboarding: authUserHasCompletedOnboarding ?? prev.hasCompletedOnboarding,
+          uiLocale: authUserUiLocale ?? prev.uiLocale,
+        }));
+
+        loadSessionData();
+      } else if (!isAuthenticated) {
+        setFavoriteIds(new Set());
+        setProfileData(createEmptyProfileData());
+        setIsProfileLoading(false);
+        setProfileError(null);
+        // Estado de busca pertence à sessão do usuário — limpa ao deslogar
+        setSearchQuery('');
+        setResults([]);
+        setAiMessage('');
+        setSeenResultIds([]);
+        setSearchTotal(0);
+        setSearchPage(0);
+        setSelectedItem(null);
+        setLastSearchScreen('home');
+        setPreviousScreen('home');
+        setSearchFilters({ types: [], area: null, openAccessOnly: false, yearFrom: null });
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [
+    isAuthenticated,
+    authUserEmail,
+    authUserHasCompletedOnboarding,
+    authUserId,
+    authUserName,
+    authUserUiLocale,
+    loadSessionData,
+  ]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    queueMicrotask(() => {
+      if (!isActive) return;
+
+      if (!isAuthenticated) {
+        if (!PUBLIC_SCREENS.includes(currentScreen)) setCurrentScreen('login');
+        return;
+      }
+
+      if (isProfileLoading) return;
+      // profileData ainda não sincronizou com o usuário recém-logado
+      if (authUserId && !profileData.email) return;
+
+      // Lógica de redirecionamento baseada em fatos (profileData finalizado)
+      if (AUTH_SCREENS.includes(currentScreen)) {
+        if (profileData.hasCompletedOnboarding) {
+          setCurrentScreen('home');
+        } else if (currentScreen !== 'onboarding') {
+          setCurrentScreen('onboarding');
+        }
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [authUserId, currentScreen, isAuthenticated, isProfileLoading, profileData.email, profileData.hasCompletedOnboarding]);
+
+  const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim() || isLoading || isRegenerating || searchRequestInFlightRef.current || regenerateRequestInFlightRef.current) return;
     searchRequestInFlightRef.current = true;
@@ -427,21 +453,7 @@ export default function App() {
     }
   };
 
-  const handleSearchPage = async (page: number) => {
-    setIsLoading(true);
-    setSearchPage(page);
-    try {
-      const { items, total } = await searchAcademicContent(searchQuery, page, searchFilters);
-      setResults(items);
-      setSearchTotal(total);
-    } catch {
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const viewDetails = (item: any) => {
+  const viewDetails = (item: CatalogItem) => {
     saveScreenScroll(currentScreen);
     setPreviousScreen(currentScreen);
     setSelectedItem(item);
@@ -459,7 +471,7 @@ export default function App() {
     setCurrentScreen('details');
   };
 
-  const toggleFavorite = async (item: any) => {
+  const toggleFavorite = async (item: CatalogItem) => {
     const isFav = favoriteIds.has(item.id);
 
     // Optimistic update — feedback imediato antes da resposta da API
@@ -479,9 +491,9 @@ export default function App() {
         toast.success(t('toast.favoriteAdded'));
       }
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao alternar favorito:', error);
-      toast.error(t('errors.favoriteAlert', { message: error?.message || t('errors.unknownFavorite') }));
+      toast.error(t('errors.favoriteAlert', { message: error instanceof Error ? error.message : t('errors.unknownFavorite') }));
       // Rollback em caso de falha
       setFavoriteIds(prev => {
         const next = new Set(prev);
@@ -493,7 +505,7 @@ export default function App() {
     }
   };
 
-  const isFavorite = (id: any) => favoriteIds.has(id);
+  const isFavorite = (id: string) => favoriteIds.has(id);
 
   const restoreSearchSection = () => {
     if (lastSearchScreen !== 'details') {

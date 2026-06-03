@@ -12,7 +12,9 @@ export const useScreenScrollRestoration = (
 
     try {
       sessionStorage.setItem(key, String(ref.current.scrollTop));
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
   }, [activeScreen, ref, storageKeys]);
 
   useEffect(() => {
@@ -29,7 +31,9 @@ export const useScreenScrollRestoration = (
     let savedY: string | null = null;
     try {
       savedY = sessionStorage.getItem(key);
-    } catch {}
+    } catch {
+      // sessionStorage can be unavailable in private browsing modes.
+    }
     if (!savedY || !ref.current) return;
 
     const nextScrollTop = parseInt(savedY, 10);

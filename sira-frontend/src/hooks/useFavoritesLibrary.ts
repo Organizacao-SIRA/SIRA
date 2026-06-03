@@ -101,7 +101,9 @@ export const useFavoritesLibrary = () => {
   const [error, setError] = useState<string | null>(null);
   const itemsRef = useRef(items);
 
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   useEffect(() => {
     setStoredState({ activeTab });
@@ -157,9 +159,9 @@ export const useFavoritesLibrary = () => {
       setTotal(data.total);
       setTotalPages(data.totalPages);
       storeSnapshot(tab, nextItems, data.counts, data.page, data.total, data.totalPages);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (signal?.aborted) return;
-      setError(err?.message || 'Erro ao carregar favoritos');
+      setError(err instanceof Error ? err.message : 'Erro ao carregar favoritos');
     } finally {
       if (!signal?.aborted) {
         setIsInitialLoading(false);
@@ -170,8 +172,16 @@ export const useFavoritesLibrary = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    void loadFavoritesPage(activeTab, 0, false, controller.signal);
-    return () => controller.abort();
+    let isActive = true;
+
+    queueMicrotask(() => {
+      if (isActive) void loadFavoritesPage(activeTab, 0, false, controller.signal);
+    });
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
   }, [activeTab, loadFavoritesPage]);
 
   const setActiveTab = (tab: FavoriteTabId) => {

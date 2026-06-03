@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { updateProfile, getPreferenceOptions } from '../services/api';
 import { toast } from '../toast';
 import type { Dispatch, SetStateAction } from 'react';
-import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData } from '../types';
+import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
 import { Button } from '../components/ui/Button';
@@ -106,13 +106,13 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   const { t } = useTranslation('profile');
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState(profileData || {});
+  const [editData, setEditData] = useState<ProfileData>(profileData);
   const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   useEffect(() => {
-    if (profileData) setEditData(profileData);
+    queueMicrotask(() => setEditData(profileData));
   }, [profileData]);
 
   useEffect(() => {
@@ -147,9 +147,14 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
     );
   }
 
-  const handleChange = (field: string, value: any) => {
-    setEditData((prev: any) => ({ ...prev, [field]: value }));
+  const handleChange = <Field extends keyof ProfileData>(field: Field, value: ProfileData[Field]) => {
+    setEditData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleTextChange = (
+    field: 'name' | 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'academicGoal',
+    value: string,
+  ) => handleChange(field, value);
 
   const handleArrayChange = (field: 'languages' | 'materialLevels', value: string, checked: boolean) => {
     const current: string[] = editData[field] || [];
@@ -167,7 +172,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const payload = {
+      const payload: UpdateProfilePayload = {
         name: editData.name || undefined,
         course: editData.course || undefined,
         educationLevel: editData.educationLevel || undefined,
@@ -230,7 +235,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
 
   const handleLocaleChange = (uiLocale: UiLocale) => {
     setProfileData(prev => ({ ...prev, uiLocale }));
-    setEditData((prev: any) => ({ ...prev, uiLocale }));
+    setEditData((prev) => ({ ...prev, uiLocale }));
     setUiLocale(uiLocale);
   };
 
@@ -293,7 +298,7 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
               mainArea: editData.mainArea || '',
               academicGoal: editData.academicGoal || '',
             }}
-            onChange={handleChange}
+            onChange={handleTextChange}
             topicsList={topicsList}
             educationLevelsList={educationLevelsList}
             academicGoalsList={academicGoalsList}

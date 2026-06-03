@@ -1,4 +1,17 @@
-import type { PreferenceOptions, UserProfile, CompleteOnboardingPayload, CatalogItem, SearchFilters } from '../types';
+import type {
+  AuthResponse,
+  CatalogItem,
+  ChatSearchResponse,
+  CompleteOnboardingPayload,
+  LoginPayload,
+  PreferenceOptions,
+  RecommendationsResponse,
+  RegisterPayload,
+  SearchFilters,
+  SearchResultsResponse,
+  UpdateProfilePayload,
+  UserProfile,
+} from '../types';
 import { i18n } from '../i18n';
 import { getStoredUiLocale } from '../i18n/locales';
 
@@ -36,6 +49,19 @@ const withLocaleHeader = (headers?: HeadersInit): Headers => {
 
 const apiMessage = (key: string) => i18n.t(`errors.${key}`, { ns: 'common' });
 
+type ApiErrorPayload = {
+  code?: unknown;
+  message?: unknown;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const readErrorPayload = async (response: Response): Promise<ApiErrorPayload> => {
+  const body: unknown = await response.json().catch(() => ({}));
+  return isRecord(body) ? body : {};
+};
+
 /**
  * Resolve a mensagem de erro a partir do payload do backend.
  *
@@ -44,13 +70,14 @@ const apiMessage = (key: string) => i18n.t(`errors.${key}`, { ns: 'common' });
  *   2. `error.message` (fallback humano vindo do backend);
  *   3. fallback genérico passado pelo caller.
  */
-const resolveApiError = (error: any, fallbackKey: string): string => {
-  const code = error?.code;
+const resolveApiError = (error: unknown, fallbackKey: string): string => {
+  const payload = isRecord(error) ? error : {};
+  const code = payload.code;
   if (typeof code === 'string') {
     const translated = i18n.t(`errorCodes.${code}`, { ns: 'common', defaultValue: '' });
     if (translated) return translated;
   }
-  const message = error?.message;
+  const message = payload.message;
   if (Array.isArray(message)) return message.join('. ');
   if (typeof message === 'string' && message) return message;
   return apiMessage(fallbackKey);
@@ -86,7 +113,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Re
       });
 
       if (refreshed.ok) {
-        const data = await refreshed.json();
+        const data: Partial<AuthResponse> = await refreshed.json();
         if (data.accessToken) saveTokens(data.accessToken, data.refreshToken);
         isRefreshing = false;
         return fetch(url, {
@@ -108,7 +135,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Re
 
 // --- Auth ---
 
-export const loginUser = async (data: any) => {
+export const loginUser = async (data: LoginPayload): Promise<AuthResponse> => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: withLocaleHeader({ 'Content-Type': 'application/json' }),
@@ -116,15 +143,15 @@ export const loginUser = async (data: any) => {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const error = await readErrorPayload(response);
     throw new Error(resolveApiError(error, 'login'));
   }
-  const result = await response.json();
+  const result: AuthResponse = await response.json();
   if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
   return result;
 };
 
-export const registerUser = async (data: any) => {
+export const registerUser = async (data: RegisterPayload): Promise<AuthResponse> => {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: withLocaleHeader({ 'Content-Type': 'application/json' }),
@@ -132,10 +159,10 @@ export const registerUser = async (data: any) => {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const error = await readErrorPayload(response);
     throw new Error(resolveApiError(error, 'register'));
   }
-  const result = await response.json();
+  const result: AuthResponse = await response.json();
   if (result.accessToken) saveTokens(result.accessToken, result.refreshToken);
   return result;
 };
@@ -149,7 +176,7 @@ export const forgotPassword = async (email: string) => {
     body: JSON.stringify({ email }),
   });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const error = await readErrorPayload(response);
     throw new Error(resolveApiError(error, 'forgotPassword'));
   }
   return response.json();
@@ -162,7 +189,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
     body: JSON.stringify({ token, newPassword, confirmNewPassword: newPassword }),
   });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const error = await readErrorPayload(response);
     throw new Error(resolveApiError(error, 'resetPassword'));
   }
   return response.json();
@@ -189,7 +216,7 @@ function buildFilterParams(filters?: SearchFilters): string {
   return str ? `&${str}` : '';
 }
 
-export const searchAcademicContent = async (query: string, page = 0, filters?: SearchFilters): Promise<{ items: any[]; total: number }> => {
+export const searchAcademicContent = async (query: string, page = 0, filters?: SearchFilters): Promise<SearchResultsResponse> => {
   if (!query || query.length < 2) return { items: [], total: 0 };
   try {
     const response = await fetchWithAuth(
@@ -223,7 +250,7 @@ export const chatSearchMaterials = async (
   prompt: string,
   filters?: SearchFilters,
   options?: ChatSearchOptions,
-): Promise<{ aiMessage: string; results: any[] }> => {
+): Promise<ChatSearchResponse> => {
   if (!prompt || prompt.trim().length < 2) return { aiMessage: '', results: [] };
   try {
     const response = await fetchWithAuth(
@@ -264,8 +291,8 @@ export const searchCatalogItems = async (
     { signal },
   );
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.message || `${apiMessage('searchMaterials')} (${response.status})`);
+    const body = await readErrorPayload(response);
+    throw new Error(resolveApiError(body, 'searchMaterials') || `${apiMessage('searchMaterials')} (${response.status})`);
   }
   return response.json();
 };
@@ -312,7 +339,7 @@ export const fetchFavorites = async ({
   return response.json();
 };
 
-export const addFavorite = async (material: any) => {
+export const addFavorite = async (material: CatalogItem): Promise<unknown> => {
   const response = await fetchWithAuth(`${API_BASE_URL}/favorites`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -332,7 +359,7 @@ export const addFavorite = async (material: any) => {
     }),
   });
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
+    const body = await readErrorPayload(response);
     throw new Error(`[${response.status}] ${resolveApiError(body, 'favoriteAdd')}`);
   }
   return response.json();
@@ -344,7 +371,7 @@ export const removeFavoriteApi = async (materialId: string) => {
     { method: 'DELETE' },
   );
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
+    const body = await readErrorPayload(response);
     throw new Error(`[${response.status}] ${resolveApiError(body, 'favoriteRemove')}`);
   }
   return response.json();
@@ -358,14 +385,14 @@ export const getProfile = async (): Promise<UserProfile> => {
   return response.json();
 };
 
-export const updateProfile = async (data: Record<string, any>) => {
+export const updateProfile = async (data: UpdateProfilePayload): Promise<UserProfile> => {
   const response = await fetchWithAuth(`${API_BASE_URL}/users/profile`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
+    const body = await readErrorPayload(response);
     throw new Error(resolveApiError(body, 'profileSave'));
   }
   return response.json();
@@ -383,20 +410,20 @@ export const uploadAvatar = async (file: File): Promise<UserProfile> => {
     method: 'POST',
     body: formData,
   });
-  const body = await response.json().catch(() => ({}));
+  const body: unknown = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(resolveApiError(body, 'avatarUpload'));
   }
-  return body;
+  return body as UserProfile;
 };
 
 export const removeAvatar = async (): Promise<UserProfile> => {
   const response = await fetchWithAuth(`${API_BASE_URL}/users/profile/avatar`, {
     method: 'DELETE',
   });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.message || apiMessage('avatarRemove'));
-  return body;
+  const body: unknown = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(resolveApiError(body, 'avatarRemove'));
+  return body as UserProfile;
 };
 
 // --- Preference Options & Onboarding ---
@@ -427,20 +454,13 @@ export const completeOnboarding = async (
 
 // --- AI Recommendations ---
 
-type RecommendationsResponse = {
-  recommendations: Array<any & { aiExplanation: string | null }>;
-  basedOn: { favorites: number; searches: number; preferences: boolean };
-  generatedAt: string;
-  coldStart?: boolean;
-};
-
 export const getAiRecommendations = async (): Promise<RecommendationsResponse> => {
   const response = await fetchWithAuth(`${API_BASE_URL}/recommendations`, {
     headers: { 'Content-Type': 'application/json' },
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || apiMessage('recommendationsLoad'));
-  return data;
+  const data: unknown = await response.json();
+  if (!response.ok) throw new Error(resolveApiError(data, 'recommendationsLoad'));
+  return data as RecommendationsResponse;
 };
 
 export const refreshAiRecommendations = async (): Promise<RecommendationsResponse> => {
@@ -448,9 +468,9 @@ export const refreshAiRecommendations = async (): Promise<RecommendationsRespons
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || apiMessage('recommendationsRefresh'));
-  return data;
+  const data: unknown = await response.json();
+  if (!response.ok) throw new Error(resolveApiError(data, 'recommendationsRefresh'));
+  return data as RecommendationsResponse;
 };
 
 export const trackRecommendationEvent = (materialId: string, eventType: 'impression' | 'click' | 'favorite'): void => {

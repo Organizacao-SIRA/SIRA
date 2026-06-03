@@ -3,7 +3,7 @@ import { Brain, LogIn, AlertCircle, RefreshCw, Clock, BookOpen, ChevronDown, Che
 import { useTranslation } from 'react-i18next';
 import { toast } from '../toast';
 import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
-import type { AuthUser } from '../types';
+import type { AuthUser, CatalogItem } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { Button } from '../components/ui/Button';
@@ -13,8 +13,8 @@ import { useIsMobile } from '../hooks/useIsMobile';
 
 interface AiRecommendationsProps {
   user: AuthUser | null;
-  viewDetails: (item: any) => void;
-  toggleFavorite: (item: any) => void;
+  viewDetails: (item: CatalogItem) => void;
+  toggleFavorite: (item: CatalogItem) => void;
   isFavorite: (id: string) => boolean;
   setCurrentScreen: (screen: string) => void;
   isChatMode?: boolean;
@@ -24,7 +24,7 @@ export const AiRecommendations = ({
   user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen, isChatMode
 }: AiRecommendationsProps) => {
   const { t } = useTranslation('common');
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<CatalogItem[]>([]);
   const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number; preferences: boolean } | null>(null);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +36,7 @@ export const AiRecommendations = ({
 
   const { mode: viewMode, setMode: setViewMode } = useViewMode('ai-recommendations', 'horizontal');
   const isMobile = useIsMobile();
+  const userId = user?.id;
 
   const effectiveVariant: 'horizontal' | 'vertical' = isChatMode
     ? 'horizontal'
@@ -53,15 +54,15 @@ export const AiRecommendations = ({
       setRecommendations(data.recommendations);
       setBasedOn(data.basedOn);
       setGeneratedAt(data.generatedAt);
-    } catch (err: any) {
-      setError(err.message || t('errors.recommendationsLoad'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('errors.recommendationsLoad'));
     } finally {
       setIsLoading(false);
     }
   }, [t]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     let isActive = true;
     queueMicrotask(() => {
@@ -71,7 +72,7 @@ export const AiRecommendations = ({
     return () => {
       isActive = false;
     };
-  }, [user, loadRecommendations]);
+  }, [userId, loadRecommendations]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -183,7 +184,7 @@ export const AiRecommendations = ({
           </div>
         ) : (
           <>
-            {(chatExpanded ? recommendations : recommendations.slice(0, CHAT_PREVIEW_COUNT)).map((item: any) => (
+            {(chatExpanded ? recommendations : recommendations.slice(0, CHAT_PREVIEW_COUNT)).map((item) => (
               <RecommendationCard
                 key={item.id}
                 item={item}
@@ -251,7 +252,7 @@ export const AiRecommendations = ({
             : 'space-y-4'
         }
       >
-        {recommendations.map((item: any) => (
+        {recommendations.map((item) => (
           <RecommendationCard
             key={item.id}
             item={item}
