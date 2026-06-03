@@ -9,97 +9,34 @@ import {
   removeFavoriteApi, 
   getProfile 
 } from './services/api';
-import { Home } from './pages/Home';
-import { Recommendations } from './pages/Recommendations';
-import { Favorites } from './pages/Favorites';
-import { Profile } from './pages/Profile';
-import { Catalog } from './pages/Catalog';
-import { Details } from './pages/Details';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Spinner } from './components/ui/Spinner';
 import { ErrorState } from './components/ui/ErrorState';
 import { PageErrorBoundary } from './components/ui/PageErrorBoundary';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Onboarding } from './pages/Onboarding';
-import { ForgotPassword } from './pages/ForgotPassword';
-import { ResetPassword } from './pages/ResetPassword';
 import { useAuth } from './contexts/AuthContext';
 import { useScreenScrollRestoration } from './hooks/useScreenScrollRestoration';
 import { DEFAULT_LOCALE } from './i18n/locales';
 import { toast } from './toast';
-
-const SCREEN_SCROLL_KEYS: Record<string, string> = {
-  results: '@sira:resultsScrollY',
-  catalog: '@sira:catalogScrollY',
-  favorites: '@sira:favoritesScrollY',
-};
-const RESET_SCROLL_SCREENS = ['details'];
-const AUTH_SCREENS = ['login', 'register', 'onboarding', 'forgot-password', 'reset-password'];
-const PUBLIC_SCREENS = ['register', 'forgot-password', 'reset-password'];
-const SCREENS_WITHOUT_SIDEBAR = new Set(['login', 'register', 'onboarding', 'forgot-password', 'reset-password']);
-type SearchSectionScreen = 'home' | 'results' | 'details';
-type SearchDetailOrigin = 'home' | 'results';
-type CatalogSectionScreen = 'catalog' | 'details';
-type FavoritesSectionScreen = 'favorites' | 'details';
-
-const isSearchSectionScreen = (screen: string): screen is SearchSectionScreen =>
-  screen === 'home' || screen === 'results' || screen === 'details';
-const isSearchDetailOrigin = (screen: string): screen is SearchDetailOrigin =>
-  screen === 'home' || screen === 'results';
-const isCatalogSectionScreen = (screen: string): screen is CatalogSectionScreen =>
-  screen === 'catalog' || screen === 'details';
-const isFavoritesSectionScreen = (screen: string): screen is FavoritesSectionScreen =>
-  screen === 'favorites' || screen === 'details';
-
-const readLastSearchScreen = (): SearchSectionScreen => {
-  const stored = sessionStorage.getItem('@sira:lastSearchScreen');
-  return isSearchSectionScreen(stored ?? '') ? stored as SearchSectionScreen : 'home';
-};
-
-const readSearchDetailOrigin = (): SearchDetailOrigin => {
-  const stored = sessionStorage.getItem('@sira:searchDetailOrigin');
-  return isSearchDetailOrigin(stored ?? '') ? stored as SearchDetailOrigin : 'results';
-};
-const readLastCatalogScreen = (): CatalogSectionScreen => {
-  const stored = sessionStorage.getItem('@sira:lastCatalogScreen');
-  return isCatalogSectionScreen(stored ?? '') ? stored as CatalogSectionScreen : 'catalog';
-};
-const readLastFavoritesScreen = (): FavoritesSectionScreen => {
-  const stored = sessionStorage.getItem('@sira:lastFavoritesScreen');
-  return isFavoritesSectionScreen(stored ?? '') ? stored as FavoritesSectionScreen : 'favorites';
-};
-
-const readCatalogItemArray = (key: string): CatalogItem[] => {
-  const saved = sessionStorage.getItem(key);
-  return saved ? JSON.parse(saved) as CatalogItem[] : [];
-};
-
-const readCatalogItem = (key: string): CatalogItem | null => {
-  const saved = sessionStorage.getItem(key);
-  return saved ? JSON.parse(saved) as CatalogItem : null;
-};
-
-const createEmptyProfileData = (): ProfileData => ({
-  name: '',
-  email: '',
-  course: '',
-  educationLevel: 'Graduação',
-  mainArea: '',
-  subAreas: '',
-  languages: ['Português'],
-  materialLevels: ['Intermediário'],
-  wantsBooks: true,
-  wantsArticles: true,
-  wantsOpenAccessOnly: false,
-  interests: [],
-  academicGoal: '',
-  avatarUrl: null,
-  uiLocale: DEFAULT_LOCALE,
-  hasCompletedOnboarding: false,
-  onboardingCompletedAt: null,
-});
+import { AppScreen } from './app/AppScreen';
+import {
+  AUTH_SCREENS,
+  PUBLIC_SCREENS,
+  RESET_SCROLL_SCREENS,
+  SCREENS_WITHOUT_SIDEBAR,
+  SCREEN_SCROLL_KEYS,
+  createEmptyProfileData,
+  readCatalogItem,
+  readCatalogItemArray,
+  readLastCatalogScreen,
+  readLastFavoritesScreen,
+  readLastSearchScreen,
+  readSearchDetailOrigin,
+  type CatalogSectionScreen,
+  type FavoritesSectionScreen,
+  type SearchDetailOrigin,
+  type SearchSectionScreen,
+} from './app/appState';
 
 export default function App() {
   const { t } = useTranslation('common');
@@ -711,7 +648,7 @@ export default function App() {
           {isLoading && currentScreen !== 'results' && (
             <div className="absolute inset-0 bg-surface/80 z-50 flex flex-col items-center justify-center">
               <Spinner size="lg" />
-              <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">Buscando...</p>
+              <p className="mt-4 text-primary-dark dark:text-text font-bold text-xs uppercase tracking-widest">{t('states.searching')}</p>
             </div>
           )}
 
@@ -727,62 +664,36 @@ export default function App() {
               </div>
             }
           >
-            {currentScreen === 'home' && (
-              <Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} filters={searchFilters} setFilters={setSearchFilters} user={user} />
-            )}
-            {currentScreen === 'results' && (
-              <Recommendations
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                handleSearch={handleSearch}
-                setCurrentScreen={setCurrentScreen}
-                results={results}
-                aiMessage={aiMessage}
-                viewDetails={viewDetails}
-                toggleFavorite={toggleFavorite}
-                isFavorite={isFavorite}
-                isLoading={isLoading}
-                isRegenerating={isRegenerating}
-                onRegenerate={regenerateSearchResults}
-                isSidebarOpen={isSidebarOpen}
-                user={user}
-              />
-            )}
-            {currentScreen === 'details' && (
-              <Details item={selectedItem} onBack={handleDetailsBack} previousScreen={previousScreen} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
-            )}
-            {currentScreen === 'catalog' && (
-              <Catalog
-                viewDetails={viewDetails}
-                toggleFavorite={toggleFavorite}
-                isFavorite={isFavorite}
-                homeResetKey={catalogHomeResetKey}
-              />
-            )}
-            {currentScreen === 'favorites' && (
-              <Favorites
-                toggleFavorite={toggleFavorite}
-                viewDetails={viewDetails}
-                setCurrentScreen={setCurrentScreen}
-                homeResetKey={favoritesHomeResetKey}
-              />
-            )}
-            {currentScreen === 'profile' && (
-              <Profile
-                profileData={profileData}
-                setProfileData={setProfileData}
-                isLoading={isProfileLoading}
-                loadError={profileError}
-                onRetryLoad={loadSessionData}
-              />
-            )}
-            {currentScreen === 'login' && <Login setCurrentScreen={setCurrentScreen} />}
-            {currentScreen === 'register' && <Register setCurrentScreen={setCurrentScreen} />}
-            {currentScreen === 'forgot-password' && <ForgotPassword setCurrentScreen={setCurrentScreen} />}
-            {currentScreen === 'reset-password' && <ResetPassword token={resetToken} setCurrentScreen={setCurrentScreen} />}
-            {currentScreen === 'onboarding' && (
-              <Onboarding setCurrentScreen={setCurrentScreen} profileData={profileData} setProfileData={setProfileData} />
-            )}
+            <AppScreen
+              currentScreen={currentScreen}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              handleSearch={handleSearch}
+              searchFilters={searchFilters}
+              setSearchFilters={setSearchFilters}
+              user={user}
+              results={results}
+              aiMessage={aiMessage}
+              viewDetails={viewDetails}
+              toggleFavorite={toggleFavorite}
+              isFavorite={isFavorite}
+              isLoading={isLoading}
+              isRegenerating={isRegenerating}
+              regenerateSearchResults={regenerateSearchResults}
+              isSidebarOpen={isSidebarOpen}
+              selectedItem={selectedItem}
+              handleDetailsBack={handleDetailsBack}
+              previousScreen={previousScreen}
+              catalogHomeResetKey={catalogHomeResetKey}
+              favoritesHomeResetKey={favoritesHomeResetKey}
+              setCurrentScreen={setCurrentScreen}
+              profileData={profileData}
+              setProfileData={setProfileData}
+              isProfileLoading={isProfileLoading}
+              profileError={profileError}
+              loadSessionData={loadSessionData}
+              resetToken={resetToken}
+            />
           </PageErrorBoundary>
         </main>
       </div>

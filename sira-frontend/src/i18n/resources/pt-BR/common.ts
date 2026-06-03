@@ -30,6 +30,7 @@ export const common = {
     loading: 'Carregando',
     loadingEllipsis: 'Carregando...',
     loadingProfile: 'Carregando perfil...',
+    searching: 'Buscando...',
     skipToContent: 'Pular para o conteúdo principal',
   },
   materialTypes: {
