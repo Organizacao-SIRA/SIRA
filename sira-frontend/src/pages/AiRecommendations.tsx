@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Brain, LogIn, RefreshCw, Clock, BookOpen, ChevronDown, ChevronUp, Sparkles, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../toast';
-import { getAiRecommendations, refreshAiRecommendations } from '../services/api';
+import { useRecommendations, useRefreshRecommendations } from '../queries/useRecommendations';
 import type { AuthUser, CatalogItem } from '../types';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
 import { RecommendationCard } from '../components/RecommendationCard';
@@ -25,13 +25,6 @@ export const AiRecommendations = ({
   user, viewDetails, toggleFavorite, isFavorite, setCurrentScreen, isChatMode
 }: AiRecommendationsProps) => {
   const { t, i18n } = useTranslation(['recommendations', 'common']);
-  const [recommendations, setRecommendations] = useState<CatalogItem[]>([]);
-  const [basedOn, setBasedOn] = useState<{ favorites: number; searches: number; preferences: boolean } | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState('');
-  const [coldStart, setColdStart] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(false);
   const CHAT_PREVIEW_COUNT = 2;
 
@@ -39,57 +32,27 @@ export const AiRecommendations = ({
   const isMobile = useIsMobile();
   const userId = user?.id;
 
+  const { data, isLoading, error, refetch } = useRecommendations(!!userId);
+  const refresh = useRefreshRecommendations();
+  const isRefreshing = refresh.isPending;
+
+  const recommendations: CatalogItem[] = data?.recommendations ?? [];
+  const basedOn = data?.basedOn ?? null;
+  const generatedAt = data?.generatedAt ?? null;
+  const coldStart = data?.coldStart ?? false;
+
   const effectiveVariant: 'horizontal' | 'vertical' = isChatMode
     ? 'horizontal'
     : isMobile
       ? 'vertical'
       : viewMode;
 
-  const loadRecommendations = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-    setColdStart(false);
-    try {
-      const data = await getAiRecommendations();
-      if (data.coldStart) { setColdStart(true); return; }
-      setRecommendations(data.recommendations);
-      setBasedOn(data.basedOn);
-      setGeneratedAt(data.generatedAt);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('common:errors.recommendationsLoad'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    let isActive = true;
-    queueMicrotask(() => {
-      if (isActive) void loadRecommendations();
-    });
-
-    return () => {
-      isActive = false;
-    };
-  }, [userId, loadRecommendations]);
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    setColdStart(false);
-    try {
-      const data = await refreshAiRecommendations();
-      if (data.coldStart) { setColdStart(true); setIsRefreshing(false); return; }
-      setRecommendations(data.recommendations);
-      setBasedOn(data.basedOn);
-      setGeneratedAt(data.generatedAt);
-    } catch (err: unknown) {
+  const handleRefresh = () => {
+    refresh.mutate(undefined, {
       // Refresh falhou: mantém a lista atual visível e notifica via toast.
-      toast.error(err instanceof Error ? err.message : t('common:errors.recommendationsRefresh'));
-    } finally {
-      setIsRefreshing(false);
-    }
+      onError: (err) =>
+        toast.error(err instanceof Error ? err.message : t('common:errors.recommendationsRefresh')),
+    });
   };
 
   const formatDate = (iso: string) => {
@@ -166,8 +129,8 @@ export const AiRecommendations = ({
   if (error) {
     return (
       <ErrorState
-        message={error}
-        onRetry={loadRecommendations}
+        message={error.message || t('common:errors.recommendationsLoad')}
+        onRetry={() => refetch()}
         className="rounded-2xl"
       />
     );

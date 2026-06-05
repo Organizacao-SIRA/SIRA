@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { updateProfile, getPreferenceOptions } from '../services/api';
+import { updateProfile } from '../services/api';
 import { toast } from '../toast';
-import type { Dispatch, SetStateAction } from 'react';
-import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
+import type { PreferenceTopic, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfileContext } from '../contexts/ProfileContext';
 import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
+import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { Button } from '../components/ui/Button';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -20,25 +21,18 @@ import { EditActionBar } from '../components/profile/EditActionBar';
 import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
 import { LanguageToggle } from '../components/ui/LanguageToggle';
 import type { UiLocale } from '../i18n/locales';
-
-interface ProfileProps {
-  profileData: ProfileData;
-  setProfileData: Dispatch<SetStateAction<ProfileData>>;
-  isLoading?: boolean;
-  loadError?: string | null;
-  onRetryLoad?: () => void;
-}
+import { EDUCATION_LEVELS, LANGUAGES, MATERIAL_LEVELS } from '../i18n/preferenceValues';
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
-  { id: 'dir', label: 'Direito' },
-  { id: 'ia',  label: 'Tecnologia' },
-  { id: 'sau', label: 'Saúde' },
-  { id: 'eco', label: 'Economia' },
-  { id: 'amb', label: 'Meio Ambiente' },
-  { id: 'gp',  label: 'Gestão Pública' },
-  { id: 'cd',  label: 'Ciência de Dados' },
-  { id: 'edu', label: 'Educação' },
-  { id: 'soc', label: 'Sociologia' },
+  { id: 'dir', label: 'dir' },
+  { id: 'ia',  label: 'ia' },
+  { id: 'sau', label: 'sau' },
+  { id: 'eco', label: 'eco' },
+  { id: 'amb', label: 'amb' },
+  { id: 'gp',  label: 'gp' },
+  { id: 'cd',  label: 'cd' },
+  { id: 'edu', label: 'edu' },
+  { id: 'soc', label: 'soc' },
 ];
 
 const ProfileSkeleton = () => {
@@ -102,24 +96,27 @@ const ProfileSkeleton = () => {
   );
 };
 
-export const Profile = ({ profileData, setProfileData, isLoading, loadError, onRetryLoad }: ProfileProps) => {
+export const Profile = () => {
   const { t } = useTranslation('profile');
   const { updateUser } = useAuth();
+  const {
+    profileData,
+    setProfileData,
+    isProfileLoading: isLoading,
+    profileError: loadError,
+    loadSessionData: onRetryLoad,
+  } = useProfileContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<ProfileData>(profileData);
-  const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
+  // Só busca as opções quando o usuário entra em modo de edição.
+  const { data: preferenceOptions } = usePreferenceOptions({ enabled: isEditing });
 
   useEffect(() => {
     queueMicrotask(() => setEditData(profileData));
   }, [profileData]);
-
-  useEffect(() => {
-    if (isEditing && !preferenceOptions) {
-      getPreferenceOptions().then(setPreferenceOptions).catch(() => {});
-    }
-  }, [isEditing, preferenceOptions]);
 
   const { setUiLocale } = useUiLocaleSync({
     onError: () => toast.error(t('errors.localeSave')),
@@ -240,9 +237,9 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   };
 
   const topicsList            = preferenceOptions?.topics          || DEFAULT_TOPICS;
-  const languagesList         = preferenceOptions?.languages       || ['Português', 'Inglês', 'Espanhol'];
-  const materialLevelsList    = preferenceOptions?.materialLevels  || ['Introdutório', 'Intermediário', 'Avançado'];
-  const educationLevelsList   = preferenceOptions?.educationLevels || ['Graduação', 'Especialização', 'Mestrado', 'Doutorado'];
+  const languagesList         = preferenceOptions?.languages       || [...LANGUAGES];
+  const materialLevelsList    = preferenceOptions?.materialLevels  || [...MATERIAL_LEVELS];
+  const educationLevelsList   = preferenceOptions?.educationLevels || [...EDUCATION_LEVELS];
   const academicGoalsList     = preferenceOptions?.academicGoals   || [];
 
   return (

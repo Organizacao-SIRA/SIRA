@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import type { CatalogItem } from '../types';
+import { useFavorites } from '../queries/useFavorites';
 import { ContentBreadcrumb } from '../components/details/ContentBreadcrumb';
 import { ContentHero } from '../components/details/ContentHero';
 import { AcademicSummarySection } from '../components/details/AcademicSummarySection';
@@ -12,25 +14,24 @@ import {
 } from '../components/details/ContentActionPanel';
 import { ContentNotFoundState } from '../components/details/ContentNotFoundState';
 
-interface DetailsProps {
-  item: CatalogItem | null;
-  onBack: () => void;
-  previousScreen: string;
-  toggleFavorite: (item: CatalogItem) => void;
-  isFavorite: (id: string) => boolean;
+interface DetailsLocationState {
+  item?: CatalogItem;
+  from?: string;
 }
 
-export const Details = ({
-  item,
-  onBack,
-  previousScreen,
-  toggleFavorite,
-  isFavorite,
-}: DetailsProps) => {
+export const Details = () => {
   const { t } = useTranslation('details');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  const state = location.state as DetailsLocationState | null;
+  const item = state?.item ?? null;
+  const previousScreen = state?.from ?? 'home';
+  const onBack = () => navigate(-1);
 
   if (!item) {
-    return <ContentNotFoundState onBack={onBack} />;
+    return <ContentNotFoundState onBack={() => navigate('/')} />;
   }
 
   const handleToggleFavorite = () => toggleFavorite(item);

@@ -1,41 +1,37 @@
 import React, { useRef } from 'react';
 import { Sparkles, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useOutletContext } from 'react-router';
 import { UserMessageBubble } from '../components/UserMessageBubble';
 import { AiMessageBubble } from '../components/AiMessageBubble';
 import { ChatLoadingSkeleton } from '../components/ChatLoadingSkeleton';
 import { MaterialsSection } from '../components/MaterialsSection';
 import { RegenerateResultsButton } from '../components/RegenerateResultsButton';
 import { PageFooter } from '../components/ui/PageFooter';
-import type { AuthUser, CatalogItem } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useSearch } from '../contexts/SearchContext';
+import { useFavorites } from '../queries/useFavorites';
+import type { AppShellOutletContext } from '../routes/AppShell';
+import type { CatalogItem } from '../types';
 
-interface RecommendationsProps {
-  results: CatalogItem[];
-  aiMessage: string;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  handleSearch: (e: React.FormEvent) => void;
-  setCurrentScreen: (screen: string) => void;
-  viewDetails: (item: CatalogItem) => void;
-  toggleFavorite: (item: CatalogItem) => void;
-  isFavorite: (id: string) => boolean;
-  isLoading?: boolean;
-  isRegenerating?: boolean;
-  onRegenerate?: () => void;
-  isSidebarOpen?: boolean;
-  user?: AuthUser | null;
-}
-
-export const Recommendations = ({
-  results, aiMessage, searchQuery, setSearchQuery, handleSearch, setCurrentScreen,
-  viewDetails, toggleFavorite, isFavorite, isLoading, isRegenerating, onRegenerate, isSidebarOpen, user,
-}: RecommendationsProps) => {
+export const Recommendations = () => {
   const { t } = useTranslation('recommendations');
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isSidebarOpen } = useOutletContext<AppShellOutletContext>();
+  const {
+    results, aiMessage, searchQuery, setSearchQuery, handleSearch,
+    isLoading, isRegenerating, regenerateSearchResults: onRegenerate,
+  } = useSearch();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const viewDetails = (item: CatalogItem) =>
+    navigate(`/material/${encodeURIComponent(item.id)}`, { state: { item, from: 'results' } });
 
   const handleClearSearch = () => {
     setSearchQuery('');
-    setCurrentScreen('home');
+    navigate('/');
   };
 
   return (

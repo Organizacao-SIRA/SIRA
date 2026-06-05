@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { BookOpenCheck, Lock, Unlock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -97,7 +97,7 @@ interface RecommendationCardProps {
   analysisSlot?: AnalysisSlot;
 }
 
-export const RecommendationCard = ({
+export const RecommendationCard = memo(function RecommendationCard({
   item,
   viewDetails,
   toggleFavorite,
@@ -106,7 +106,7 @@ export const RecommendationCard = ({
   trackEvents = true,
   stretch = true,
   analysisSlot = 'auto',
-}: RecommendationCardProps) => {
+}: RecommendationCardProps) {
   const { t } = useTranslation('common');
   const [imageError, setImageError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -284,4 +284,4 @@ export const RecommendationCard = ({
       {isVertical ? verticalLayout : horizontalLayout}
     </div>
   );
-};
+});

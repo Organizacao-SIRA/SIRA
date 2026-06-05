@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface UserAvatarProps {
   name: string;
@@ -30,6 +31,7 @@ const sizes = {
 };
 
 export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: UserAvatarProps) => {
+  const { t } = useTranslation('common');
   const letter = (name || '?').charAt(0).toUpperCase();
   const { container, text } = sizes[size];
   const color = getAvatarColor(name);
@@ -42,7 +44,7 @@ export const UserAvatar = ({ name, imageUrl, size = 'md', className = '' }: User
       {showImage ? (
         <img
           src={imageUrl!}
-          alt={`Foto de perfil de ${name || 'usuário'}`}
+          alt={t('avatar.imageAlt', { name: name || t('avatar.fallbackName') })}
           className="w-full h-full object-cover"
           onError={() => setFailedImageUrl(imageUrl)}
         />

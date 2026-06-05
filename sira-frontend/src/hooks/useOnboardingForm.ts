@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { completeOnboarding } from '../services/api';
 import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
+import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
 import { ONBOARDING_STEPS } from '../types/onboarding';
 import type { UserProfile, ProfileData } from '../types';
@@ -12,12 +13,12 @@ const STEP_KEY = '@sira:onboardingStep';
 
 const DEFAULT_FORM: OnboardingFormData = {
   course: '',
-  educationLevel: 'Graduação',
+  educationLevel: DEFAULT_EDUCATION_LEVEL,
   mainArea: '',
   subAreas: '',
   interests: [],
-  languages: ['Português'],
-  materialLevels: ['Intermediário'],
+  languages: [...DEFAULT_LANGUAGES],
+  materialLevels: [...DEFAULT_MATERIAL_LEVELS],
   wantsBooks: true,
   wantsArticles: true,
   academicGoal: '',
@@ -44,12 +45,12 @@ const hydrate = (initial: Partial<OnboardingFormData> | undefined): OnboardingFo
   const source = { ...DEFAULT_FORM, ...(initial || {}), ...(draft || {}) };
   return {
     course: source.course || '',
-    educationLevel: source.educationLevel || 'Graduação',
+    educationLevel: source.educationLevel || DEFAULT_EDUCATION_LEVEL,
     mainArea: source.mainArea || '',
     subAreas: source.subAreas || '',
     interests: Array.isArray(source.interests) ? source.interests : [],
-    languages: source.languages?.length ? source.languages : ['Português'],
-    materialLevels: source.materialLevels?.length ? source.materialLevels : ['Intermediário'],
+    languages: source.languages?.length ? source.languages : [...DEFAULT_LANGUAGES],
+    materialLevels: source.materialLevels?.length ? source.materialLevels : [...DEFAULT_MATERIAL_LEVELS],
     wantsBooks: source.wantsBooks ?? true,
     wantsArticles: source.wantsArticles ?? true,
     academicGoal: source.academicGoal || '',

@@ -1,15 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 import { SiraLogo } from '../components/ui/SiraLogo';
 
-interface ForgotPasswordProps {
-  setCurrentScreen: (screen: string) => void;
-}
-
-export const ForgotPassword = ({ setCurrentScreen }: ForgotPasswordProps) => {
+export const ForgotPassword = () => {
   const { t } = useTranslation('auth');
+  const navigate = useNavigate();
 
   return (
     <AuthLayout>
@@ -23,7 +21,7 @@ export const ForgotPassword = ({ setCurrentScreen }: ForgotPasswordProps) => {
           <p className="text-sm text-text-muted">
             {t('forgotPassword.rememberPassword')}{' '}
             <button
-              onClick={() => setCurrentScreen('login')}
+              onClick={() => navigate('/login')}
               className="text-link hover:text-link-hover font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1"
             >
               {t('forgotPassword.signIn')}
@@ -31,7 +29,7 @@ export const ForgotPassword = ({ setCurrentScreen }: ForgotPasswordProps) => {
           </p>
         }
       >
-        <ForgotPasswordForm onBackToLogin={() => setCurrentScreen('login')} />
+        <ForgotPasswordForm onBackToLogin={() => navigate('/login')} />
       </AuthFormCard>
     </AuthLayout>
   );

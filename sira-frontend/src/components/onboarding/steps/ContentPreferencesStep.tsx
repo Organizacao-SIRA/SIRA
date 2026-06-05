@@ -2,9 +2,9 @@ import { Settings, Languages, BarChart3, BookCopy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SelectableChip } from '../SelectableChip';
 import { PreferenceGroup } from '../PreferenceGroup';
-import { preferenceValueLabel } from '../../../i18n/preferenceLabels';
-import type { OnboardingFormData, StepFieldErrors } from '../../../types/onboarding';
-import type { PreferenceOptions } from '../../../types';
+import { preferenceValueLabel } from '@/i18n/preferenceLabels';
+import type { OnboardingFormData, StepFieldErrors } from '@/types/onboarding';
+import type { PreferenceOptions } from '@/types';
 
 interface ContentPreferencesStepProps {
   data: OnboardingFormData;

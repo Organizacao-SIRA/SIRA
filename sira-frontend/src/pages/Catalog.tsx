@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import { Library } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useCatalog } from '../hooks/useCatalog';
+import { useFavorites } from '../queries/useFavorites';
 import { CatalogSearchBar } from '../components/CatalogSearchBar';
 import { CatalogCategoryFilter } from '../components/CatalogCategoryFilter';
 import { SearchFilters as SearchFiltersBar } from '../components/SearchFilters';
@@ -12,15 +14,10 @@ import { useViewMode } from '../hooks/useViewMode';
 import { useIsMobile } from '../hooks/useIsMobile';
 import type { CatalogItem } from '../types';
 
-interface CatalogProps {
-  viewDetails: (item: CatalogItem) => void;
-  toggleFavorite: (item: CatalogItem) => void;
-  isFavorite: (id: string) => boolean;
-  homeResetKey?: number;
-}
-
-export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey = 0 }: CatalogProps) => {
+export const Catalog = () => {
   const { t } = useTranslation('catalog');
+  const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const {
     searchQuery, setSearchQuery, submitSearch, clearSearch,
     category, setCategory,
@@ -31,19 +28,17 @@ export const Catalog = ({ viewDetails, toggleFavorite, isFavorite, homeResetKey 
     isSearchMode, submittedQuery,
     topics,
     refetch,
-    resetCatalogHome,
   } = useCatalog();
 
   const { mode: viewMode, setMode: setViewMode } = useViewMode('catalog', 'vertical');
   const isMobile = useIsMobile();
   const effectiveMode = isMobile ? 'vertical' : viewMode;
-  const lastHomeResetKey = useRef(homeResetKey);
 
-  useEffect(() => {
-    if (lastHomeResetKey.current === homeResetKey) return;
-    lastHomeResetKey.current = homeResetKey;
-    resetCatalogHome();
-  }, [homeResetKey, resetCatalogHome]);
+  const viewDetails = useCallback(
+    (item: CatalogItem) =>
+      navigate(`/material/${encodeURIComponent(item.id)}`, { state: { item, from: 'catalog' } }),
+    [navigate],
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn">

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { Bookmark, BookOpen, FileText, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { CatalogCardSkeleton } from '../components/CatalogCardSkeleton';
 import { RecommendationCardSkeleton } from '../components/RecommendationCardSkeleton';
 import { RecommendationCard } from '../components/RecommendationCard';
@@ -11,17 +11,13 @@ import { ViewModeToggle } from '../components/ui/ViewModeToggle';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useViewMode } from '../hooks/useViewMode';
 import { FAVORITES_PAGE_SIZE, FAVORITE_TABS, useFavoritesLibrary } from '../hooks/useFavoritesLibrary';
+import { useFavorites } from '../queries/useFavorites';
 import type { CatalogItem } from '../types';
 
-interface FavoritesProps {
-  toggleFavorite: (item: CatalogItem) => Promise<boolean> | boolean | void;
-  viewDetails: (item: CatalogItem) => void;
-  setCurrentScreen: (screen: string) => void;
-  homeResetKey?: number;
-}
-
-export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeResetKey = 0 }: FavoritesProps) => {
+export const Favorites = () => {
   const { t } = useTranslation('favorites');
+  const navigate = useNavigate();
+  const { toggleFavorite } = useFavorites();
   const {
     activeTab,
     setActiveTab,
@@ -35,10 +31,12 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
     error,
     loadFavoritesPage,
     removeFavoriteLocally,
-    resetFavoritesHome,
   } = useFavoritesLibrary();
   const isMobile = useIsMobile();
   const { mode: viewMode, setMode: setViewMode } = useViewMode('favorites', 'vertical');
+
+  const viewDetails = (item: CatalogItem) =>
+    navigate(`/material/${encodeURIComponent(item.id)}`, { state: { item, from: 'favorites' } });
 
   const effectiveVariant = isMobile ? 'vertical' : viewMode;
   const containerClasses = effectiveVariant === 'vertical'
@@ -51,13 +49,6 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
 
   const bookCount = counts.book;
   const articleCount = counts.article;
-  const lastHomeResetKey = useRef(homeResetKey);
-
-  useEffect(() => {
-    if (lastHomeResetKey.current === homeResetKey) return;
-    lastHomeResetKey.current = homeResetKey;
-    resetFavoritesHome();
-  }, [homeResetKey, resetFavoritesHome]);
 
   const handleFavoriteToggle = async (item: CatalogItem) => {
     const result = await toggleFavorite(item);
@@ -127,7 +118,7 @@ export const Favorites = ({ toggleFavorite, viewDetails, setCurrentScreen, homeR
           <p className="text-text-muted mb-6 sm:mb-8 max-w-xs mx-auto text-sm sm:text-base">
             {t('states.emptyDescription')}
           </p>
-          <Button variant="primary" size="lg" onClick={() => setCurrentScreen('home')} className="mx-auto">
+          <Button variant="primary" size="lg" onClick={() => navigate('/')} className="mx-auto">
             <Search className="w-4 h-4" /> {t('states.explore')}
           </Button>
         </div>

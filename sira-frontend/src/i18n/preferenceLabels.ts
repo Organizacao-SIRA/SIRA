@@ -1,23 +1,29 @@
 import type { TFunction } from 'i18next';
 import type { PreferenceTopic } from '../types';
+import {
+  ACADEMIC_GOALS,
+  EDUCATION_LEVELS,
+  LANGUAGES,
+  MATERIAL_LEVELS,
+} from './preferenceValues';
 
 const valueKeys: Record<string, string> = {
-  'Graduação': 'education.graduation',
-  'Especialização': 'education.specialization',
-  'Mestrado': 'education.master',
-  'Doutorado': 'education.doctorate',
-  'Português': 'languages.portuguese',
-  'Inglês': 'languages.english',
-  'Espanhol': 'languages.spanish',
-  'Introdutório': 'materialLevels.introductory',
-  'Intermediário': 'materialLevels.intermediate',
-  'Avançado': 'materialLevels.advanced',
-  'TCC': 'goals.thesis',
-  'Pesquisa científica': 'goals.scientificResearch',
-  'Estudo introdutório': 'goals.introductoryStudy',
-  'Aprofundamento técnico': 'goals.technicalDepth',
-  'Concursos': 'goals.exams',
-  'Trabalho profissional': 'goals.professionalWork',
+  [EDUCATION_LEVELS[0]]: 'education.graduation',
+  [EDUCATION_LEVELS[1]]: 'education.specialization',
+  [EDUCATION_LEVELS[2]]: 'education.master',
+  [EDUCATION_LEVELS[3]]: 'education.doctorate',
+  [LANGUAGES[0]]: 'languages.portuguese',
+  [LANGUAGES[1]]: 'languages.english',
+  [LANGUAGES[2]]: 'languages.spanish',
+  [MATERIAL_LEVELS[0]]: 'materialLevels.introductory',
+  [MATERIAL_LEVELS[1]]: 'materialLevels.intermediate',
+  [MATERIAL_LEVELS[2]]: 'materialLevels.advanced',
+  [ACADEMIC_GOALS[0]]: 'goals.thesis',
+  [ACADEMIC_GOALS[1]]: 'goals.scientificResearch',
+  [ACADEMIC_GOALS[2]]: 'goals.introductoryStudy',
+  [ACADEMIC_GOALS[3]]: 'goals.technicalDepth',
+  [ACADEMIC_GOALS[4]]: 'goals.exams',
+  [ACADEMIC_GOALS[5]]: 'goals.professionalWork',
 };
 
 export const preferenceValueLabel = (value: string, t: TFunction<'preferences'>) => {

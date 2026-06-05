@@ -1,7 +1,8 @@
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AuthUser } from '../types';
+import { useLocation, useNavigate } from 'react-router';
 import { resolveAvatarUrl } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/Button';
 import { NavBrand } from './NavBrand';
 import { UserProfileChip } from './ui/UserProfileChip';
@@ -12,16 +13,15 @@ import { prefetchScreen } from '../app/screenLoaders';
 interface NavbarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean) => void;
-  setCurrentScreen: (screen: string) => void;
-  currentScreen: string;
-  showMenuButton: boolean;
-  user: AuthUser | null;
-  onLogout: () => void;
 }
 
-export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, currentScreen, showMenuButton, user, onLogout }: NavbarProps) => {
+export const Navbar = ({ isSidebarOpen, setIsSidebarOpen }: NavbarProps) => {
   const { t } = useTranslation('navigation');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
   const displayName = user?.name || user?.email || '';
+  const isLoginRoute = location.pathname === '/login';
 
   return (
     <header className="bg-primary text-white shadow-md sticky top-0 z-50 w-full transition-all">
@@ -30,9 +30,9 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
         <div className="flex justify-between items-center h-16 gap-2 sm:gap-3">
 
           <NavBrand
-            showMenuButton={showMenuButton}
+            showMenuButton
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-            onLogoClick={() => setCurrentScreen('home')}
+            onLogoClick={() => navigate('/')}
             onLogoPrefetch={() => prefetchScreen('home')}
           />
 
@@ -43,22 +43,22 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen, setCurrentScreen, curr
                 <UserProfileChip
                   name={displayName}
                   avatarUrl={resolveAvatarUrl(user.avatarUrl)}
-                  onClick={() => setCurrentScreen('profile')}
+                  onClick={() => navigate('/perfil')}
                   onPrefetch={() => prefetchScreen('profile')}
                 />
-                <NavLogoutButton onLogout={onLogout} />
+                <NavLogoutButton onLogout={logout} />
               </>
             ) : (
               <Button
-                onClick={() => setCurrentScreen('login')}
+                onClick={() => navigate('/login')}
                 onMouseEnter={() => prefetchScreen('login')}
                 onFocus={() => prefetchScreen('login')}
                 variant="navbarAction"
                 size="sm"
-                disabled={currentScreen === 'login'}
+                disabled={isLoginRoute}
               >
-                {currentScreen !== 'login' && <LogIn className="w-4 h-4" />}
-                {currentScreen === 'login' ? t('auth.signingIn') : t('auth.signIn')}
+                {!isLoginRoute && <LogIn className="w-4 h-4" />}
+                {isLoginRoute ? t('auth.signingIn') : t('auth.signIn')}
               </Button>
             )}
           </div>

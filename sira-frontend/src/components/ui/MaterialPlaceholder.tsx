@@ -1,4 +1,5 @@
 import { Book, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MaterialPlaceholderProps {
   type: 'book' | 'article';
@@ -11,13 +12,14 @@ export const MaterialPlaceholder = ({
   className = '',
   iconClassName = 'w-7 h-7',
 }: MaterialPlaceholderProps) => {
+  const { t } = useTranslation('common');
   const isBook = type === 'book';
   const Icon = isBook ? Book : FileText;
 
   return (
     <div
       role="img"
-      aria-label={isBook ? 'Capa indisponível' : 'Imagem indisponível'}
+      aria-label={isBook ? t('materialPlaceholder.bookUnavailable') : t('materialPlaceholder.articleUnavailable')}
       className={`flex items-center justify-center rounded-lg border ${
         isBook
           ? 'bg-primary-soft border-link/30 text-link'

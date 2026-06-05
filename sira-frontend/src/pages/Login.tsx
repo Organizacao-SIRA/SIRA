@@ -1,15 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthFormCard } from '../components/auth/AuthFormCard';
 import { LoginForm } from '../components/auth/LoginForm';
 import { SiraLogo } from '../components/ui/SiraLogo';
 
-interface LoginProps {
-  setCurrentScreen: (screen: string) => void;
-}
-
-export const Login = ({ setCurrentScreen }: LoginProps) => {
+export const Login = () => {
   const { t } = useTranslation('auth');
+  const navigate = useNavigate();
 
   return (
     <AuthLayout>
@@ -23,7 +21,7 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
           <p className="text-sm text-text-muted">
             {t('login.noAccount')}{' '}
             <button
-              onClick={() => setCurrentScreen('register')}
+              onClick={() => navigate('/register')}
               className="text-link hover:text-link-hover font-bold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded px-1"
             >
               {t('login.createAccount')}
@@ -31,7 +29,7 @@ export const Login = ({ setCurrentScreen }: LoginProps) => {
           </p>
         }
       >
-        <LoginForm onForgotPassword={() => setCurrentScreen('forgot-password')} />
+        <LoginForm onForgotPassword={() => navigate('/forgot-password')} />
       </AuthFormCard>
     </AuthLayout>
   );

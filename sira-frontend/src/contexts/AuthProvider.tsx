@@ -3,6 +3,7 @@ import { i18n } from '../i18n';
 import { normalizeLocale, setStoredUiLocale, type UiLocale } from '../i18n/locales';
 import type { AuthUser } from '../types';
 import { AuthContext } from './AuthContext';
+import { queryClient } from '../queries/queryClient';
 
 const AUTH_API = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
@@ -31,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     Object.keys(sessionStorage)
       .filter(k => k.startsWith('@sira:'))
       .forEach(k => sessionStorage.removeItem(k));
+    queryClient.clear(); // descarta cache de servidor (perfil, favoritos, recomendações)
     setUser(null);
   }, []);
 
