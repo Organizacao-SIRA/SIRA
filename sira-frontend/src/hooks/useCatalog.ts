@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { searchCatalogItems, TOPIC_SEARCH_QUERIES } from '../services/api';
 import { usePersistedState } from './usePersistedState';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
-import { createSessionCache } from '../utils/sessionCache';
-import type { CatalogItem, SearchFilters } from '../types';
+import type { SearchFilters } from '../types';
 
 const PAGE_SIZE = 10;
+const CATALOG_TTL = 15 * 60 * 1000;
 const DEFAULT_FILTERS: SearchFilters = { types: [], area: null, openAccessOnly: false, yearFrom: null };
 
 const CATALOG_VERSION = 'v1';
@@ -19,17 +20,6 @@ interface CatalogStoredState {
   page: number;
 }
 
-interface CatalogSnapshot extends CatalogStoredState {
-  items: CatalogItem[];
-  total: number;
-  loading: boolean;
-}
-
-interface CatalogResult {
-  items: CatalogItem[];
-  total: number;
-}
-
 const DEFAULT_CATALOG_STATE: CatalogStoredState = {
   searchQuery: '',
   submittedQuery: '',
@@ -37,13 +27,6 @@ const DEFAULT_CATALOG_STATE: CatalogStoredState = {
   filters: DEFAULT_FILTERS,
   page: 0,
 };
-
-const catalogCache = createSessionCache<CatalogResult>({
-  namespace: 'catalog',
-  version: CATALOG_VERSION,
-  ttlMs: 15 * 60 * 1000,
-  maxEntries: 50,
-});
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -73,27 +56,11 @@ const validateCatalogState = (value: unknown): CatalogStoredState => {
   };
 };
 
-const buildFilterKey = (filters: SearchFilters) =>
-  [
-    filters.types.join(',') || 'all-types',
-    filters.area ?? 'all-areas',
-    filters.openAccessOnly ? 'oa' : 'all-access',
-    filters.yearFrom ?? 'all-years',
-  ].join(':');
-
+// Chave estável da busca — distingue modo busca (search:<q>) de navegação (browse:<cat>).
 const buildResultKey = (query: string, categoryId: string) => {
   const normalizedQuery = query.trim().toLowerCase();
   if (normalizedQuery.length >= 2) return `search:${encodeURIComponent(normalizedQuery)}`;
   return `browse:${categoryId}`;
-};
-
-const buildCacheKey = (query: string, categoryId: string, page: number, filters: SearchFilters = DEFAULT_FILTERS) =>
-  `${buildResultKey(query, categoryId)}:p${page}:${buildFilterKey(filters)}`;
-
-const readInitialSnapshot = (state: CatalogStoredState): CatalogSnapshot => {
-  const hit = catalogCache.get(buildCacheKey(state.submittedQuery, state.category, state.page, state.filters));
-  if (hit) return { ...state, items: hit.items, total: hit.total, loading: false };
-  return { ...state, items: [], total: 0, loading: true };
 };
 
 export const useCatalog = () => {
@@ -102,138 +69,64 @@ export const useCatalog = () => {
     DEFAULT_CATALOG_STATE,
     { validate: validateCatalogState },
   );
-  const [initialSnapshot] = useState(() => readInitialSnapshot(storedState));
-  const [searchQuery, setSearchQueryState] = useState(initialSnapshot.searchQuery);
-  const [category, setCategoryState] = useState(initialSnapshot.category);
-  const [filters, setFiltersState] = useState<SearchFilters>(initialSnapshot.filters);
-  const [page, setPageState] = useState(initialSnapshot.page);
-  const [items, setItems] = useState<CatalogItem[]>(initialSnapshot.items);
-  const [total, setTotal] = useState(initialSnapshot.total);
-  const [loading, setLoading] = useState(initialSnapshot.loading);
-  const [error, setError] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQueryState] = useState(storedState.searchQuery);
+  const [submittedQuery, setSubmittedQuery] = useState(storedState.submittedQuery);
+  const [category, setCategoryState] = useState(storedState.category);
+  const [filters, setFiltersState] = useState<SearchFilters>(storedState.filters);
+  const [page, setPageState] = useState(storedState.page);
+
   const { data: preferenceData } = usePreferenceOptions();
   const topics = preferenceData?.topics ?? [];
 
-  // Tracks the query that was actually submitted (used for labels/isSearchMode)
-  const [submittedQuery, setSubmittedQuery] = useState(initialSnapshot.submittedQuery);
+  const isSearchMode = submittedQuery.trim().length >= 2;
+  const effectiveQuery = isSearchMode
+    ? submittedQuery.trim()
+    : (TOPIC_SEARCH_QUERIES[category] ?? 'science research');
 
-  const abortRef = useRef<AbortController | null>(null);
-  // Refs to avoid stale closures in imperative handlers
-  const searchRef = useRef(searchQuery);
-  const submittedQueryRef = useRef(submittedQuery);
-  const categoryRef = useRef(category);
-  const filtersRef = useRef(filters);
+  // O TanStack Query substitui o sessionCache + AbortController manuais: cacheia por
+  // chave, deduplica e cancela requisições obsoletas via `signal` nativamente.
+  const query = useQuery({
+    queryKey: ['catalog', buildResultKey(submittedQuery, category), page, filters],
+    queryFn: ({ signal }) => searchCatalogItems(effectiveQuery, page, filters, signal),
+    staleTime: CATALOG_TTL,
+    gcTime: CATALOG_TTL,
+  });
 
+  // Persiste o estado de navegação (texto, categoria, filtros, página) para sobreviver ao F5.
   useEffect(() => {
-    searchRef.current = searchQuery;
-    submittedQueryRef.current = submittedQuery;
-    categoryRef.current = category;
-    filtersRef.current = filters;
-  }, [category, filters, searchQuery, submittedQuery]);
-
-  const doFetch = useCallback(async (query: string, catId: string, pg: number, activeFilters: SearchFilters) => {
-    abortRef.current?.abort();
-    abortRef.current = new AbortController();
-
-    const isSearch = query.trim().length >= 2;
-    const effectiveQuery = isSearch
-      ? query.trim()
-      : (TOPIC_SEARCH_QUERIES[catId] ?? 'science research');
-
-    const cacheKey = buildCacheKey(isSearch ? query : '', catId, pg, activeFilters);
-    const hit = catalogCache.get(cacheKey);
-    if (hit) {
-      setItems(hit.items);
-      setTotal(hit.total);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await searchCatalogItems(effectiveQuery, pg, activeFilters, abortRef.current.signal);
-      setItems(result.items);
-      setTotal(result.total);
-      catalogCache.set(cacheKey, result);
-    } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
-      setError(err instanceof Error ? err.message : 'Erro ao carregar materiais');
-      setItems([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    let isActive = true;
-
-    // Se o cache já populou o estado inicial, não busca novamente.
-    if (initialSnapshot.loading) {
-      queueMicrotask(() => {
-        if (isActive) {
-          void doFetch(initialSnapshot.submittedQuery, initialSnapshot.category, initialSnapshot.page, initialSnapshot.filters);
-        }
-      });
-    }
-
-    return () => {
-      isActive = false;
-    };
-  }, [doFetch, initialSnapshot.category, initialSnapshot.filters, initialSnapshot.loading, initialSnapshot.page, initialSnapshot.submittedQuery]);
-
-  useEffect(() => {
-    setStoredState({
-      searchQuery,
-      submittedQuery,
-      category,
-      filters,
-      page,
-    });
+    setStoredState({ searchQuery, submittedQuery, category, filters, page });
   }, [category, filters, page, searchQuery, setStoredState, submittedQuery]);
 
-  // Apenas atualiza o texto — não dispara busca
-  const setSearchQuery = (q: string) => {
-    setSearchQueryState(q);
-  };
+  // Apenas atualiza o texto — não dispara busca.
+  const setSearchQuery = (q: string) => setSearchQueryState(q);
 
-  // Dispara a busca explicitamente (Enter ou botão)
+  // Dispara a busca explicitamente (Enter ou botão). A query refaz ao mudar a key.
   const submitSearch = () => {
-    const q = searchRef.current.trim();
+    setSubmittedQuery(searchQuery.trim());
     setPageState(0);
-    setSubmittedQuery(q);
-    doFetch(q, categoryRef.current, 0, filtersRef.current);
   };
 
-  // Limpa a busca e volta ao modo browse da categoria atual
+  // Limpa a busca e volta ao modo navegação da categoria atual.
   const clearSearch = () => {
     setSearchQueryState('');
     setSubmittedQuery('');
     setPageState(0);
-    doFetch('', categoryRef.current, 0, filtersRef.current);
   };
 
   const setCategory = (catId: string) => {
     setCategoryState(catId);
-    setPageState(0);
     setSearchQueryState('');
     setSubmittedQuery('');
-    doFetch('', catId, 0, filtersRef.current);
+    setPageState(0);
   };
 
   const setFilters = (nextFilters: SearchFilters) => {
     setFiltersState(nextFilters);
     setPageState(0);
-    doFetch(submittedQueryRef.current, categoryRef.current, 0, nextFilters);
   };
 
-  const setPage = (pg: number) => {
-    setPageState(pg);
-    doFetch(submittedQueryRef.current, categoryRef.current, pg, filtersRef.current);
-  };
+  const setPage = (pg: number) => setPageState(pg);
 
   const resetCatalogHome = useCallback(() => {
     setSearchQueryState(DEFAULT_CATALOG_STATE.searchQuery);
@@ -241,15 +134,9 @@ export const useCatalog = () => {
     setCategoryState(DEFAULT_CATALOG_STATE.category);
     setFiltersState(DEFAULT_CATALOG_STATE.filters);
     setPageState(DEFAULT_CATALOG_STATE.page);
-    doFetch(
-      DEFAULT_CATALOG_STATE.submittedQuery,
-      DEFAULT_CATALOG_STATE.category,
-      DEFAULT_CATALOG_STATE.page,
-      DEFAULT_CATALOG_STATE.filters,
-    );
-  }, [doFetch]);
+  }, []);
 
-  const refetch = () => doFetch(submittedQueryRef.current, categoryRef.current, page, filtersRef.current);
+  const total = query.data?.total ?? 0;
 
   return {
     searchQuery,
@@ -262,15 +149,15 @@ export const useCatalog = () => {
     setFilters,
     page,
     setPage,
-    items,
-    loading,
-    error,
+    items: query.data?.items ?? [],
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : null,
     total,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
-    isSearchMode: submittedQuery.length >= 2,
+    isSearchMode,
     submittedQuery,
     topics,
-    refetch,
+    refetch: () => query.refetch(),
     resetCatalogHome,
   };
 };
