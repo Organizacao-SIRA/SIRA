@@ -2,7 +2,7 @@ import { Pencil, ClipboardCheck } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
 import type { OnboardingFormData } from '../../../types/onboarding';
-import type { PreferenceOptions, PreferenceTopic } from '../../../types';
+import type { PreferenceOptions } from '../../../types';
 
 interface ReviewStepProps {
   data: OnboardingFormData;
@@ -46,10 +46,11 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
   const { t } = useTranslation('onboarding');
   const { t: tp } = useTranslation('preferences');
+  const selectedMainArea = options.topics.find((topic) => topic.id === data.mainArea);
   const mainAreaLabel =
-    options.topics.find((topic) => topic.id === data.mainArea)
-      ? preferenceTopicLabel(options.topics.find((topic) => topic.id === data.mainArea) as PreferenceTopic, tp)
-      : data.mainArea || '—';
+    selectedMainArea
+      ? preferenceTopicLabel(selectedMainArea, tp)
+      : data.mainArea || t('review.notInformed');
 
   const interestLabels = data.interests
     .map((id) => {
@@ -84,7 +85,7 @@ export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
             <div>
               <dt className="text-xs text-text-muted">{t('review.course')}</dt>
-              <dd className="font-semibold">{data.course || '—'}</dd>
+              <dd className="font-semibold">{data.course || t('review.notInformed')}</dd>
             </div>
             <div>
               <dt className="text-xs text-text-muted">{t('review.level')}</dt>

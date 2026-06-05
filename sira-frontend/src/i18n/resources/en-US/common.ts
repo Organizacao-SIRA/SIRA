@@ -52,6 +52,14 @@ export const common = {
     savedWithoutAi: 'Material saved directly from the catalog, without personalized AI analysis.',
     viewDetails: 'View details for {{title}}',
   },
+  materialPlaceholder: {
+    bookUnavailable: 'Cover unavailable',
+    articleUnavailable: 'Image unavailable',
+  },
+  avatar: {
+    imageAlt: 'Profile photo of {{name}}',
+    fallbackName: 'user',
+  },
   favorites: {
     add: 'Add to favorites',
     remove: 'Remove from favorites',
@@ -109,6 +117,8 @@ export const common = {
     AVATAR_FORMAT_INVALID: 'Only JPG, PNG, or WEBP images are allowed.',
     FAVORITE_ALREADY_EXISTS: 'This material is already in your favorites.',
     FAVORITE_NOT_FOUND: 'Favorite not found.',
+    UNHANDLED_HTTP_ERROR: 'Unable to complete the request.',
+    INTERNAL_SERVER_ERROR: 'An internal error occurred. Please try again later.',
     RATE_LIMITED: 'Too many attempts in a short time. Please wait a moment and try again.',
   },
   errors: {
@@ -133,6 +143,8 @@ export const common = {
     recommendationsRefresh: 'Unable to refresh recommendations',
     conversationalSearch: 'Sorry, I had an error while processing your conversational search.',
     regenerateSearch: 'I could not generate new suggestions right now. Try again in a moment.',
+    clipboardUnavailable: 'Clipboard is unavailable in this browser.',
+    clipboardCopy: 'Unable to copy.',
     unknownFavorite: 'Unknown error while updating favorite',
     favoriteAlert: 'Favorite error: {{message}}',
   },

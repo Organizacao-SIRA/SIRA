@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE } from '../i18n/locales';
+import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
 import type { CatalogItem, ProfileData } from '../types';
 
 export const SCREEN_SCROLL_KEYS: Record<string, string> = {
@@ -73,11 +74,11 @@ export const createEmptyProfileData = (): ProfileData => ({
   name: '',
   email: '',
   course: '',
-  educationLevel: 'Graduação',
+  educationLevel: DEFAULT_EDUCATION_LEVEL,
   mainArea: '',
   subAreas: '',
-  languages: ['Português'],
-  materialLevels: ['Intermediário'],
+  languages: [...DEFAULT_LANGUAGES],
+  materialLevels: [...DEFAULT_MATERIAL_LEVELS],
   wantsBooks: true,
   wantsArticles: true,
   wantsOpenAccessOnly: false,

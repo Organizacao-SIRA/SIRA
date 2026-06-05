@@ -1,20 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Target, BookOpen, Rocket, Trophy, GraduationCap,
+  Target, Rocket, GraduationCap,
   Briefcase, Lightbulb, FlaskConical, ScrollText, X,
 } from 'lucide-react';
 import { preferenceValueLabel } from '../../../i18n/preferenceLabels';
+import { ACADEMIC_GOALS } from '../../../i18n/preferenceValues';
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
-  'TCC':                  ScrollText,
-  'Iniciação Científica': FlaskConical,
-  'Mestrado':             GraduationCap,
-  'Doutorado':            Trophy,
-  'Pós-Graduação':        BookOpen,
-  'Concurso Público':     Briefcase,
-  'Estudo Pessoal':       Lightbulb,
-  'Pesquisa Profissional':Rocket,
+  [ACADEMIC_GOALS[0]]: ScrollText,
+  [ACADEMIC_GOALS[1]]: FlaskConical,
+  [ACADEMIC_GOALS[2]]: Lightbulb,
+  [ACADEMIC_GOALS[3]]: GraduationCap,
+  [ACADEMIC_GOALS[4]]: Briefcase,
+  [ACADEMIC_GOALS[5]]: Rocket,
 };
 
 interface AcademicGoalStepProps {

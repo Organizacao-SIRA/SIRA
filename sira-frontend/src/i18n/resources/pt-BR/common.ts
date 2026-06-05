@@ -52,6 +52,14 @@ export const common = {
     savedWithoutAi: 'Material salvo diretamente do catálogo, sem análise personalizada da IA.',
     viewDetails: 'Ver detalhes de {{title}}',
   },
+  materialPlaceholder: {
+    bookUnavailable: 'Capa indisponível',
+    articleUnavailable: 'Imagem indisponível',
+  },
+  avatar: {
+    imageAlt: 'Foto de perfil de {{name}}',
+    fallbackName: 'usuário',
+  },
   favorites: {
     add: 'Adicionar aos favoritos',
     remove: 'Remover dos favoritos',
@@ -109,6 +117,8 @@ export const common = {
     AVATAR_FORMAT_INVALID: 'Apenas imagens JPG, PNG ou WEBP são permitidas.',
     FAVORITE_ALREADY_EXISTS: 'Este material já está nos seus favoritos.',
     FAVORITE_NOT_FOUND: 'Favorito não encontrado.',
+    UNHANDLED_HTTP_ERROR: 'Não foi possível concluir a solicitação.',
+    INTERNAL_SERVER_ERROR: 'Ocorreu um erro interno. Tente novamente mais tarde.',
     RATE_LIMITED: 'Muitas tentativas em pouco tempo. Aguarde um momento e tente novamente.',
   },
   errors: {
@@ -133,6 +143,8 @@ export const common = {
     recommendationsRefresh: 'Erro ao atualizar recomendações',
     conversationalSearch: 'Desculpe, tive um erro ao processar sua busca conversacional.',
     regenerateSearch: 'Não consegui gerar novas sugestões agora. Tente novamente em instantes.',
+    clipboardUnavailable: 'Clipboard indisponível neste navegador.',
+    clipboardCopy: 'Falha ao copiar.',
     unknownFavorite: 'Erro desconhecido ao favoritar',
     favoriteAlert: 'Erro ao favoritar: {{message}}',
   },

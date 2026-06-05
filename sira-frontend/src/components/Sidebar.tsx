@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import type { AuthUser } from '../types';
 import { SidebarNavItem } from './ui/SidebarNavItem';
 import { SIDEBAR_ITEMS } from './sidebar/sidebarItems';
@@ -87,7 +88,7 @@ export const Sidebar = ({
             onClick={() => setIsSidebarOpen(false)}
             className="cursor-pointer text-text-muted hover:text-danger-strong text-2xl leading-none w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-subtle transition-colors"
           >
-            &times;
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 

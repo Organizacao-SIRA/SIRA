@@ -20,6 +20,7 @@ import { EditActionBar } from '../components/profile/EditActionBar';
 import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
 import { LanguageToggle } from '../components/ui/LanguageToggle';
 import type { UiLocale } from '../i18n/locales';
+import { EDUCATION_LEVELS, LANGUAGES, MATERIAL_LEVELS } from '../i18n/preferenceValues';
 
 interface ProfileProps {
   profileData: ProfileData;
@@ -30,15 +31,15 @@ interface ProfileProps {
 }
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
-  { id: 'dir', label: 'Direito' },
-  { id: 'ia',  label: 'Tecnologia' },
-  { id: 'sau', label: 'Saúde' },
-  { id: 'eco', label: 'Economia' },
-  { id: 'amb', label: 'Meio Ambiente' },
-  { id: 'gp',  label: 'Gestão Pública' },
-  { id: 'cd',  label: 'Ciência de Dados' },
-  { id: 'edu', label: 'Educação' },
-  { id: 'soc', label: 'Sociologia' },
+  { id: 'dir', label: 'dir' },
+  { id: 'ia',  label: 'ia' },
+  { id: 'sau', label: 'sau' },
+  { id: 'eco', label: 'eco' },
+  { id: 'amb', label: 'amb' },
+  { id: 'gp',  label: 'gp' },
+  { id: 'cd',  label: 'cd' },
+  { id: 'edu', label: 'edu' },
+  { id: 'soc', label: 'soc' },
 ];
 
 const ProfileSkeleton = () => {
@@ -240,9 +241,9 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   };
 
   const topicsList            = preferenceOptions?.topics          || DEFAULT_TOPICS;
-  const languagesList         = preferenceOptions?.languages       || ['Português', 'Inglês', 'Espanhol'];
-  const materialLevelsList    = preferenceOptions?.materialLevels  || ['Introdutório', 'Intermediário', 'Avançado'];
-  const educationLevelsList   = preferenceOptions?.educationLevels || ['Graduação', 'Especialização', 'Mestrado', 'Doutorado'];
+  const languagesList         = preferenceOptions?.languages       || [...LANGUAGES];
+  const materialLevelsList    = preferenceOptions?.materialLevels  || [...MATERIAL_LEVELS];
+  const educationLevelsList   = preferenceOptions?.educationLevels || [...EDUCATION_LEVELS];
   const academicGoalsList     = preferenceOptions?.academicGoals   || [];
 
   return (

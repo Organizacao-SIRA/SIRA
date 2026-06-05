@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type UseClipboardOptions = {
   resetAfterMs?: number;
 };
 
 export const useClipboard = ({ resetAfterMs = 2000 }: UseClipboardOptions = {}) => {
+  const { t } = useTranslation('common');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -16,7 +18,7 @@ export const useClipboard = ({ resetAfterMs = 2000 }: UseClipboardOptions = {}) 
   const copy = useCallback(async (value: string) => {
     try {
       if (!navigator?.clipboard) {
-        throw new Error('Clipboard indisponível neste navegador.');
+        throw new Error(t('errors.clipboardUnavailable'));
       }
       await navigator.clipboard.writeText(value);
       setCopied(true);
@@ -26,11 +28,11 @@ export const useClipboard = ({ resetAfterMs = 2000 }: UseClipboardOptions = {}) 
       return true;
     } catch (err: unknown) {
       setCopied(false);
-      const message = err instanceof Error ? err.message : 'Falha ao copiar.';
+      const message = err instanceof Error ? err.message : t('errors.clipboardCopy');
       setError(message);
       return false;
     }
-  }, [resetAfterMs]);
+  }, [resetAfterMs, t]);
 
   return { copied, error, copy };
 };
