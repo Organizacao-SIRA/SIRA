@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { Library } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -33,8 +34,11 @@ export const Catalog = () => {
   const isMobile = useIsMobile();
   const effectiveMode = isMobile ? 'vertical' : viewMode;
 
-  const viewDetails = (item: CatalogItem) =>
-    navigate(`/material/${encodeURIComponent(item.id)}`, { state: { item, from: 'catalog' } });
+  const viewDetails = useCallback(
+    (item: CatalogItem) =>
+      navigate(`/material/${encodeURIComponent(item.id)}`, { state: { item, from: 'catalog' } }),
+    [navigate],
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fadeIn">
