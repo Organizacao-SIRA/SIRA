@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import type { CatalogItem } from '../types';
 import { useFavorites } from '../queries/useFavorites';
+import { createSessionCache } from '../utils/sessionCache';
 import { ContentBreadcrumb } from '../components/details/ContentBreadcrumb';
 import { ContentHero } from '../components/details/ContentHero';
 import { AcademicSummarySection } from '../components/details/AcademicSummarySection';
@@ -19,16 +21,37 @@ interface DetailsLocationState {
   from?: string;
 }
 
+/**
+ * Cache de sessão dos materiais já visitados. Como os materiais vêm de APIs
+ * externas (sem `GET /materials/:id` no backend), o item navegado vem via route
+ * state — que se perde no F5. Este cache restaura o material por `:id` ao recarregar
+ * ou ao voltar/avançar no navegador. (Deep-link "frio" ainda exige endpoint no backend.)
+ */
+const materialCache = createSessionCache<CatalogItem>({
+  namespace: 'material',
+  version: 'v1',
+  ttlMs: 30 * 60 * 1000,
+  maxEntries: 30,
+});
+
 export const Details = () => {
   const { t } = useTranslation('details');
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const state = location.state as DetailsLocationState | null;
-  const item = state?.item ?? null;
+  const item = state?.item ?? (id ? materialCache.get(id) : null);
   const previousScreen = state?.from ?? 'home';
   const onBack = () => navigate(-1);
+
+  // Persiste o material recém-navegado para sobreviver ao F5 / voltar do navegador.
+  useEffect(() => {
+    if (state?.item && id) {
+      materialCache.set(id, state.item);
+    }
+  }, [state?.item, id]);
 
   if (!item) {
     return <ContentNotFoundState onBack={() => navigate('/')} />;
