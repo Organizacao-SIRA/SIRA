@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { updateProfile, getPreferenceOptions } from '../services/api';
+import { updateProfile } from '../services/api';
 import { toast } from '../toast';
 import type { Dispatch, SetStateAction } from 'react';
-import type { PreferenceTopic, PreferenceOptions, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
+import type { PreferenceTopic, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
+import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { Button } from '../components/ui/Button';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -108,19 +109,15 @@ export const Profile = ({ profileData, setProfileData, isLoading, loadError, onR
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<ProfileData>(profileData);
-  const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
+  // Só busca as opções quando o usuário entra em modo de edição.
+  const { data: preferenceOptions } = usePreferenceOptions({ enabled: isEditing });
 
   useEffect(() => {
     queueMicrotask(() => setEditData(profileData));
   }, [profileData]);
-
-  useEffect(() => {
-    if (isEditing && !preferenceOptions) {
-      getPreferenceOptions().then(setPreferenceOptions).catch(() => {});
-    }
-  }, [isEditing, preferenceOptions]);
 
   const { setUiLocale } = useUiLocaleSync({
     onError: () => toast.error(t('errors.localeSave')),

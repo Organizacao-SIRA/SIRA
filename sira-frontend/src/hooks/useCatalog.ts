@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { searchCatalogItems, TOPIC_SEARCH_QUERIES, getPreferenceOptions } from '../services/api';
+import { searchCatalogItems, TOPIC_SEARCH_QUERIES } from '../services/api';
 import { usePersistedState } from './usePersistedState';
+import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { createSessionCache } from '../utils/sessionCache';
-import type { CatalogItem, PreferenceTopic, SearchFilters } from '../types';
+import type { CatalogItem, SearchFilters } from '../types';
 
 const PAGE_SIZE = 10;
 const DEFAULT_FILTERS: SearchFilters = { types: [], area: null, openAccessOnly: false, yearFrom: null };
@@ -110,7 +111,8 @@ export const useCatalog = () => {
   const [total, setTotal] = useState(initialSnapshot.total);
   const [loading, setLoading] = useState(initialSnapshot.loading);
   const [error, setError] = useState<string | null>(null);
-  const [topics, setTopics] = useState<PreferenceTopic[]>([]);
+  const { data: preferenceData } = usePreferenceOptions();
+  const topics = preferenceData?.topics ?? [];
 
   // Tracks the query that was actually submitted (used for labels/isSearchMode)
   const [submittedQuery, setSubmittedQuery] = useState(initialSnapshot.submittedQuery);
@@ -169,9 +171,6 @@ export const useCatalog = () => {
   useEffect(() => {
     let isActive = true;
 
-    getPreferenceOptions()
-      .then(opts => setTopics(opts.topics))
-      .catch(() => {});
     // Se o cache já populou o estado inicial, não busca novamente.
     if (initialSnapshot.loading) {
       queueMicrotask(() => {

@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { getPreferenceOptions } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
-import type { PreferenceOptions, UserProfile, ProfileData } from '../types';
+import { usePreferenceOptions } from '../queries/usePreferenceOptions';
+import type { UserProfile, ProfileData } from '../types';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { OnboardingActions } from '../components/onboarding/OnboardingActions';
@@ -27,33 +27,12 @@ interface OnboardingProps {
 export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: OnboardingProps) => {
   const { t } = useTranslation('onboarding');
   const { user } = useAuth();
-  const [preferenceOptions, setPreferenceOptions] = useState<PreferenceOptions | null>(null);
-  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
-  const [optionsError, setOptionsError] = useState('');
-
-  const loadPreferenceOptions = useCallback(async () => {
-    setIsLoadingOptions(true);
-    setOptionsError('');
-    try {
-      const opts = await getPreferenceOptions();
-      setPreferenceOptions(opts);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : t('loading.errorTitle');
-      setOptionsError(message);
-    } finally {
-      setIsLoadingOptions(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    let isActive = true;
-    queueMicrotask(() => {
-      if (isActive) void loadPreferenceOptions();
-    });
-    return () => {
-      isActive = false;
-    };
-  }, [loadPreferenceOptions]);
+  const {
+    data: preferenceOptions,
+    isLoading: isLoadingOptions,
+    error: optionsError,
+    refetch: loadPreferenceOptions,
+  } = usePreferenceOptions();
 
   const handleSuccess = (profile: UserProfile) => {
     setProfileData({
@@ -116,8 +95,8 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
         <div className="sira-card rounded-2xl p-6 sm:p-8 max-w-md w-full text-center">
           <AlertCircle className="w-10 h-10 text-warning-strong mx-auto mb-3" />
           <h3 className="text-lg font-bold text-primary-dark dark:text-text mb-2">{t('loading.errorTitle')}</h3>
-          <p className="text-text-muted text-sm mb-4">{optionsError || t('loading.unavailable')}</p>
-          <Button onClick={loadPreferenceOptions} className="px-6">
+          <p className="text-text-muted text-sm mb-4">{optionsError?.message || t('loading.unavailable')}</p>
+          <Button onClick={() => loadPreferenceOptions()} className="px-6">
             {t('common:actions.retry')}
           </Button>
         </div>
