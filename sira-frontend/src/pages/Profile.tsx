@@ -3,9 +3,9 @@ import { Pencil, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { updateProfile } from '../services/api';
 import { toast } from '../toast';
-import type { Dispatch, SetStateAction } from 'react';
 import type { PreferenceTopic, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfileContext } from '../contexts/ProfileContext';
 import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { Button } from '../components/ui/Button';
@@ -22,14 +22,6 @@ import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
 import { LanguageToggle } from '../components/ui/LanguageToggle';
 import type { UiLocale } from '../i18n/locales';
 import { EDUCATION_LEVELS, LANGUAGES, MATERIAL_LEVELS } from '../i18n/preferenceValues';
-
-interface ProfileProps {
-  profileData: ProfileData;
-  setProfileData: Dispatch<SetStateAction<ProfileData>>;
-  isLoading?: boolean;
-  loadError?: string | null;
-  onRetryLoad?: () => void;
-}
 
 const DEFAULT_TOPICS: PreferenceTopic[] = [
   { id: 'dir', label: 'dir' },
@@ -104,9 +96,16 @@ const ProfileSkeleton = () => {
   );
 };
 
-export const Profile = ({ profileData, setProfileData, isLoading, loadError, onRetryLoad }: ProfileProps) => {
+export const Profile = () => {
   const { t } = useTranslation('profile');
   const { updateUser } = useAuth();
+  const {
+    profileData,
+    setProfileData,
+    isProfileLoading: isLoading,
+    profileError: loadError,
+    loadSessionData: onRetryLoad,
+  } = useProfileContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<ProfileData>(profileData);
   const [isSaving, setIsSaving] = useState(false);

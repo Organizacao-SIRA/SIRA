@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { chatSearchMaterials } from '../services/api';
 import type { CatalogItem, SearchFilters } from '../types';
 import { readCatalogItemArray, readSessionJson } from './appState';
@@ -11,18 +12,15 @@ const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   yearFrom: null,
 };
 
-interface UseSearchSessionParams {
-  setCurrentScreen: (screen: string) => void;
-}
-
 const readSessionNumber = (key: string) => {
   const saved = sessionStorage.getItem(key);
   const parsed = saved ? Number.parseInt(saved, 10) : 0;
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export const useSearchSession = ({ setCurrentScreen }: UseSearchSessionParams) => {
+export const useSearchSession = () => {
   const { t } = useTranslation('common');
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('@sira:searchQuery') || '');
   const [results, setResults] = useState<CatalogItem[]>(() => readCatalogItemArray('@sira:results'));
   const [searchTotal, setSearchTotal] = useState(() => readSessionNumber('@sira:searchTotal'));
@@ -59,7 +57,7 @@ export const useSearchSession = ({ setCurrentScreen }: UseSearchSessionParams) =
 
     searchRequestInFlightRef.current = true;
     setIsLoading(true);
-    setCurrentScreen('results');
+    navigate('/buscar');
     setSearchPage(0);
     try {
       const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery, searchFilters);
@@ -76,7 +74,7 @@ export const useSearchSession = ({ setCurrentScreen }: UseSearchSessionParams) =
       setIsLoading(false);
       searchRequestInFlightRef.current = false;
     }
-  }, [isLoading, isRegenerating, searchFilters, searchQuery, setCurrentScreen, t]);
+  }, [isLoading, isRegenerating, navigate, searchFilters, searchQuery, t]);
 
   const regenerateSearchResults = useCallback(async () => {
     if (

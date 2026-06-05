@@ -9,7 +9,6 @@ interface UseSessionProfileParams {
   isAuthenticated: boolean;
   user: AuthUser | null;
   updateUser: (userData: Partial<AuthUser>) => void;
-  onLogoutReset: () => void;
 }
 
 /**
@@ -23,7 +22,6 @@ export const useSessionProfile = ({
   isAuthenticated,
   user,
   updateUser,
-  onLogoutReset,
 }: UseSessionProfileParams) => {
   const [profileData, setProfileData] = useState<ProfileData>({
     ...createEmptyProfileData(),
@@ -100,17 +98,16 @@ export const useSessionProfile = ({
     return () => { isActive = false; };
   }, [profileQueryData, updateUser]);
 
-  // Logout: zera o espelho local e dispara o reset do estado de sessão.
+  // Logout: zera o espelho local (o provider desmonta ao sair da área autenticada).
   useEffect(() => {
     if (isAuthenticated) return;
     let isActive = true;
     queueMicrotask(() => {
       if (!isActive) return;
       setProfileData(createEmptyProfileData());
-      onLogoutReset();
     });
     return () => { isActive = false; };
-  }, [isAuthenticated, onLogoutReset]);
+  }, [isAuthenticated]);
 
   const loadSessionData = useCallback(() => {
     void profileQuery.refetch();

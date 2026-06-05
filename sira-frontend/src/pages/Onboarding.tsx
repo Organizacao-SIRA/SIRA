@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfileContext } from '../contexts/ProfileContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
-import type { UserProfile, ProfileData } from '../types';
+import type { UserProfile } from '../types';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { OnboardingActions } from '../components/onboarding/OnboardingActions';
@@ -18,15 +20,11 @@ import { ReviewStep } from '../components/onboarding/steps/ReviewStep';
 import { Button } from '../components/ui/Button';
 import { Spinner } from '../components/ui/Spinner';
 
-interface OnboardingProps {
-  setCurrentScreen: (screen: string) => void;
-  profileData: ProfileData;
-  setProfileData: (data: ProfileData) => void;
-}
-
-export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: OnboardingProps) => {
+export const Onboarding = () => {
   const { t } = useTranslation('onboarding');
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { profileData, setProfileData } = useProfileContext();
   const {
     data: preferenceOptions,
     isLoading: isLoadingOptions,
@@ -54,7 +52,7 @@ export const Onboarding = ({ setCurrentScreen, profileData, setProfileData }: On
       hasCompletedOnboarding: true,
       onboardingCompletedAt: profile.onboardingCompletedAt,
     });
-    setCurrentScreen('home');
+    navigate('/');
   };
 
   const onboarding = useOnboardingForm({

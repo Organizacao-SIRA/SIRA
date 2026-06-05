@@ -1,39 +1,33 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { X } from 'lucide-react';
-import type { AuthUser } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import { SidebarNavItem } from './ui/SidebarNavItem';
-import { SIDEBAR_ITEMS } from './sidebar/sidebarItems';
+import { SIDEBAR_ITEMS, type SidebarItem } from './sidebar/sidebarItems';
 import { prefetchScreen } from '../app/screenLoaders';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean) => void;
-  currentScreen: string;
-  previousScreen: string;
-  setCurrentScreen: (screen: string) => void;
-  user: AuthUser | null;
 }
 
 export const Sidebar = ({
   isSidebarOpen,
   setIsSidebarOpen,
-  currentScreen,
-  previousScreen,
-  setCurrentScreen,
-  user,
 }: SidebarProps) => {
   const { t } = useTranslation('navigation');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const menuItems = SIDEBAR_ITEMS.filter(item => !item.authRequired || !!user);
-  const activeScreen = currentScreen === 'details'
-    ? previousScreen === 'results' ? 'home' : previousScreen
-    : currentScreen === 'results' ? 'home' : currentScreen;
 
-  const isActive = (id: string) => activeScreen === id;
+  const isActive = (item: SidebarItem) =>
+    location.pathname === item.path || (item.matchPaths?.includes(location.pathname) ?? false);
 
   // Em mobile (< md), navegar fecha o drawer; em desktop, mantém o estado atual.
-  const handleItemClick = (id: string) => {
-    setCurrentScreen(id);
+  const handleItemClick = (item: SidebarItem) => {
+    navigate(item.path);
     if (window.matchMedia('(max-width: 767px)').matches) {
       setIsSidebarOpen(false);
     }
@@ -98,9 +92,9 @@ export const Sidebar = ({
               <SidebarNavItem
                 key={item.id}
                 item={item}
-                isActive={isActive(item.id)}
+                isActive={isActive(item)}
                 isExpanded={isSidebarOpen}
-                onClick={() => handleItemClick(item.id)}
+                onClick={() => handleItemClick(item)}
                 onPrefetch={() => prefetchScreen(item.id)}
               />
             ))}

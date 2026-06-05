@@ -1,22 +1,15 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AuthUser, SearchFilters } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useSearch } from '../contexts/SearchContext';
 import { AiGreeting } from '../components/AiGreeting';
 import { ChatInputForm } from '../components/ChatInputForm';
 import { SearchFilters as SearchFiltersBar } from '../components/SearchFilters';
 import { PageFooter } from '../components/ui/PageFooter';
 
-interface HomeProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  handleSearch: (e: React.FormEvent) => void;
-  filters: SearchFilters;
-  setFilters: (filters: SearchFilters) => void;
-  user: AuthUser | null;
-}
-
-export const Home = ({ searchQuery, setSearchQuery, handleSearch, filters, setFilters, user }: HomeProps) => {
+export const Home = () => {
   const { t } = useTranslation('home');
+  const { user } = useAuth();
+  const { searchQuery, setSearchQuery, handleSearch, searchFilters, setSearchFilters } = useSearch();
   const isWritingSearch = searchQuery.trim().length > 0;
 
   return (
@@ -46,7 +39,7 @@ export const Home = ({ searchQuery, setSearchQuery, handleSearch, filters, setFi
               />
             </div>
             <div className="w-full max-w-3xl animate-fadeIn" style={{ animationDelay: '300ms' }}>
-              <SearchFiltersBar filters={filters} onChange={setFilters} />
+              <SearchFiltersBar filters={searchFilters} onChange={setSearchFilters} />
             </div>
           </div>
         </div>
