@@ -9,6 +9,10 @@ interface AuthContextData {
   isAuthenticated: boolean;
 }
 
-export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+export const AuthContext = createContext<AuthContextData | null>(null);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth precisa estar dentro de <AuthProvider>');
+  return ctx;
+};

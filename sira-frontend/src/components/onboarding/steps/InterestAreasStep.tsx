@@ -1,9 +1,9 @@
 import { Globe, Sparkles } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { InterestCard } from '../InterestCard';
-import { TOPIC_ICONS } from '../../../constants/topicIcons';
-import { preferenceTopicDescription, preferenceTopicLabel } from '../../../i18n/preferenceLabels';
-import type { PreferenceTopic } from '../../../types';
+import { TOPIC_ICONS } from '@/constants/topicIcons';
+import { preferenceTopicDescription, preferenceTopicLabel } from '@/i18n/preferenceLabels';
+import type { PreferenceTopic } from '@/types';
 
 interface InterestAreasStepProps {
   topics: PreferenceTopic[];

@@ -28,7 +28,7 @@ export const PasswordStrengthMeter = ({ password }: PasswordStrengthMeterProps) 
       {/* Barra de força */}
       <div className="space-y-1.5">
         <div className="flex gap-1">
-          {LEVELS.map((lvl, i) => (
+          {LEVELS.map((_, i) => (
             <div
               key={i}
               className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${

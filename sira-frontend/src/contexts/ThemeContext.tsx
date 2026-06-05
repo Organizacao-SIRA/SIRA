@@ -10,6 +10,10 @@ interface ThemeContextData {
   toggle: () => void;
 }
 
-export const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
+export const ThemeContext = createContext<ThemeContextData | null>(null);
 
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme precisa estar dentro de <ThemeProvider>');
+  return ctx;
+};

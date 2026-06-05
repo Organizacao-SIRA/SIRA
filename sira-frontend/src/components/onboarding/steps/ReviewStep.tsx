@@ -1,8 +1,8 @@
 import { Pencil, ClipboardCheck } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
-import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
-import type { OnboardingFormData } from '../../../types/onboarding';
-import type { PreferenceOptions } from '../../../types';
+import { preferenceTopicLabel, preferenceValueLabel } from '@/i18n/preferenceLabels';
+import type { OnboardingFormData } from '@/types/onboarding';
+import type { PreferenceOptions } from '@/types';
 
 interface ReviewStepProps {
   data: OnboardingFormData;

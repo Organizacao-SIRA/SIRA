@@ -2,9 +2,9 @@ import { GraduationCap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
-import { preferenceTopicLabel, preferenceValueLabel } from '../../../i18n/preferenceLabels';
-import type { OnboardingFormData, StepFieldErrors } from '../../../types/onboarding';
-import type { PreferenceOptions } from '../../../types';
+import { preferenceTopicLabel, preferenceValueLabel } from '@/i18n/preferenceLabels';
+import type { OnboardingFormData, StepFieldErrors } from '@/types/onboarding';
+import type { PreferenceOptions } from '@/types';
 
 interface AcademicProfileStepProps {
   data: OnboardingFormData;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './Button';

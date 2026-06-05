@@ -4,8 +4,8 @@ import {
   Target, Rocket, GraduationCap,
   Briefcase, Lightbulb, FlaskConical, ScrollText, X,
 } from 'lucide-react';
-import { preferenceValueLabel } from '../../../i18n/preferenceLabels';
-import { ACADEMIC_GOALS } from '../../../i18n/preferenceValues';
+import { preferenceValueLabel } from '@/i18n/preferenceLabels';
+import { ACADEMIC_GOALS } from '@/i18n/preferenceValues';
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   [ACADEMIC_GOALS[0]]: ScrollText,
