@@ -1,18 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CatalogItem } from './types';
-import { 
-  addFavorite, 
-  removeFavoriteApi
-} from './services/api';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Spinner } from './components/ui/Spinner';
 import { ErrorState } from './components/ui/ErrorState';
 import { PageErrorBoundary } from './components/ui/PageErrorBoundary';
 import { useAuth } from './contexts/AuthContext';
+import { useFavorites } from './queries/useFavorites';
 import { useScreenScrollRestoration } from './hooks/useScreenScrollRestoration';
-import { toast } from './toast';
 import { AppScreen } from './app/AppScreen';
 import { useSessionProfile } from './app/useSessionProfile';
 import { useSearchSession } from './app/useSearchSession';
@@ -174,8 +170,6 @@ export default function App() {
   }, [resetSearchSession]);
 
   const {
-    favoriteIds,
-    setFavoriteIds,
     isProfileLoading,
     profileError,
     profileData,
@@ -187,6 +181,8 @@ export default function App() {
     updateUser,
     onLogoutReset: resetUserScopedState,
   });
+
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     let isActive = true;
@@ -235,42 +231,6 @@ export default function App() {
     }
     setCurrentScreen('details');
   };
-
-  const toggleFavorite = async (item: CatalogItem) => {
-    const isFav = favoriteIds.has(item.id);
-
-    // Optimistic update — feedback imediato antes da resposta da API
-    setFavoriteIds(prev => {
-      const next = new Set(prev);
-      if (isFav) next.delete(item.id);
-      else next.add(item.id);
-      return next;
-    });
-
-    try {
-      if (isFav) {
-        await removeFavoriteApi(item.id);
-        toast.success(t('toast.favoriteRemoved'));
-      } else {
-        await addFavorite(item);
-        toast.success(t('toast.favoriteAdded'));
-      }
-      return true;
-    } catch (error: unknown) {
-      console.error('Erro ao alternar favorito:', error);
-      toast.error(t('errors.favoriteAlert', { message: error instanceof Error ? error.message : t('errors.unknownFavorite') }));
-      // Rollback em caso de falha
-      setFavoriteIds(prev => {
-        const next = new Set(prev);
-        if (isFav) next.add(item.id);
-        else next.delete(item.id);
-        return next;
-      });
-      return false;
-    }
-  };
-
-  const isFavorite = (id: string) => favoriteIds.has(id);
 
   const restoreSearchSection = () => {
     if (lastSearchScreen !== 'details') {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchFavoriteIds, getProfile } from '../services/api';
+import { getProfile } from '../services/api';
 import { DEFAULT_LOCALE } from '../i18n/locales';
 import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
 import type { AuthUser, ProfileData } from '../types';
@@ -18,7 +18,6 @@ export const useSessionProfile = ({
   updateUser,
   onLogoutReset,
 }: UseSessionProfileParams) => {
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
   const [isProfileLoading, setIsProfileLoading] = useState(isAuthenticated);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -73,23 +72,13 @@ export const useSessionProfile = ({
     }
   }, [updateUser]);
 
-  const loadFavoriteIds = useCallback(async () => {
-    try {
-      const data = await fetchFavoriteIds();
-      setFavoriteIds(new Set(data));
-    } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
-    }
-  }, []);
-
   const loadSessionData = useCallback(() => {
     setIsProfileLoading(true);
     setProfileError(null);
-    Promise.all([loadFavoriteIds(), loadProfile()])
-      .finally(() => {
-        setIsProfileLoading(false);
-      });
-  }, [loadFavoriteIds, loadProfile]);
+    loadProfile().finally(() => {
+      setIsProfileLoading(false);
+    });
+  }, [loadProfile]);
 
   useEffect(() => {
     let isActive = true;
@@ -108,7 +97,6 @@ export const useSessionProfile = ({
 
         loadSessionData();
       } else if (!isAuthenticated) {
-        setFavoriteIds(new Set());
         setProfileData(createEmptyProfileData());
         setIsProfileLoading(false);
         setProfileError(null);
@@ -131,8 +119,6 @@ export const useSessionProfile = ({
   ]);
 
   return {
-    favoriteIds,
-    setFavoriteIds,
     isProfileLoading,
     profileError,
     profileData,
