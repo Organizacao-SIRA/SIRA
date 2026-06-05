@@ -15,7 +15,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister: queryPersister, maxAge: 15 * 60 * 1000 }}
+      persistOptions={{ persister: queryPersister, maxAge: 15 * 60 * 1000, buster: 'v2-favorites-array' }}
     >
       <ThemeProvider>
         <AuthProvider>

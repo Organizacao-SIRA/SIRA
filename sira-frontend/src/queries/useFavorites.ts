@@ -15,18 +15,18 @@ interface ToggleVars {
 }
 
 interface ToggleContext {
-  previous: Set<string> | undefined;
+  previous: string[] | undefined;
 }
 
 /**
  * Conjunto de favoritos do usuário + ações de alternância.
  *
- * Substitui:
- *  - o carregamento manual de `favoriteIds` em `useSessionProfile`;
- *  - o optimistic-update-com-rollback escrito à mão em `App.tsx`.
+ * O cache guarda um `string[]` (serializável — sobrevive à persistência em
+ * sessionStorage), e expomos um `Set` aos componentes via `select`. Guardar um
+ * `Set` direto no cache quebraria no F5: `JSON.stringify(new Set())` vira `{}`.
  *
- * O `useMutation` com `onMutate`/`onError` faz exatamente o feedback imediato
- * com reversão em caso de falha, agora de forma declarativa.
+ * O `useMutation` com `onMutate`/`onError` faz o optimistic-update-com-rollback
+ * de forma declarativa.
  */
 export const useFavorites = () => {
   const queryClient = useQueryClient();
@@ -35,8 +35,10 @@ export const useFavorites = () => {
 
   const { data: favoriteIds } = useQuery({
     queryKey: queryKeys.favoriteIds,
-    queryFn: async () => new Set(await fetchFavoriteIds()),
+    queryFn: fetchFavoriteIds,
     enabled: isAuthenticated,
+    // Defensivo: cache antigo/corrompido pode não ser um array iterável.
+    select: (ids) => new Set(Array.isArray(ids) ? ids : []),
   });
 
   const ids = favoriteIds ?? EMPTY_IDS;
@@ -45,12 +47,11 @@ export const useFavorites = () => {
     mutationFn: ({ item, isFav }) => (isFav ? removeFavoriteApi(item.id) : addFavorite(item)),
     onMutate: async ({ item, isFav }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.favoriteIds });
-      const previous = queryClient.getQueryData<Set<string>>(queryKeys.favoriteIds);
-      queryClient.setQueryData<Set<string>>(queryKeys.favoriteIds, (old) => {
-        const next = new Set(old);
-        if (isFav) next.delete(item.id);
-        else next.add(item.id);
-        return next;
+      const previous = queryClient.getQueryData<string[]>(queryKeys.favoriteIds);
+      queryClient.setQueryData<string[]>(queryKeys.favoriteIds, (old) => {
+        const current = Array.isArray(old) ? old : [];
+        if (isFav) return current.filter(existing => existing !== item.id);
+        return current.includes(item.id) ? current : [...current, item.id];
       });
       return { previous };
     },
