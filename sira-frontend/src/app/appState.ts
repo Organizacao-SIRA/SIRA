@@ -1,22 +1,6 @@
 import { DEFAULT_LOCALE } from '../i18n/locales';
 import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
-import type { CatalogItem, ProfileData } from '../types';
-
-export const readSessionJson = <T,>(key: string, fallback: T): T => {
-  const saved = sessionStorage.getItem(key);
-  if (!saved) return fallback;
-
-  try {
-    return JSON.parse(saved) as T;
-  } catch {
-    sessionStorage.removeItem(key);
-    return fallback;
-  }
-};
-
-export const readCatalogItemArray = (key: string): CatalogItem[] => {
-  return readSessionJson<CatalogItem[]>(key, []);
-};
+import type { ProfileData } from '../types';
 
 export const createEmptyProfileData = (): ProfileData => ({
   name: '',

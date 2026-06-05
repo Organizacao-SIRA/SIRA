@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { chatSearchMaterials } from '../services/api';
+import { usePersistedState } from '../hooks/usePersistedState';
 import type { CatalogItem, SearchFilters } from '../types';
-import { readCatalogItemArray, readSessionJson } from './appState';
 
 const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   types: [],
@@ -12,36 +12,22 @@ const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   yearFrom: null,
 };
 
-const readSessionNumber = (key: string) => {
-  const saved = sessionStorage.getItem(key);
-  const parsed = saved ? Number.parseInt(saved, 10) : 0;
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
 export const useSearchSession = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('@sira:searchQuery') || '');
-  const [results, setResults] = useState<CatalogItem[]>(() => readCatalogItemArray('@sira:results'));
-  const [searchTotal, setSearchTotal] = useState(() => readSessionNumber('@sira:searchTotal'));
-  const [aiMessage, setAiMessage] = useState(() => sessionStorage.getItem('@sira:aiMessage') || '');
-  const [seenResultIds, setSeenResultIds] = useState<string[]>(() => readSessionJson<string[]>('@sira:seenResultIds', []));
-  const [searchPage, setSearchPage] = useState(() => readSessionNumber('@sira:searchPage'));
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>(() => {
-    return readSessionJson<SearchFilters>('@sira:searchFilters', DEFAULT_SEARCH_FILTERS);
-  });
+
+  // Persistência via `usePersistedState` (estratégia única do projeto) para
+  // sobreviver ao F5 e à navegação entre `/` e `/buscar`.
+  const [searchQuery, setSearchQuery] = usePersistedState<string>('@sira:searchQuery', '');
+  const [results, setResults] = usePersistedState<CatalogItem[]>('@sira:results', []);
+  const [aiMessage, setAiMessage] = usePersistedState<string>('@sira:aiMessage', '');
+  const [seenResultIds, setSeenResultIds] = usePersistedState<string[]>('@sira:seenResultIds', []);
+  const [searchFilters, setSearchFilters] = usePersistedState<SearchFilters>('@sira:searchFilters', DEFAULT_SEARCH_FILTERS);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const searchRequestInFlightRef = useRef(false);
   const regenerateRequestInFlightRef = useRef(false);
-
-  useEffect(() => { sessionStorage.setItem('@sira:searchQuery', searchQuery); }, [searchQuery]);
-  useEffect(() => { sessionStorage.setItem('@sira:results', JSON.stringify(results)); }, [results]);
-  useEffect(() => { sessionStorage.setItem('@sira:searchTotal', searchTotal.toString()); }, [searchTotal]);
-  useEffect(() => { sessionStorage.setItem('@sira:aiMessage', aiMessage); }, [aiMessage]);
-  useEffect(() => { sessionStorage.setItem('@sira:seenResultIds', JSON.stringify(seenResultIds)); }, [seenResultIds]);
-  useEffect(() => { sessionStorage.setItem('@sira:searchPage', searchPage.toString()); }, [searchPage]);
-  useEffect(() => { sessionStorage.setItem('@sira:searchFilters', JSON.stringify(searchFilters)); }, [searchFilters]);
 
   const handleSearch = useCallback(async (e: FormEvent) => {
     e.preventDefault();
@@ -58,23 +44,20 @@ export const useSearchSession = () => {
     searchRequestInFlightRef.current = true;
     setIsLoading(true);
     navigate('/buscar');
-    setSearchPage(0);
     try {
       const { aiMessage: msg, results: items } = await chatSearchMaterials(searchQuery, searchFilters);
       setResults(items);
       setAiMessage(msg);
-      setSearchTotal(items.length);
       setSeenResultIds(items.map(item => item.id).filter(Boolean));
     } catch {
       setResults([]);
       setAiMessage(t('errors.conversationalSearch'));
-      setSearchTotal(0);
       setSeenResultIds([]);
     } finally {
       setIsLoading(false);
       searchRequestInFlightRef.current = false;
     }
-  }, [isLoading, isRegenerating, navigate, searchFilters, searchQuery, t]);
+  }, [isLoading, isRegenerating, navigate, searchFilters, searchQuery, setAiMessage, setResults, setSeenResultIds, t]);
 
   const regenerateSearchResults = useCallback(async () => {
     if (
@@ -104,7 +87,6 @@ export const useSearchSession = () => {
       });
       setResults(items);
       setAiMessage(msg);
-      setSearchTotal(items.length);
       setSeenResultIds(prev => [...new Set([...prev, ...items.map(item => item.id).filter(Boolean)])]);
     } catch {
       setAiMessage(t('errors.regenerateSearch'));
@@ -112,17 +94,7 @@ export const useSearchSession = () => {
       setIsRegenerating(false);
       regenerateRequestInFlightRef.current = false;
     }
-  }, [isLoading, isRegenerating, results, searchFilters, searchQuery, seenResultIds, t]);
-
-  const resetSearchSession = useCallback(() => {
-    setSearchQuery('');
-    setResults([]);
-    setAiMessage('');
-    setSeenResultIds([]);
-    setSearchTotal(0);
-    setSearchPage(0);
-    setSearchFilters(DEFAULT_SEARCH_FILTERS);
-  }, []);
+  }, [isLoading, isRegenerating, results, searchFilters, searchQuery, seenResultIds, setAiMessage, setResults, setSeenResultIds, t]);
 
   return {
     searchQuery,
@@ -135,6 +107,5 @@ export const useSearchSession = () => {
     isRegenerating,
     handleSearch,
     regenerateSearchResults,
-    resetSearchSession,
   };
 };
