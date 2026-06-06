@@ -15,6 +15,7 @@ import { SemanticScholarClient } from '../clients/semantic-scholar.client';
 import { OpenAlexClient } from '../clients/openalex.client';
 import { MaterialsCacheService } from '../cache/materials-cache.service';
 import { MaterialPersistenceService } from './material-persistence.service';
+import { parseAiJson, isAiSynthesisResponse } from '../parsing/ai-json-parser';
 
 /**
  * Coordena a busca em múltiplas fontes: chama os clients, lida com falha parcial
@@ -224,17 +225,24 @@ export class MaterialsOrchestratorService {
         user: `USER REQUEST: "${prompt}"\n\nCANDIDATES:\n${candidatesText}\n\nReturn ONLY JSON: {"aiMessage": "...", "recommendations": [{"id": "...", "explanation": "..."}]}\n\nReminder: aiMessage and explanation in ${outputLanguage}.`,
         maxTokens: 1500,
       });
-      const text = rawSynthesis.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const { aiMessage, recommendations: selected } = JSON.parse(text);
+      const parsed = parseAiJson(rawSynthesis, this.logger);
+      if (!isAiSynthesisResponse(parsed)) {
+        this.logger.warn('Síntese da IA com formato inesperado — usando fallback');
+        return {
+          aiMessage: aiGenericFallbackMessage(uiLocale),
+          results: candidates.slice(0, 5),
+        };
+      }
 
-      const explanationMap = new Map<string, string>(
-        selected.map((r: { id: string; explanation: string }) => [r.id, r.explanation]),
+      const { aiMessage, recommendations: selected } = parsed;
+      const explanationMap = new Map<string, string | undefined>(
+        selected.map(r => [r.id, r.explanation]),
       );
 
       const finalResults = candidates
         .filter(c => explanationMap.has(c.id))
         .sort((a, b) => {
-          const ids = selected.map((r: { id: string }) => r.id);
+          const ids = selected.map(r => r.id);
           return ids.indexOf(a.id) - ids.indexOf(b.id);
         })
         .map((c, idx) => ({
