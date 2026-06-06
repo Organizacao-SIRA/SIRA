@@ -6,6 +6,7 @@ import { SearchFilters } from '../types/materials.types';
 import { MaterialScoringService } from '../services/material-scoring.service';
 import { fetchWithRetry } from './fetch-with-retry';
 import { AREA_SS_FIELDS } from './area-mappings';
+import { SemanticScholarResponse, SemanticScholarPaper } from '../types/external-api.types';
 
 @Injectable()
 export class SemanticScholarClient {
@@ -36,21 +37,21 @@ export class SemanticScholarClient {
     }
 
     try {
-      const response = await fetchWithRetry(() => firstValueFrom(this.http.get(url, { headers })), this.logger);
+      const response = await fetchWithRetry(() => firstValueFrom(this.http.get<SemanticScholarResponse>(url, { headers })), this.logger);
 
-      let data: any[] = response.data.data || [];
+      let data: SemanticScholarPaper[] = response.data?.data ?? [];
       if (filters?.openAccessOnly) {
         data = data.filter(item => item.isOpenAccess || item.openAccessPdf?.url || item.externalIds?.ArXiv);
       }
 
-      return data.map((item: any, index: number) => {
+      return data.map((item, index) => {
         const arxivId = item.externalIds?.ArXiv;
         const arxivPdfUrl = arxivId ? `https://arxiv.org/pdf/${arxivId}` : null;
         return {
           id: `ss-${item.paperId}`,
           type: MaterialType.ARTICLE,
           title: item.title || 'Título Indisponível',
-          authors: item.authors?.map((a: any) => a.name).join(', ') || 'Vários autores',
+          authors: item.authors?.map((a) => a.name).join(', ') || 'Vários autores',
           year: item.year != null ? String(item.year) : 'N/A',
           source: item.venue || 'Semantic Scholar',
           provider: 'Semantic Scholar',

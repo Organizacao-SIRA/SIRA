@@ -6,6 +6,7 @@ import { SearchFilters } from '../types/materials.types';
 import { MaterialScoringService } from '../services/material-scoring.service';
 import { fetchWithRetry } from './fetch-with-retry';
 import { AREA_OA_CONCEPT, LANGUAGE_ISO } from './area-mappings';
+import { OpenAlexResponse, OpenAlexWork } from '../types/external-api.types';
 
 @Injectable()
 export class OpenAlexClient {
@@ -47,15 +48,15 @@ export class OpenAlexClient {
     if (mailto) url += `&mailto=${encodeURIComponent(mailto)}`;
 
     try {
-      const response = await fetchWithRetry(() => firstValueFrom(this.http.get(url)), this.logger);
-      const results: any[] = response.data.results || [];
+      const response = await fetchWithRetry(() => firstValueFrom(this.http.get<OpenAlexResponse>(url)), this.logger);
+      const results: OpenAlexWork[] = response.data?.results ?? [];
 
-      const filtered = results.filter(item => item.title);
-      return filtered.map((item: any, index: number) => {
+      const filtered = results.filter((item): item is OpenAlexWork & { title: string } => Boolean(item.title));
+      return filtered.map((item, index) => {
         const isBook = item.type === 'book' || item.type === 'book-chapter';
         const authors = (item.authorships || [])
           .slice(0, 5)
-          .map((a: any) => a.author?.display_name)
+          .map((a) => a.author?.display_name)
           .filter(Boolean)
           .join(', ') || 'Autores não informados';
         const openAccessUrl = item.open_access?.oa_url;
@@ -73,7 +74,7 @@ export class OpenAlexClient {
           source: item.primary_location?.source?.display_name || 'OpenAlex',
           provider: 'OpenAlex',
           relevance: this.scoring.positionScore(index, filtered.length) + this.scoring.citationBoost(item.cited_by_count ?? 0),
-          abstract: this.reconstructAbstract(item.abstract_inverted_index),
+          abstract: this.reconstructAbstract(item.abstract_inverted_index ?? null),
           image: undefined,
           url,
           isOpenAccess: item.open_access?.is_oa === true || !!item.open_access?.oa_url,

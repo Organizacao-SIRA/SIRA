@@ -6,6 +6,7 @@ import { SearchFilters } from '../types/materials.types';
 import { MaterialScoringService } from '../services/material-scoring.service';
 import { fetchWithRetry } from './fetch-with-retry';
 import { AREA_GB_SUBJECT, LANGUAGE_ISO } from './area-mappings';
+import { GoogleBooksResponse, GoogleBooksVolume } from '../types/external-api.types';
 
 @Injectable()
 export class GoogleBooksClient {
@@ -37,9 +38,9 @@ export class GoogleBooksClient {
     const url = `${this.baseUrl}?${params.toString()}`;
 
     try {
-      const response = await fetchWithRetry(() => firstValueFrom(this.http.get(url)), this.logger);
+      const response = await fetchWithRetry(() => firstValueFrom(this.http.get<GoogleBooksResponse>(url)), this.logger);
 
-      let items: any[] = (response.data.items || []);
+      let items: GoogleBooksVolume[] = response.data?.items ?? [];
 
       if (filters?.yearFrom) {
         items = items.filter(item => {
@@ -55,7 +56,7 @@ export class GoogleBooksClient {
         });
       }
 
-      return items.map((item: any, index: number) => {
+      return items.map((item, index) => {
         const isOpenAccess =
           item.accessInfo?.publicDomain === true ||
           item.saleInfo?.saleability === 'FREE' ||
@@ -75,7 +76,7 @@ export class GoogleBooksClient {
           provider: 'Google Books',
           relevance: this.scoring.positionScore(index, items.length),
           abstract: item.volumeInfo?.description || 'Sem resumo disponível.',
-          image: item.volumeInfo?.imageLinks?.thumbnail || null,
+          image: item.volumeInfo?.imageLinks?.thumbnail || undefined,
           url,
           isOpenAccess,
           language: item.volumeInfo?.language ?? undefined,
