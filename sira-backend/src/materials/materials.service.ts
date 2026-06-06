@@ -4,6 +4,8 @@ import { ChatSearchResponseDto } from './dto/chat-search-response.dto';
 import { SearchFilters, ChatSearchOptions } from './types/materials.types';
 import { MaterialsOrchestratorService } from './services/materials-orchestrator.service';
 import { MaterialPersistenceService } from './services/material-persistence.service';
+import { notFoundError } from '../common/errors/http-error';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 // Re-export para preservar os imports existentes (ex.: materials.controller).
 export type { SearchFilters, ChatSearchOptions } from './types/materials.types';
@@ -30,5 +32,14 @@ export class MaterialsService {
 
   ensureMaterialExists(data: MaterialDto) {
     return this.persistence.ensureMaterialExists(data);
+  }
+
+  /** Busca um material persistido por ID (deep-link de detalhes). */
+  async getById(id: string): Promise<MaterialDto> {
+    const material = await this.persistence.findMaterialById(id);
+    if (!material) {
+      throw notFoundError(ERROR_CODES.MATERIAL_NOT_FOUND, 'Material não encontrado.');
+    }
+    return material;
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { MaterialDto } from '../dto/material.dto';
+import { MaterialDto, MaterialType } from '../dto/material.dto';
 
 /**
  * Único ponto de acesso ao Prisma do módulo materials: upsert de material,
@@ -41,6 +41,36 @@ export class MaterialPersistenceService {
         url: payload.url ?? undefined,
       },
     });
+  }
+
+  /**
+   * Busca um material persistido por ID e o mapeia para o formato `MaterialDto`
+   * consumido pelo frontend. Usado no deep-link frio da tela de detalhes.
+   * Campos opcionais nulos no banco viram `undefined` (forma das respostas de busca).
+   */
+  async findMaterialById(id: string): Promise<MaterialDto | null> {
+    const record = await this.prisma.material.findUnique({ where: { id } });
+    if (!record) return null;
+
+    return {
+      id: record.id,
+      type: record.type as MaterialType,
+      title: record.title,
+      authors: record.authors,
+      year: record.year,
+      source: record.source,
+      provider: record.provider ?? undefined,
+      relevance: record.relevance,
+      abstract: record.abstract ?? '',
+      image: record.image ?? undefined,
+      url: record.url ?? undefined,
+      isOpenAccess: record.isOpenAccess,
+      thematicArea: record.thematicArea ?? undefined,
+      doi: record.doi ?? undefined,
+      isbn: record.isbn ?? undefined,
+      level: record.level ?? undefined,
+      aiJustification: record.aiJustification ?? undefined,
+    };
   }
 
   /** Perfil do usuário usado para personalizar o prompt da IA no chatSearch. */

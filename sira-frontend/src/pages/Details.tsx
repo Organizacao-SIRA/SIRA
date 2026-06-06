@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import type { CatalogItem } from '../types';
 import { useFavorites } from '../queries/useFavorites';
-import { createSessionCache } from '../utils/sessionCache';
+import { useMaterial } from '../queries/useMaterial';
 import { ContentBreadcrumb } from '../components/details/ContentBreadcrumb';
 import { ContentHero } from '../components/details/ContentHero';
 import { AcademicSummarySection } from '../components/details/AcademicSummarySection';
@@ -15,24 +14,13 @@ import {
   ContentSecondaryActions,
 } from '../components/details/ContentActionPanel';
 import { ContentNotFoundState } from '../components/details/ContentNotFoundState';
+import { ContentDetailsSkeleton } from '../components/details/ContentDetailsSkeleton';
+import { ErrorState } from '../components/ui/ErrorState';
 
 interface DetailsLocationState {
   item?: CatalogItem;
   from?: string;
 }
-
-/**
- * Cache de sessão dos materiais já visitados. Como os materiais vêm de APIs
- * externas (sem `GET /materials/:id` no backend), o item navegado vem via route
- * state — que se perde no F5. Este cache restaura o material por `:id` ao recarregar
- * ou ao voltar/avançar no navegador. (Deep-link "frio" ainda exige endpoint no backend.)
- */
-const materialCache = createSessionCache<CatalogItem>({
-  namespace: 'material',
-  version: 'v1',
-  ttlMs: 30 * 60 * 1000,
-  maxEntries: 30,
-});
 
 export const Details = () => {
   const { t } = useTranslation('details');
@@ -42,16 +30,28 @@ export const Details = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const state = location.state as DetailsLocationState | null;
-  const item = state?.item ?? (id ? materialCache.get(id) : null);
   const previousScreen = state?.from ?? 'home';
+  // Navegação interna: item via route state (initialData, render instantâneo).
+  // Deep-link/F5 (sem state): busca GET /materials/:id. `data === null` → não encontrado.
+  const { data: item, isLoading, error, refetch } = useMaterial(id, state?.item);
+
   const onBack = () => navigate(-1);
 
-  // Persiste o material recém-navegado para sobreviver ao F5 / voltar do navegador.
-  useEffect(() => {
-    if (state?.item && id) {
-      materialCache.set(id, state.item);
-    }
-  }, [state?.item, id]);
+  if (isLoading) {
+    return <ContentDetailsSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-68px)] flex items-center">
+        <ErrorState
+          message={error instanceof Error ? error.message : undefined}
+          onRetry={() => refetch()}
+          className="max-w-2xl mx-auto"
+        />
+      </div>
+    );
+  }
 
   if (!item) {
     return <ContentNotFoundState onBack={() => navigate('/')} />;

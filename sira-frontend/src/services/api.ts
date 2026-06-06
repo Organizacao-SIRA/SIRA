@@ -296,6 +296,21 @@ export const searchCatalogItems = async (
   return response.json();
 };
 
+/**
+ * Busca um material persistido por ID (deep-link de detalhes).
+ * Retorna `null` em 404 (MATERIAL_NOT_FOUND) para a UI distinguir "não encontrado"
+ * de erro de rede; lança nos demais erros.
+ */
+export const getMaterialById = async (id: string): Promise<CatalogItem | null> => {
+  const response = await fetchWithAuth(`${API_BASE_URL}/materials/${encodeURIComponent(id)}`);
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    const body = await readErrorPayload(response);
+    throw new Error(resolveApiError(body, 'materialLoad'));
+  }
+  return response.json();
+};
+
 // --- Favorites ---
 
 export type FavoriteTypeFilter = 'all' | 'book' | 'article';
