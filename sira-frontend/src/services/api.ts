@@ -5,7 +5,6 @@ import type {
   CompleteOnboardingPayload,
   LoginPayload,
   PreferenceOptions,
-  RecommendationsResponse,
   RegisterPayload,
   SearchFilters,
   SearchResultsResponse,
@@ -453,25 +452,11 @@ export const completeOnboarding = async (
 };
 
 // --- AI Recommendations ---
-
-export const getAiRecommendations = async (): Promise<RecommendationsResponse> => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/recommendations`, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  const data: unknown = await response.json();
-  if (!response.ok) throw new Error(resolveApiError(data, 'recommendationsLoad'));
-  return data as RecommendationsResponse;
-};
-
-export const refreshAiRecommendations = async (): Promise<RecommendationsResponse> => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/recommendations/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  const data: unknown = await response.json();
-  if (!response.ok) throw new Error(resolveApiError(data, 'recommendationsRefresh'));
-  return data as RecommendationsResponse;
-};
+// Nota: getAiRecommendations/refreshAiRecommendations foram removidos junto com a
+// página órfã AiRecommendations (sem UI que os consumisse). Os endpoints de
+// recomendação seguem existindo no backend; re-adicionar a integração é trivial
+// quando uma tela de Recomendações for construída. `trackRecommendationEvent`
+// permanece pois é usado pelo RecommendationCard (telemetria de impressão/clique).
 
 export const trackRecommendationEvent = (materialId: string, eventType: 'impression' | 'click' | 'favorite'): void => {
   void fetchWithAuth(`${API_BASE_URL}/recommendations/events`, {
