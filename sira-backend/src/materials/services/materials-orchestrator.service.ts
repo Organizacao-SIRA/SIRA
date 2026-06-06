@@ -47,7 +47,7 @@ export class MaterialsOrchestratorService {
     }
 
     let rawResults: MaterialDto[];
-    const cached = this.cache.get(cacheKey);
+    const cached = this.cache.get<MaterialDto[]>(cacheKey);
 
     if (cached) {
       this.logger.log(`Cache hit para: "${query}"`);
