@@ -6,6 +6,7 @@ import { getPreferenceTopicKeywords, getPreferenceTopicLabels } from '../users/p
 import { AiProvider } from '../ai/ai-provider.abstract';
 import { normalizeUiLocale } from '../common/constants/ui-locale';
 import { aiOutputInstruction, aiOutputLanguageLabel } from '../common/constants/ai-output-language';
+import { parseAiJson, isAiRankingResponse } from '../materials/parsing/ai-json-parser';
 
 export interface RecommendationItem extends MaterialDto {
   aiExplanation: string | null;
@@ -315,15 +316,21 @@ export class RecommendationsService {
         user: `USER FAVORITES:\n${favoritesText}\n\nRECENT SEARCHES:\n${searchesText}\n\nCANDIDATES:\n${candidatesText}\n\nSelect the TOP ${topN} materials most relevant to this user. Prioritize, in this order: favorites, recent searches, declared interests, main area/subareas, language/level/format, and academic goal. For each one:\n- Write ONE short sentence explaining why it is relevant\n- Assign a relevance score from 0 to 100\n- For the "level" field: if the candidate already has a level different from "?", use exactly that value. If it is "?", determine one of these Portuguese strings (stored values, do NOT translate): "Introdutório", "Intermediário", or "Avançado"\n\nJSON: {"recommendations": [{"id": "...", "explanation": "...", "relevance": 0, "level": "..."}]}\n\nLANGUAGE RULE (mandatory): every explanation must be written exclusively in ${outputLanguage}. Do not mix languages. Do not translate titles, authors, or external metadata — keep them in their original language.`,
         maxTokens: 1024,
       });
-      const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const parsed = JSON.parse(text);
+      const parsed = parseAiJson(raw, this.logger);
+      if (!isAiRankingResponse(parsed)) {
+        this.logger.warn('Ranking da IA com formato inesperado — usando ordenação por relevância');
+        return candidates
+          .slice(0, topN)
+          .map(c => ({ ...c, aiExplanation: null }))
+          .sort((a, b) => b.relevance - a.relevance);
+      }
 
-      const metaMap = new Map<string, { explanation: string; relevance: number; level: string }>(
-        parsed.recommendations.map((r: { id: string; explanation: string; relevance: number; level: string }) => [
+      const metaMap = new Map(
+        parsed.recommendations.map(r => [
           r.id,
           {
-            explanation: r.explanation,
-            relevance: Math.min(100, Math.max(0, Math.round(r.relevance))),
+            explanation: r.explanation ?? null,
+            relevance: Math.min(100, Math.max(0, Math.round(r.relevance ?? 0))),
             level: r.level,
           },
         ]),
@@ -335,11 +342,11 @@ export class RecommendationsService {
           ...c,
           aiExplanation: metaMap.get(c.id)!.explanation,
           relevance: metaMap.get(c.id)!.relevance,
-          level: metaMap.get(c.id)!.level,
+          level: metaMap.get(c.id)!.level ?? c.level,
         }))
         .sort((a, b) => b.relevance - a.relevance);
     } catch (error) {
-      this.logger.error(`Erro ao chamar Claude: ${error.message}`);
+      this.logger.error(`Erro ao chamar Claude: ${(error as Error).message}`);
       return candidates
         .slice(0, topN)
         .map(c => ({ ...c, aiExplanation: null }))

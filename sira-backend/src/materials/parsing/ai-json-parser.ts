@@ -34,6 +34,30 @@ export function isAiSynthesisResponse(value: unknown): value is AiSynthesisRespo
   );
 }
 
+// ── Forma esperada do ranking de recomendações (rankWithClaude) ──────
+export interface AiRankingItem {
+  id: string;
+  explanation?: string;
+  relevance?: number;
+  level?: string;
+}
+
+export interface AiRankingResponse {
+  recommendations: AiRankingItem[];
+}
+
+function isAiRankingItem(value: unknown): value is AiRankingItem {
+  return isRecord(value) && isString(value.id);
+}
+
+export function isAiRankingResponse(value: unknown): value is AiRankingResponse {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.recommendations) &&
+    value.recommendations.every(isAiRankingItem)
+  );
+}
+
 /**
  * Faz parse seguro de JSON vindo da IA.
  *
