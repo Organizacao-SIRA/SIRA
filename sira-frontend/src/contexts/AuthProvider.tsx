@@ -4,6 +4,7 @@ import { normalizeLocale, setStoredUiLocale, type UiLocale } from '../i18n/local
 import type { AuthUser } from '../types';
 import { AuthContext } from './AuthContext';
 import { queryClient } from '../queries/queryClient';
+import { clearTokens } from '../services/api';
 
 const AUTH_API = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
@@ -27,13 +28,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await fetch(`${AUTH_API}/auth/logout`, { method: 'POST', credentials: 'include' });
     } catch {
       // Logout local continua mesmo se a chamada de rede falhar.
+    } finally {
+      clearTokens(); // remove sira_access_token e sira_refresh_token do localStorage
+      localStorage.removeItem('@sira:user');
+      Object.keys(sessionStorage)
+        .filter(k => k.startsWith('@sira:'))
+        .forEach(k => sessionStorage.removeItem(k));
+      queryClient.clear(); // descarta cache de servidor (perfil, favoritos, recomendações)
+      setUser(null);
     }
-    localStorage.removeItem('@sira:user');
-    Object.keys(sessionStorage)
-      .filter(k => k.startsWith('@sira:'))
-      .forEach(k => sessionStorage.removeItem(k));
-    queryClient.clear(); // descarta cache de servidor (perfil, favoritos, recomendações)
-    setUser(null);
   }, []);
 
   useEffect(() => {

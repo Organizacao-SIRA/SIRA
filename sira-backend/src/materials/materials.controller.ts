@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MaterialsService, SearchFilters } from './materials.service';
 import { MaterialDto } from './dto/material.dto';
@@ -75,5 +75,16 @@ export class MaterialsController {
       diversify: diversify === 'true',
       locale: acceptLanguage,
     });
+  }
+
+  // Declarado por último para não capturar as rotas estáticas /search e /chat.
+  @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Busca um material persistido por ID (deep-link de detalhes)' })
+  @ApiResponse({ status: 200, type: MaterialDto })
+  @ApiResponse({ status: 404, description: 'MATERIAL_NOT_FOUND' })
+  getById(@Param('id') id: string): Promise<MaterialDto> {
+    return this.materialsService.getById(id);
   }
 }

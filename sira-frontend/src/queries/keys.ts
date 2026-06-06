@@ -18,6 +18,8 @@ export const queryKeys = {
 
   recommendations: ['recommendations'] as const,
 
+  material: (id: string | undefined) => ['material', id] as const,
+
   catalogSearch: (query: string, category: string, page: number, filters: SearchFilters) =>
     ['catalog', { query, category, page, filters }] as const,
 } as const;
