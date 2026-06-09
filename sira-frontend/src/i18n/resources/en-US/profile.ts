@@ -31,6 +31,11 @@ export const profile = {
     completed: 'Preferences completed',
     pending: 'Preferences pending',
   },
+  setup: {
+    title: 'Complete your academic profile',
+    description: 'Set your course, interest areas and preferences in the onboarding to unlock editing here and get better recommendations.',
+    cta: 'Complete profile',
+  },
   content: {
     books: 'Books',
     articles: 'Articles',

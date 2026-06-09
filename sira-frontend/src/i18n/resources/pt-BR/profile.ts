@@ -31,6 +31,11 @@ export const profile = {
     completed: 'Preferências concluídas',
     pending: 'Preferências pendentes',
   },
+  setup: {
+    title: 'Complete seu perfil acadêmico',
+    description: 'Defina curso, áreas de interesse e preferências no onboarding para liberar a edição aqui e receber recomendações melhores.',
+    cta: 'Completar perfil',
+  },
   content: {
     books: 'Livros',
     articles: 'Artigos',

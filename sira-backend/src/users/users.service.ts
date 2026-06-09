@@ -10,22 +10,8 @@ import {
   EDUCATION_LEVELS,
   LANGUAGES,
   MATERIAL_LEVELS,
-  MIN_INTEREST_AREAS,
   PREFERENCE_TOPICS,
 } from './preferences-options';
-
-/**
- * O perfil tem os dados essenciais do onboarding (curso, área principal e o
- * mínimo de interesses)? Espelha as exigências do fluxo de onboarding.
- */
-const hasEssentialProfile = (p: {
-  course: string | null;
-  mainArea: string | null;
-  interests: string[];
-}): boolean =>
-  (p.course?.trim().length ?? 0) >= 2 &&
-  !!p.mainArea?.trim() &&
-  p.interests.length >= MIN_INTEREST_AREAS;
 
 @Injectable()
 export class UsersService {
@@ -92,21 +78,9 @@ export class UsersService {
       throw badRequestError(ERROR_CODES.PROFILE_FORMAT_REQUIRED, 'Selecione pelo menos um formato de material');
     }
 
-    // Editar pelas Configurações conta como concluir o onboarding: se ainda não
-    // estava concluído e o perfil resultante já tem os essenciais (curso, área
-    // principal e o mínimo de interesses), marca a conclusão. Assim o estado
-    // "concluído" reflete ter os dados, não a tela usada.
-    const completeOnboarding =
-      !current.onboardingCompletedAt &&
-      hasEssentialProfile({
-        course: dto.course ?? current.course,
-        mainArea: dto.mainArea ?? current.mainArea,
-        interests: dto.interests ?? current.interests,
-      });
-
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { ...dto, ...(completeOnboarding ? { onboardingCompletedAt: new Date() } : {}) },
+      data: dto,
     });
 
     if (this.hasRecommendationRelevantChanges(dto)) {
