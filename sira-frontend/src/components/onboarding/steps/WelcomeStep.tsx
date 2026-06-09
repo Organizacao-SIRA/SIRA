@@ -1,5 +1,6 @@
-import { Sparkles, BookOpen, Compass, BrainCircuit } from 'lucide-react';
+import { Sparkles, BookOpen, Compass, BrainCircuit, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../../ui/Button';
 
 interface WelcomeStepProps {
   userName?: string | null;
@@ -44,13 +45,10 @@ export const WelcomeStep = ({ userName, onSkip }: WelcomeStepProps) => {
       </ul>
 
       {onSkip && (
-        <button
-          type="button"
-          onClick={onSkip}
-          className="mt-6 text-sm font-semibold text-text-muted hover:text-link transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded-md px-2 py-1"
-        >
+        <Button variant="ghost" size="sm" onClick={onSkip} className="mt-6">
+          <Clock className="w-4 h-4" aria-hidden="true" />
           {t('welcome.skip')}
-        </button>
+        </Button>
       )}
     </div>
   );
