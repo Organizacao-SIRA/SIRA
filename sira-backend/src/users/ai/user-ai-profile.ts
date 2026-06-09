@@ -9,6 +9,7 @@ export interface UserAiProfileInput {
   educationLevel?: string | null;
   mainArea?: string | null;
   subAreas?: string | null;
+  currentWork?: string | null;
   interests?: string[] | null;
   academicGoal?: string | null;
   materialLevels?: string[] | null;
@@ -61,6 +62,7 @@ const AI_PROFILE_FIELDS: ProfileField[] = [
   { label: 'Education level', resolve: u => u.educationLevel },
   { label: 'Main area', resolve: u => topicLabel(u.mainArea) },
   { label: 'Subareas', resolve: u => u.subAreas },
+  { label: 'Currently working on', resolve: u => u.currentWork },
   { label: 'Interests', resolve: u => topicLabelsJoined(u.interests) },
   { label: 'Academic goal', resolve: u => u.academicGoal },
   { label: 'Preferred material level', resolve: u => u.materialLevels?.join(', ') },

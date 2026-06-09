@@ -51,6 +51,8 @@ export const onboarding = {
     selectMainArea: 'Select the main area',
     subAreas: 'Subareas (optional)',
     subAreasPlaceholder: 'E.g. Machine Learning, NLP',
+    currentWork: 'What are you working on right now? (optional)',
+    currentWorkPlaceholder: 'E.g. Thesis on fraud detection with machine learning',
   },
   interests: {
     title: 'Which topics interest you?',
@@ -93,6 +95,7 @@ export const onboarding = {
     level: 'Level',
     mainArea: 'Main area',
     subAreas: 'Subareas',
+    currentWork: 'Current work',
     noneSelected: 'None selected',
     languages: 'Languages',
     formats: 'Formats',

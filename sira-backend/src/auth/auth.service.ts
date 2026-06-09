@@ -174,6 +174,7 @@ export class AuthService {
       educationLevel: user.educationLevel,
       mainArea: user.mainArea,
       subAreas: user.subAreas,
+      currentWork: user.currentWork,
       languages: user.languages,
       materialLevels: user.materialLevels,
       wantsBooks: user.wantsBooks,

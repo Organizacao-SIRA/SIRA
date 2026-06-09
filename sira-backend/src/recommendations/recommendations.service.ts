@@ -25,6 +25,7 @@ type RecommendationUser = {
   educationLevel: string | null;
   mainArea: string | null;
   subAreas: string | null;
+  currentWork: string | null;
   languages: string[];
   materialLevels: string[];
   wantsBooks: boolean;
@@ -94,6 +95,7 @@ export class RecommendationsService {
           educationLevel: true,
           mainArea: true,
           subAreas: true,
+          currentWork: true,
           languages: true,
           materialLevels: true,
           wantsBooks: true,

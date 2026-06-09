@@ -101,6 +101,12 @@ export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
                 <dd className="font-semibold">{data.subAreas}</dd>
               </div>
             )}
+            {data.currentWork && (
+              <div className="sm:col-span-2">
+                <dt className="text-xs text-text-muted">{t('review.currentWork')}</dt>
+                <dd className="font-semibold">{data.currentWork}</dd>
+              </div>
+            )}
           </dl>
         </Section>
 

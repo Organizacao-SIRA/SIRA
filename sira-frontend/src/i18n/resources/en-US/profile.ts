@@ -18,6 +18,7 @@ export const profile = {
     level: 'Level',
     area: 'Area',
     subAreas: 'Subareas',
+    currentWork: 'Current work',
     objective: 'Goal',
     languages: 'Languages',
     formats: 'Formats',

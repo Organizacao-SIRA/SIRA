@@ -159,7 +159,7 @@ export const Profile = () => {
   };
 
   const handleTextChange = (
-    field: 'name' | 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'academicGoal',
+    field: 'name' | 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'currentWork' | 'academicGoal',
     value: string,
   ) => handleChange(field, value);
 
@@ -186,6 +186,7 @@ export const Profile = () => {
           educationLevel: editData.educationLevel || undefined,
           mainArea: editData.mainArea || undefined,
           subAreas: editData.subAreas || undefined,
+          currentWork: editData.currentWork || undefined,
           languages: editData.languages,
           materialLevels: editData.materialLevels,
           wantsBooks: editData.wantsBooks,
@@ -281,6 +282,7 @@ export const Profile = () => {
                   educationLevel: profileData.educationLevel,
                   mainArea: profileData.mainArea,
                   subAreas: profileData.subAreas,
+                  currentWork: profileData.currentWork,
                   academicGoal: profileData.academicGoal,
                 }}
                 editData={{
@@ -288,6 +290,7 @@ export const Profile = () => {
                   educationLevel: editData.educationLevel || '',
                   mainArea: editData.mainArea || '',
                   subAreas: editData.subAreas || '',
+                  currentWork: editData.currentWork || '',
                   academicGoal: editData.academicGoal || '',
                 }}
                 onChange={handleTextChange}

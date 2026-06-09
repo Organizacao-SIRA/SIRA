@@ -30,6 +30,10 @@ export class UpdateProfileDto {
   subAreas?: string;
 
   @IsOptional()
+  @IsString()
+  currentWork?: string;
+
+  @IsOptional()
   @IsArray()
   @IsIn(LANGUAGE_LIST, { each: true })
   languages?: string[];

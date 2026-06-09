@@ -18,6 +18,7 @@ model User {
   educationLevel        String?
   mainArea              String?
   subAreas              String?
+  currentWork           String?
   languages             String[]
   materialLevels        String[]
   wantsBooks            Boolean              @default(true)

@@ -66,6 +66,14 @@ export const AcademicProfileStep = ({ data, errors, options, onChange }: Academi
         onChange={(e) => onChange('subAreas', e.target.value)}
       />
     </div>
+
+    <Input
+      label={t('academicProfile.currentWork')}
+      type="text"
+      placeholder={t('academicProfile.currentWorkPlaceholder')}
+      value={data.currentWork}
+      onChange={(e) => onChange('currentWork', e.target.value)}
+    />
     </div>
   );
 };
