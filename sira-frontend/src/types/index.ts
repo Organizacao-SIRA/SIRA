@@ -47,9 +47,8 @@ export type UserProfile = {
 
 // Payload enviado ao concluir o onboarding. Deriva do contrato de preferências;
 // `subAreas`/`academicGoal` são opcionais (o cliente envia `undefined` quando vazios).
-// `wantsOpenAccessOnly` ainda não faz parte do onboarding (ver domain/academicPreferences).
 export type CompleteOnboardingPayload =
-  Omit<AcademicPreferences, 'subAreas' | 'academicGoal' | 'wantsOpenAccessOnly'> & {
+  Omit<AcademicPreferences, 'subAreas' | 'academicGoal'> & {
     subAreas?: string;
     academicGoal?: string;
   };

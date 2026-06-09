@@ -266,12 +266,14 @@ export const Profile = () => {
               course: profileData.course,
               educationLevel: profileData.educationLevel,
               mainArea: profileData.mainArea,
+              subAreas: profileData.subAreas,
               academicGoal: profileData.academicGoal,
             }}
             editData={{
               course: editData.course || '',
               educationLevel: editData.educationLevel || '',
               mainArea: editData.mainArea || '',
+              subAreas: editData.subAreas || '',
               academicGoal: editData.academicGoal || '',
             }}
             onChange={handleTextChange}

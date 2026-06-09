@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useCompleteOnboarding } from '../queries/useProfileMutations';
-import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
-import { MIN_INTERESTS, onboardingPreferencesSchema } from '../domain/academicPreferences';
+import { MIN_INTERESTS, academicPreferencesSchema, createDefaultAcademicPreferences } from '../domain/academicPreferences';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
 import { ONBOARDING_STEPS, ONBOARDING_STEP_FIELDS } from '../types/onboarding';
 import type { UserProfile, ProfileData } from '../types';
@@ -21,19 +20,6 @@ const VALIDATION_KEY_BY_FIELD: Partial<Record<keyof OnboardingFormData, string>>
 
 const DRAFT_KEY = '@sira:onboardingDraft';
 const STEP_KEY = '@sira:onboardingStep';
-
-const DEFAULT_FORM: OnboardingFormData = {
-  course: '',
-  educationLevel: DEFAULT_EDUCATION_LEVEL,
-  mainArea: '',
-  subAreas: '',
-  interests: [],
-  languages: [...DEFAULT_LANGUAGES],
-  materialLevels: [...DEFAULT_MATERIAL_LEVELS],
-  wantsBooks: true,
-  wantsArticles: true,
-  academicGoal: '',
-};
 
 const readDraft = (): Partial<OnboardingFormData> | null => {
   try {
@@ -52,18 +38,20 @@ const readStep = (max: number): number => {
 };
 
 const hydrate = (initial: Partial<OnboardingFormData> | undefined): OnboardingFormData => {
+  const defaults = createDefaultAcademicPreferences();
   const draft = readDraft();
-  const source = { ...DEFAULT_FORM, ...(initial || {}), ...(draft || {}) };
+  const source = { ...defaults, ...(initial || {}), ...(draft || {}) };
   return {
     course: source.course || '',
-    educationLevel: source.educationLevel || DEFAULT_EDUCATION_LEVEL,
+    educationLevel: source.educationLevel || defaults.educationLevel,
     mainArea: source.mainArea || '',
     subAreas: source.subAreas || '',
     interests: Array.isArray(source.interests) ? source.interests : [],
-    languages: source.languages?.length ? source.languages : [...DEFAULT_LANGUAGES],
-    materialLevels: source.materialLevels?.length ? source.materialLevels : [...DEFAULT_MATERIAL_LEVELS],
+    languages: source.languages?.length ? source.languages : defaults.languages,
+    materialLevels: source.materialLevels?.length ? source.materialLevels : defaults.materialLevels,
     wantsBooks: source.wantsBooks ?? true,
     wantsArticles: source.wantsArticles ?? true,
+    wantsOpenAccessOnly: source.wantsOpenAccessOnly ?? false,
     academicGoal: source.academicGoal || '',
   };
 };
@@ -122,7 +110,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   const stepErrors = useMemo<StepFieldErrors[]>(() => {
     // Valida pelo schema do contrato e mapeia cada issue para a mensagem i18n
     // do campo correspondente.
-    const result = onboardingPreferencesSchema.safeParse(data);
+    const result = academicPreferencesSchema.safeParse(data);
     const fieldErrors: StepFieldErrors = {};
     if (!result.success) {
       for (const issue of result.error.issues) {
@@ -186,6 +174,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
         materialLevels: data.materialLevels,
         wantsBooks: data.wantsBooks,
         wantsArticles: data.wantsArticles,
+        wantsOpenAccessOnly: data.wantsOpenAccessOnly,
         interests: data.interests,
         academicGoal: data.academicGoal || undefined,
       });

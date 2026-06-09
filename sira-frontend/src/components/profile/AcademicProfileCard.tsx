@@ -6,7 +6,7 @@ import { SectionCard } from './SectionCard';
 import { preferenceTopicLabel, preferenceValueLabel } from '../../i18n/preferenceLabels';
 import type { PreferenceTopic } from '../../types';
 
-type AcademicProfileField = 'course' | 'educationLevel' | 'mainArea' | 'academicGoal';
+type AcademicProfileField = 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'academicGoal';
 
 interface AcademicProfileCardProps {
   isEditing: boolean;
@@ -14,12 +14,14 @@ interface AcademicProfileCardProps {
     course: string;
     educationLevel: string;
     mainArea: string;
+    subAreas: string;
     academicGoal: string;
   };
   editData: {
     course: string;
     educationLevel: string;
     mainArea: string;
+    subAreas: string;
     academicGoal: string;
   };
   onChange: (field: AcademicProfileField, value: string) => void;
@@ -85,6 +87,13 @@ export const AcademicProfileCard = ({
             {selectedTopic ? preferenceTopicLabel(selectedTopic, tp) : data.mainArea}
           </span>
         )}
+      </Row>
+
+      <Row label={t('fields.subAreas')}>
+        {isEditing
+          ? <Input value={editData.subAreas} onChange={(e) => onChange('subAreas', e.target.value)} />
+          : <span className="text-text font-bold break-words">{data.subAreas || t('values.notInformed')}</span>
+        }
       </Row>
 
       <Row label={t('fields.objective')}>

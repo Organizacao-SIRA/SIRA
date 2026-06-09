@@ -17,6 +17,7 @@ export const profile = {
     course: 'Curso',
     level: 'Nível',
     area: 'Área',
+    subAreas: 'Subáreas',
     objective: 'Objetivo',
     languages: 'Idiomas',
     formats: 'Formatos',

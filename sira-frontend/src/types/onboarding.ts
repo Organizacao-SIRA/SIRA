@@ -1,8 +1,8 @@
 import type { AcademicPreferences } from '../domain/academicPreferences';
 
-// Estado do formulário de onboarding. Deriva do contrato de preferências; hoje
-// o onboarding ainda não coleta `wantsOpenAccessOnly` (só as Configurações).
-export type OnboardingFormData = Omit<AcademicPreferences, 'wantsOpenAccessOnly'>;
+// Estado do formulário de onboarding = contrato completo de preferências
+// (onboarding e Configurações cobrem o mesmo conjunto de campos).
+export type OnboardingFormData = AcademicPreferences;
 
 export type OnboardingStepId =
   | 'welcome'
@@ -38,7 +38,7 @@ export const ONBOARDING_STEP_FIELDS: Record<OnboardingStepId, (keyof OnboardingF
   'welcome': [],
   'academic-profile': ['course', 'educationLevel', 'mainArea', 'subAreas'],
   'interest-areas': ['interests'],
-  'content-preferences': ['languages', 'materialLevels', 'wantsBooks', 'wantsArticles'],
+  'content-preferences': ['languages', 'materialLevels', 'wantsBooks', 'wantsArticles', 'wantsOpenAccessOnly'],
   'academic-goal': ['academicGoal'],
   'review': [],
 };

@@ -65,6 +65,9 @@ export const onboarding = {
     formatsDescription: 'Select at least one material type.',
     books: 'Books',
     articles: 'Scientific articles',
+    openAccessTitle: 'Open access',
+    openAccessDescription: 'Prefer only open-access (free) materials?',
+    openAccessLabel: 'Open access only',
   },
   goal: {
     title: 'What is your goal?',
@@ -87,6 +90,7 @@ export const onboarding = {
     noneSelected: 'None selected',
     languages: 'Languages',
     formats: 'Formats',
+    access: 'Access',
     notInformed: 'Not informed',
   },
   validation: {
