@@ -107,11 +107,11 @@ Abordagem escolhida: **expandir** (manter as 9 originais + adicionar 21), evitan
 - [ ] *(Deferido)* Eliminar a duplicação FE×BE das listas (módulo/fonte compartilhada).
 - [ ] *(Deferido, opcional)* Taxonomia em 2 níveis (grande área → subáreas filtradas) para reduzir o tamanho do grid de interesses.
 
-### Fase 4 — Campo "trabalho atual"
-- [ ] Schema Prisma + migration (`currentWork String?`).
-- [ ] Contrato Zod (FE) + DTO (BE) + adaptador (`academicPreferencesFromProfile`).
-- [ ] UI: campo no onboarding (`AcademicProfileStep`) e nas configurações (`AcademicProfileCard`), com placeholder/exemplos.
-- [ ] Incluir no `buildUserAiProfile`.
+### Fase 4 — Campo "trabalho atual" ✅
+- [x] Schema Prisma (`currentWork String?`), aplicado via `db push` (fluxo do projeto).
+- [x] Contrato Zod (FE) + DTOs (BE) + adaptador (`academicPreferencesFromProfile`).
+- [x] UI: campo no onboarding (`AcademicProfileStep` + Review) e nas Configurações (`AcademicProfileCard`), com placeholder/exemplos e i18n pt/en.
+- [x] Incluído no `buildUserAiProfile` ("Currently working on") + selects da busca e recomendações.
 
 ### Fase 5 — Refinos de conteúdo
 - [ ] Reorganizar **objetivos** (separar intenção × entregável × contexto, ou agrupar coerentemente).
