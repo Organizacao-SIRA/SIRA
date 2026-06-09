@@ -55,6 +55,7 @@ export class UsersService {
         materialLevels: dto.materialLevels,
         wantsBooks: dto.wantsBooks,
         wantsArticles: dto.wantsArticles,
+        wantsOpenAccessOnly: dto.wantsOpenAccessOnly,
         uiLocale: dto.uiLocale,
         interests: dto.interests,
         academicGoal: dto.academicGoal,

@@ -10,7 +10,7 @@ interface InterestAreasStepProps {
   selected: string[];
   onToggle: (topicId: string) => void;
   error?: string;
-  minSelected?: number;
+  minSelected: number;
 }
 
 export const InterestAreasStep = ({
@@ -18,7 +18,7 @@ export const InterestAreasStep = ({
   selected,
   onToggle,
   error,
-  minSelected = 3,
+  minSelected,
 }: InterestAreasStepProps) => {
   const { t } = useTranslation('onboarding');
   const { t: tp } = useTranslation('preferences');

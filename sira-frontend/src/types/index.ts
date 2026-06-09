@@ -1,4 +1,5 @@
 import type { UiLocale } from '../i18n/locales';
+import type { AcademicPreferences } from '../domain/academicPreferences';
 
 export interface AuthUser {
   id: string;
@@ -44,33 +45,19 @@ export type UserProfile = {
   hasCompletedOnboarding: boolean;
 };
 
-export type CompleteOnboardingPayload = {
-  course: string;
-  educationLevel: string;
-  mainArea: string;
-  subAreas?: string;
-  languages: string[];
-  materialLevels: string[];
-  wantsBooks: boolean;
-  wantsArticles: boolean;
-  interests: string[];
-  academicGoal?: string;
-};
+// Payload enviado ao concluir o onboarding. Deriva do contrato de preferências;
+// `subAreas`/`academicGoal` são opcionais (o cliente envia `undefined` quando vazios).
+export type CompleteOnboardingPayload =
+  Omit<AcademicPreferences, 'subAreas' | 'academicGoal'> & {
+    subAreas?: string;
+    academicGoal?: string;
+  };
 
-export type ProfileData = {
+// Espelho editável do perfil: as preferências acadêmicas (contrato) + os campos
+// de conta/sessão que não pertencem ao onboarding.
+export type ProfileData = AcademicPreferences & {
   name: string;
   email: string;
-  course: string;
-  educationLevel: string;
-  mainArea: string;
-  subAreas: string;
-  languages: string[];
-  materialLevels: string[];
-  wantsBooks: boolean;
-  wantsArticles: boolean;
-  wantsOpenAccessOnly: boolean;
-  interests: string[];
-  academicGoal: string;
   avatarUrl: string | null;
   uiLocale: UiLocale;
   hasCompletedOnboarding: boolean;
@@ -134,24 +121,13 @@ export type ChatSearchResponse = {
   results: CatalogItem[];
 };
 
-export type UpdateProfilePayload = Partial<
-  Pick<
-    ProfileData,
-    | 'name'
-    | 'course'
-    | 'educationLevel'
-    | 'mainArea'
-    | 'subAreas'
-    | 'languages'
-    | 'materialLevels'
-    | 'wantsBooks'
-    | 'wantsArticles'
-    | 'wantsOpenAccessOnly'
-    | 'interests'
-    | 'academicGoal'
-    | 'uiLocale'
-  >
->;
+// Atualização parcial do perfil: qualquer preferência acadêmica (contrato) +
+// nome e idioma da UI. Deriva do contrato — novos campos de preferência entram
+// automaticamente, sem precisar manter esta lista à mão.
+export type UpdateProfilePayload = Partial<AcademicPreferences & {
+  name: string;
+  uiLocale: UiLocale;
+}>;
 
 export type RecommendationsResponse = {
   recommendations: CatalogItem[];

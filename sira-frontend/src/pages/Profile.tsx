@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Settings } from 'lucide-react';
+import { Pencil, Settings, GraduationCap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { toast } from '../toast';
 import type { PreferenceTopic, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +20,7 @@ import { InterestAreasCard } from '../components/profile/InterestAreasCard';
 import { ContentPreferencesCard } from '../components/profile/ContentPreferencesCard';
 import { EditActionBar } from '../components/profile/EditActionBar';
 import { AvatarUploadModal } from '../components/profile/AvatarUploadModal';
+import { EmptyState } from '../components/ui/EmptyState';
 import { LanguageToggle } from '../components/ui/LanguageToggle';
 import type { UiLocale } from '../i18n/locales';
 import { EDUCATION_LEVELS, LANGUAGES, MATERIAL_LEVELS } from '../i18n/preferenceValues';
@@ -98,6 +100,7 @@ const ProfileSkeleton = () => {
 
 export const Profile = () => {
   const { t } = useTranslation('profile');
+  const navigate = useNavigate();
   const { updateUser } = useAuth();
   const {
     profileData,
@@ -113,8 +116,13 @@ export const Profile = () => {
   const { mutateAsync: saveProfile, isPending: isSaving } = useUpdateProfile();
   const syncProfileCache = useSyncProfileCache();
 
-  // Só busca as opções quando o usuário entra em modo de edição.
-  const { data: preferenceOptions } = usePreferenceOptions({ enabled: isEditing });
+  // As seções de onboarding (perfil acadêmico, interesses, preferências) só são
+  // editáveis após o onboarding ser concluído — antes disso, viram um convite
+  // para completá-lo. Nome/avatar/idioma seguem editáveis normalmente.
+  const onboardingDone = profileData.hasCompletedOnboarding;
+
+  // As opções de preferência só servem às seções de onboarding em edição.
+  const { data: preferenceOptions } = usePreferenceOptions({ enabled: isEditing && onboardingDone });
 
   useEffect(() => {
     queueMicrotask(() => setEditData(profileData));
@@ -169,24 +177,28 @@ export const Profile = () => {
   };
 
   const handleSave = async () => {
-    const payload: UpdateProfilePayload = {
-      name: editData.name || undefined,
-      course: editData.course || undefined,
-      educationLevel: editData.educationLevel || undefined,
-      mainArea: editData.mainArea || undefined,
-      subAreas: editData.subAreas || undefined,
-      languages: editData.languages,
-      materialLevels: editData.materialLevels,
-      wantsBooks: editData.wantsBooks,
-      wantsArticles: editData.wantsArticles,
-      wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
-      interests: editData.interests,
-      academicGoal: editData.academicGoal || undefined,
-    };
+    // Enquanto o onboarding não foi concluído, só os campos não-onboarding são
+    // editáveis (hoje, o nome) — os dados de onboarding só pelo fluxo guiado.
+    const payload: UpdateProfilePayload = onboardingDone
+      ? {
+          name: editData.name || undefined,
+          course: editData.course || undefined,
+          educationLevel: editData.educationLevel || undefined,
+          mainArea: editData.mainArea || undefined,
+          subAreas: editData.subAreas || undefined,
+          languages: editData.languages,
+          materialLevels: editData.materialLevels,
+          wantsBooks: editData.wantsBooks,
+          wantsArticles: editData.wantsArticles,
+          wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
+          interests: editData.interests,
+          academicGoal: editData.academicGoal || undefined,
+        }
+      : { name: editData.name || undefined };
     try {
       // A mutation grava o perfil salvo no cache `['profile']`; `useSessionProfile`
       // reidrata `profileData` a partir dele. Aqui só sincronizamos o AuthContext
-      // (nome/idioma alimentam o roteamento e a navbar).
+      // (nome/idioma alimentam navbar/roteamento).
       const saved = await saveProfile(payload);
       updateUser({
         name: saved.name,
@@ -252,51 +264,77 @@ export const Profile = () => {
           onAvatarChangeRequest={() => setIsAvatarModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PersonalInfoCard
-            isEditing={isEditing}
-            name={profileData.name}
-            email={profileData.email}
-            editName={editData.name || ''}
-            onChangeName={(v) => handleChange('name', v)}
-          />
-          <AcademicProfileCard
-            isEditing={isEditing}
-            data={{
-              course: profileData.course,
-              educationLevel: profileData.educationLevel,
-              mainArea: profileData.mainArea,
-              academicGoal: profileData.academicGoal,
-            }}
-            editData={{
-              course: editData.course || '',
-              educationLevel: editData.educationLevel || '',
-              mainArea: editData.mainArea || '',
-              academicGoal: editData.academicGoal || '',
-            }}
-            onChange={handleTextChange}
-            topicsList={topicsList}
-            educationLevelsList={educationLevelsList}
-            academicGoalsList={academicGoalsList}
-          />
-        </div>
+        {onboardingDone ? (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PersonalInfoCard
+                isEditing={isEditing}
+                name={profileData.name}
+                email={profileData.email}
+                editName={editData.name || ''}
+                onChangeName={(v) => handleChange('name', v)}
+              />
+              <AcademicProfileCard
+                isEditing={isEditing}
+                data={{
+                  course: profileData.course,
+                  educationLevel: profileData.educationLevel,
+                  mainArea: profileData.mainArea,
+                  subAreas: profileData.subAreas,
+                  academicGoal: profileData.academicGoal,
+                }}
+                editData={{
+                  course: editData.course || '',
+                  educationLevel: editData.educationLevel || '',
+                  mainArea: editData.mainArea || '',
+                  subAreas: editData.subAreas || '',
+                  academicGoal: editData.academicGoal || '',
+                }}
+                onChange={handleTextChange}
+                topicsList={topicsList}
+                educationLevelsList={educationLevelsList}
+                academicGoalsList={academicGoalsList}
+              />
+            </div>
 
-        <InterestAreasCard
-          isEditing={isEditing}
-          topicsList={topicsList}
-          selectedIds={(isEditing ? editData.interests : profileData.interests) || []}
-          onToggle={toggleInterest}
-        />
+            <InterestAreasCard
+              isEditing={isEditing}
+              topicsList={topicsList}
+              selectedIds={(isEditing ? editData.interests : profileData.interests) || []}
+              onToggle={toggleInterest}
+            />
 
-        <ContentPreferencesCard
-          isEditing={isEditing}
-          data={profileData}
-          editData={editData}
-          onArrayChange={handleArrayChange}
-          onBoolChange={(field, value) => handleChange(field, value)}
-          languagesList={languagesList}
-          materialLevelsList={materialLevelsList}
-        />
+            <ContentPreferencesCard
+              isEditing={isEditing}
+              data={profileData}
+              editData={editData}
+              onArrayChange={handleArrayChange}
+              onBoolChange={(field, value) => handleChange(field, value)}
+              languagesList={languagesList}
+              materialLevelsList={materialLevelsList}
+            />
+          </>
+        ) : (
+          <>
+            <PersonalInfoCard
+              isEditing={isEditing}
+              name={profileData.name}
+              email={profileData.email}
+              editName={editData.name || ''}
+              onChangeName={(v) => handleChange('name', v)}
+            />
+
+            {/* Dados de onboarding ficam bloqueados para edição até o fluxo ser
+                concluído — aqui um convite guiado em vez de campos editáveis. */}
+            <EmptyState
+              icon={<GraduationCap className="w-full h-full" />}
+              title={t('setup.title')}
+              description={t('setup.description')}
+              actionLabel={t('setup.cta')}
+              onAction={() => navigate('/onboarding')}
+            />
+          </>
+        )}
 
         {isEditing && (
           <EditActionBar

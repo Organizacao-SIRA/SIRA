@@ -73,6 +73,9 @@ export const LANGUAGE_LIST = [...LANGUAGES];
 export const MATERIAL_LEVEL_LIST = [...MATERIAL_LEVELS];
 export const ACADEMIC_GOAL_LIST = [...ACADEMIC_GOALS];
 
+/** Mínimo de áreas de interesse exigido para o onboarding ser considerado completo. */
+export const MIN_INTEREST_AREAS = 3;
+
 export const PREFERENCE_TOPIC_IDS_SET = new Set(PREFERENCE_TOPIC_IDS);
 export const EDUCATION_LEVEL_SET = new Set<string>(EDUCATION_LEVELS);
 export const LANGUAGE_SET = new Set<string>(LANGUAGES);

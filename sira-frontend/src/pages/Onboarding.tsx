@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
+import { MIN_INTERESTS } from '../domain/academicPreferences';
+import { deferOnboarding } from '../app/onboardingDeferral';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
@@ -38,6 +40,13 @@ export const Onboarding = () => {
     initialData: profileData,
     onSuccess: () => navigate('/'),
   });
+
+  // "Fazer isso depois": registra o adiamento e entra no app; o banner em
+  // AppShell segue reconvidando até o onboarding ser concluído.
+  const handleSkip = () => {
+    if (user) deferOnboarding(user.id);
+    navigate('/');
+  };
 
   const [direction, setDirection] = useState(1);
   const goToStep = (target: number) => {
@@ -84,7 +93,7 @@ export const Onboarding = () => {
   const renderStep = () => {
     switch (onboarding.step) {
       case 0:
-        return <WelcomeStep userName={user?.name} />;
+        return <WelcomeStep userName={user?.name} onSkip={handleSkip} />;
       case 1:
         return (
           <AcademicProfileStep
@@ -101,6 +110,7 @@ export const Onboarding = () => {
             selected={onboarding.data.interests}
             onToggle={(id) => onboarding.toggleArrayField('interests', id)}
             error={onboarding.stepErrors[2].interests}
+            minSelected={MIN_INTERESTS}
           />
         );
       case 3:
@@ -134,20 +144,13 @@ export const Onboarding = () => {
     }
   };
 
-  const stepHint = (() => {
-    if (onboarding.step === 2) {
-      const count = onboarding.data.interests.length;
-      return t('interests.hint', { count });
-    }
-    return null;
-  })();
-
   return (
     <OnboardingLayout
       progress={
         <OnboardingProgress
           currentStep={onboarding.step}
           onJumpTo={goToStep}
+          canNavigateTo={onboarding.canNavigateTo}
         />
       }
       actions={
@@ -159,7 +162,6 @@ export const Onboarding = () => {
           onBack={goBack}
           onNext={goNext}
           onSubmit={onboarding.submit}
-          hint={stepHint}
         />
       }
     >

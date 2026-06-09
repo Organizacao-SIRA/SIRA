@@ -1,11 +1,11 @@
 export const onboarding = {
   steps: {
-    welcome: { label: 'Boas-vindas', short: 'Início' },
-    academicProfile: { label: 'Perfil acadêmico', short: 'Perfil' },
-    interestAreas: { label: 'Áreas de interesse', short: 'Interesses' },
-    contentPreferences: { label: 'Preferências', short: 'Preferências' },
-    academicGoal: { label: 'Objetivo', short: 'Objetivo' },
-    review: { label: 'Revisão', short: 'Revisão' },
+    welcome: { label: 'Boas-vindas' },
+    academicProfile: { label: 'Perfil acadêmico' },
+    interestAreas: { label: 'Áreas de interesse' },
+    contentPreferences: { label: 'Preferências' },
+    academicGoal: { label: 'Objetivo' },
+    review: { label: 'Revisão' },
   },
   progress: {
     label: 'Etapa {{current}} de {{total}}',
@@ -18,6 +18,12 @@ export const onboarding = {
     continue: 'Continuar',
     saving: 'Salvando...',
     finish: 'Finalizar configuração',
+  },
+  nudge: {
+    title: 'Complete seu perfil',
+    description: 'Leva 1 minuto e deixa suas recomendações muito melhores.',
+    cta: 'Completar agora',
+    dismiss: 'Dispensar',
   },
   loading: {
     options: 'Carregando opções...',
@@ -33,6 +39,7 @@ export const onboarding = {
       library: 'Livros e artigos científicos curados para suas áreas de interesse.',
       aiSearch: 'Busca conversacional com IA para encontrar exatamente o que precisa.',
     },
+    skip: 'Prefiro fazer isso depois',
   },
   academicProfile: {
     title: 'Seu perfil acadêmico',
@@ -52,7 +59,6 @@ export const onboarding = {
     selected_other: '{{selected}} de {{min}} mín. selecionados',
     done: 'Tudo certo!',
     missing: 'Faltam {{count}}',
-    hint: '{{count}} / 3 mín. selecionados',
   },
   preferences: {
     title: 'Preferências de conteúdo',
@@ -65,6 +71,9 @@ export const onboarding = {
     formatsDescription: 'Selecione pelo menos um tipo de material.',
     books: 'Livros',
     articles: 'Artigos científicos',
+    openAccessTitle: 'Acesso aberto',
+    openAccessDescription: 'Prefere apenas materiais de acesso aberto (gratuitos)?',
+    openAccessLabel: 'Apenas acesso aberto',
   },
   goal: {
     title: 'Qual o seu objetivo?',
@@ -87,12 +96,13 @@ export const onboarding = {
     noneSelected: 'Nenhuma selecionada',
     languages: 'Idiomas',
     formats: 'Formatos',
+    access: 'Acesso',
     notInformed: 'Não informado',
   },
   validation: {
     course: 'Informe o curso (mínimo 2 caracteres).',
     mainArea: 'Selecione a área principal.',
-    interests: 'Selecione pelo menos 3 áreas de interesse.',
+    interests: 'Selecione pelo menos {{count}} áreas de interesse.',
     languages: 'Selecione pelo menos 1 idioma.',
     materialLevels: 'Selecione pelo menos 1 nível de material.',
     formats: 'Selecione pelo menos um formato (livros ou artigos).',

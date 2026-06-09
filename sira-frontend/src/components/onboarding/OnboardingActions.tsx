@@ -10,7 +10,6 @@ interface OnboardingActionsProps {
   onBack: () => void;
   onNext: () => void;
   onSubmit: () => void;
-  hint?: React.ReactNode;
 }
 
 export const OnboardingActions = ({
@@ -21,7 +20,6 @@ export const OnboardingActions = ({
   onBack,
   onNext,
   onSubmit,
-  hint,
 }: OnboardingActionsProps) => {
   const { t } = useTranslation('onboarding');
   const isFirst = step === 0;
@@ -40,7 +38,6 @@ export const OnboardingActions = ({
             {t('actions.back')}
           </button>
         )}
-        {hint && <div className="text-[10px] font-bold uppercase tracking-widest text-text-subtle truncate">{hint}</div>}
       </div>
 
       {isLast ? (

@@ -1,8 +1,10 @@
-import { Sparkles, BookOpen, Compass, BrainCircuit } from 'lucide-react';
+import { Sparkles, BookOpen, Compass, BrainCircuit, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../../ui/Button';
 
 interface WelcomeStepProps {
   userName?: string | null;
+  onSkip?: () => void;
 }
 
 const HIGHLIGHTS = [
@@ -11,7 +13,7 @@ const HIGHLIGHTS = [
   { icon: BrainCircuit, labelKey: 'welcome.highlights.aiSearch' },
 ];
 
-export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
+export const WelcomeStep = ({ userName, onSkip }: WelcomeStepProps) => {
   const { t } = useTranslation('onboarding');
   const firstName = userName?.trim().split(' ')[0];
 
@@ -41,6 +43,13 @@ export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
           </li>
         ))}
       </ul>
+
+      {onSkip && (
+        <Button variant="ghost" size="sm" onClick={onSkip} className="mt-6">
+          <Clock className="w-4 h-4" aria-hidden="true" />
+          {t('welcome.skip')}
+        </Button>
+      )}
     </div>
   );
 };

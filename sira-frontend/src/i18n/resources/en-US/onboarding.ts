@@ -1,11 +1,11 @@
 export const onboarding = {
   steps: {
-    welcome: { label: 'Welcome', short: 'Start' },
-    academicProfile: { label: 'Academic profile', short: 'Profile' },
-    interestAreas: { label: 'Interest areas', short: 'Interests' },
-    contentPreferences: { label: 'Preferences', short: 'Preferences' },
-    academicGoal: { label: 'Goal', short: 'Goal' },
-    review: { label: 'Review', short: 'Review' },
+    welcome: { label: 'Welcome' },
+    academicProfile: { label: 'Academic profile' },
+    interestAreas: { label: 'Interest areas' },
+    contentPreferences: { label: 'Preferences' },
+    academicGoal: { label: 'Goal' },
+    review: { label: 'Review' },
   },
   progress: {
     label: 'Step {{current}} of {{total}}',
@@ -18,6 +18,12 @@ export const onboarding = {
     continue: 'Continue',
     saving: 'Saving...',
     finish: 'Finish setup',
+  },
+  nudge: {
+    title: 'Complete your profile',
+    description: 'It takes a minute and makes your recommendations much better.',
+    cta: 'Complete now',
+    dismiss: 'Dismiss',
   },
   loading: {
     options: 'Loading options...',
@@ -33,6 +39,7 @@ export const onboarding = {
       library: 'Books and scientific articles curated for your interest areas.',
       aiSearch: 'Conversational AI search to find exactly what you need.',
     },
+    skip: "I'd rather do this later",
   },
   academicProfile: {
     title: 'Your academic profile',
@@ -52,7 +59,6 @@ export const onboarding = {
     selected_other: '{{selected}} of {{min}} min. selected',
     done: 'All set!',
     missing: '{{count}} missing',
-    hint: '{{count}} / 3 min. selected',
   },
   preferences: {
     title: 'Content preferences',
@@ -65,6 +71,9 @@ export const onboarding = {
     formatsDescription: 'Select at least one material type.',
     books: 'Books',
     articles: 'Scientific articles',
+    openAccessTitle: 'Open access',
+    openAccessDescription: 'Prefer only open-access (free) materials?',
+    openAccessLabel: 'Open access only',
   },
   goal: {
     title: 'What is your goal?',
@@ -87,12 +96,13 @@ export const onboarding = {
     noneSelected: 'None selected',
     languages: 'Languages',
     formats: 'Formats',
+    access: 'Access',
     notInformed: 'Not informed',
   },
   validation: {
     course: 'Enter the course (minimum 2 characters).',
     mainArea: 'Select the main area.',
-    interests: 'Select at least 3 interest areas.',
+    interests: 'Select at least {{count}} interest areas.',
     languages: 'Select at least 1 language.',
     materialLevels: 'Select at least 1 material level.',
     formats: 'Select at least one format (books or articles).',

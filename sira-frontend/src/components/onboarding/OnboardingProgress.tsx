@@ -5,9 +5,10 @@ import { ONBOARDING_STEPS } from '../../types/onboarding';
 interface OnboardingProgressProps {
   currentStep: number;
   onJumpTo?: (step: number) => void;
+  canNavigateTo?: (step: number) => boolean;
 }
 
-export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgressProps) => {
+export const OnboardingProgress = ({ currentStep, onJumpTo, canNavigateTo }: OnboardingProgressProps) => {
   const { t } = useTranslation('onboarding');
   const total = ONBOARDING_STEPS.length;
   const percent = Math.round(((currentStep + 1) / total) * 100);
@@ -32,7 +33,7 @@ export const OnboardingProgress = ({ currentStep, onJumpTo }: OnboardingProgress
         {ONBOARDING_STEPS.map((stepMeta, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
-          const interactive = onJumpTo && index <= currentStep;
+          const interactive = !!onJumpTo && (canNavigateTo ? canNavigateTo(index) : index <= currentStep);
           return (
             <li
               key={stepMeta.id}

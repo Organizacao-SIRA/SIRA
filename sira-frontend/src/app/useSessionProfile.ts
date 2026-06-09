@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_LOCALE } from '../i18n/locales';
-import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
+import { academicPreferencesFromProfile } from '../domain/academicPreferences';
 import { useProfile } from '../queries/useProfile';
 import type { AuthUser, ProfileData } from '../types';
 import { createEmptyProfileData } from './appState';
@@ -69,19 +69,11 @@ export const useSessionProfile = ({
       if (!isActive) return;
       setProfileData(prev => ({
         ...prev,
+        // Preferências acadêmicas: mapeadas pelo adaptador único (null → '').
+        ...academicPreferencesFromProfile(data),
+        // Campos de conta/sessão (fora do contrato de preferências):
         name: data.name || prev.name,
         email: data.email || prev.email,
-        course: data.course || '',
-        educationLevel: data.educationLevel || DEFAULT_EDUCATION_LEVEL,
-        mainArea: data.mainArea || '',
-        subAreas: data.subAreas || '',
-        languages: data.languages?.length ? data.languages : [...DEFAULT_LANGUAGES],
-        materialLevels: data.materialLevels?.length ? data.materialLevels : [...DEFAULT_MATERIAL_LEVELS],
-        wantsBooks: data.wantsBooks ?? true,
-        wantsArticles: data.wantsArticles ?? true,
-        wantsOpenAccessOnly: data.wantsOpenAccessOnly ?? false,
-        interests: data.interests || [],
-        academicGoal: data.academicGoal || '',
         avatarUrl: data.avatarUrl ?? null,
         uiLocale: data.uiLocale ?? DEFAULT_LOCALE,
         hasCompletedOnboarding: data.hasCompletedOnboarding ?? false,

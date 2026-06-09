@@ -132,6 +132,14 @@ export const ReviewStep = ({ data, options, onEdit }: ReviewStepProps) => {
                 {formats.map((f) => <Chip key={f}>{f}</Chip>)}
               </div>
             </div>
+            {data.wantsOpenAccessOnly && (
+              <div>
+                <span className="text-xs text-text-muted block mb-1">{t('review.access')}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <Chip>{t('preferences.openAccessLabel')}</Chip>
+                </div>
+              </div>
+            )}
           </div>
         </Section>
 
