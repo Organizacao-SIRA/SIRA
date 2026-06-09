@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { completeOnboarding } from '../services/api';
 import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
+import { useCompleteOnboarding } from '../queries/useProfileMutations';
 import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
 import { ONBOARDING_STEPS } from '../types/onboarding';
@@ -65,11 +65,11 @@ interface UseOnboardingFormParams {
 export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormParams) {
   const { t } = useTranslation('onboarding');
   const { updateUser } = useAuth();
+  const { mutateAsync: completeOnboardingAsync, isPending: isSaving } = useCompleteOnboarding();
   const maxStep = ONBOARDING_STEPS.length - 1;
 
   const [data, setData] = useState<OnboardingFormData>(() => hydrate(initialData));
   const [step, setStep] = useState<number>(() => readStep(maxStep));
-  const [isSaving, setIsSaving] = useState(false);
 
   const hydratedFromProps = useRef(false);
   useEffect(() => {
@@ -167,10 +167,8 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       }
     }
 
-    setIsSaving(true);
-
     try {
-      const profile = await completeOnboarding({
+      const profile = await completeOnboardingAsync({
         course: data.course.trim(),
         educationLevel: data.educationLevel,
         mainArea: data.mainArea,
@@ -189,10 +187,8 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       onSuccess(profile);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('validation.submit'));
-    } finally {
-      setIsSaving(false);
     }
-  }, [data, isStepValid, updateUser, onSuccess, t]);
+  }, [data, isStepValid, updateUser, onSuccess, t, completeOnboardingAsync]);
 
   return {
     data,

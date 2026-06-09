@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { updateProfile } from '../services/api';
+import { useUpdateProfile } from '../queries/useProfileMutations';
 import { normalizeLocale, type UiLocale } from '../i18n/locales';
 
 /**
@@ -16,6 +16,7 @@ import { normalizeLocale, type UiLocale } from '../i18n/locales';
 export const useUiLocaleSync = (options?: { onError?: (error: Error) => void }) => {
   const { i18n } = useTranslation();
   const { user, updateUser } = useAuth();
+  const { mutate: saveProfile } = useUpdateProfile();
   const userId = user?.id;
 
   const setUiLocale = useCallback(
@@ -28,13 +29,20 @@ export const useUiLocaleSync = (options?: { onError?: (error: Error) => void }) 
       if (!userId) return;
 
       updateUser({ uiLocale: locale });
-      updateProfile({ uiLocale: locale }).catch((err: unknown) => {
-        const error = err instanceof Error ? err : new Error(String(err));
-        if (options?.onError) options.onError(error);
-        else console.warn('[i18n] Falha ao persistir uiLocale no perfil:', error);
-      });
+      // A mutation atualiza o cache `['profile']` no sucesso; aqui só tratamos a
+      // falha (a persistência é "fire-and-forget" e não bloqueia a UI).
+      saveProfile(
+        { uiLocale: locale },
+        {
+          onError: (err) => {
+            const error = err instanceof Error ? err : new Error(String(err));
+            if (options?.onError) options.onError(error);
+            else console.warn('[i18n] Falha ao persistir uiLocale no perfil:', error);
+          },
+        },
+      );
     },
-    [i18n, userId, updateUser, options],
+    [i18n, userId, updateUser, saveProfile, options],
   );
 
   return { setUiLocale };

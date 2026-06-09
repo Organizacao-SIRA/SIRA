@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
-import type { UserProfile } from '../types';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { OnboardingActions } from '../components/onboarding/OnboardingActions';
@@ -24,7 +23,7 @@ export const Onboarding = () => {
   const { t } = useTranslation('onboarding');
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profileData, setProfileData } = useProfileContext();
+  const { profileData } = useProfileContext();
   const {
     data: preferenceOptions,
     isLoading: isLoadingOptions,
@@ -32,32 +31,12 @@ export const Onboarding = () => {
     refetch: loadPreferenceOptions,
   } = usePreferenceOptions();
 
-  const handleSuccess = (profile: UserProfile) => {
-    setProfileData({
-      ...profileData,
-      name: profile.name || profileData.name,
-      email: profile.email,
-      course: profile.course || '',
-      educationLevel: profile.educationLevel || profileData.educationLevel,
-      mainArea: profile.mainArea || '',
-      subAreas: profile.subAreas || '',
-      languages: profile.languages?.length ? profile.languages : profileData.languages,
-      materialLevels: profile.materialLevels?.length ? profile.materialLevels : profileData.materialLevels,
-      wantsBooks: profile.wantsBooks,
-      wantsArticles: profile.wantsArticles,
-      interests: profile.interests || [],
-      academicGoal: profile.academicGoal || '',
-      avatarUrl: profile.avatarUrl ?? profileData.avatarUrl,
-      uiLocale: profile.uiLocale ?? profileData.uiLocale,
-      hasCompletedOnboarding: true,
-      onboardingCompletedAt: profile.onboardingCompletedAt,
-    });
-    navigate('/');
-  };
-
+  // O perfil salvo já é gravado no cache `['profile']` pela mutation de
+  // onboarding (useCompleteOnboarding), e `useSessionProfile` reidrata a tela a
+  // partir dele. Aqui só resta navegar para a home.
   const onboarding = useOnboardingForm({
     initialData: profileData,
-    onSuccess: handleSuccess,
+    onSuccess: () => navigate('/'),
   });
 
   const [direction, setDirection] = useState(1);

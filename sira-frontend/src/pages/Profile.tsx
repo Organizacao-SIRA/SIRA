@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { updateProfile } from '../services/api';
 import { toast } from '../toast';
 import type { PreferenceTopic, UserProfile, ProfileData, UpdateProfilePayload } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useUiLocaleSync } from '../hooks/useUiLocaleSync';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
+import { useUpdateProfile, useSyncProfileCache } from '../queries/useProfileMutations';
 import { Button } from '../components/ui/Button';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -108,8 +108,10 @@ export const Profile = () => {
   } = useProfileContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<ProfileData>(profileData);
-  const [isSaving, setIsSaving] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
+  const { mutateAsync: saveProfile, isPending: isSaving } = useUpdateProfile();
+  const syncProfileCache = useSyncProfileCache();
 
   // Só busca as opções quando o usuário entra em modo de edição.
   const { data: preferenceOptions } = usePreferenceOptions({ enabled: isEditing });
@@ -167,43 +169,25 @@ export const Profile = () => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    const payload: UpdateProfilePayload = {
+      name: editData.name || undefined,
+      course: editData.course || undefined,
+      educationLevel: editData.educationLevel || undefined,
+      mainArea: editData.mainArea || undefined,
+      subAreas: editData.subAreas || undefined,
+      languages: editData.languages,
+      materialLevels: editData.materialLevels,
+      wantsBooks: editData.wantsBooks,
+      wantsArticles: editData.wantsArticles,
+      wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
+      interests: editData.interests,
+      academicGoal: editData.academicGoal || undefined,
+    };
     try {
-      const payload: UpdateProfilePayload = {
-        name: editData.name || undefined,
-        course: editData.course || undefined,
-        educationLevel: editData.educationLevel || undefined,
-        mainArea: editData.mainArea || undefined,
-        subAreas: editData.subAreas || undefined,
-        languages: editData.languages,
-        materialLevels: editData.materialLevels,
-        wantsBooks: editData.wantsBooks,
-        wantsArticles: editData.wantsArticles,
-        wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
-        interests: editData.interests,
-        academicGoal: editData.academicGoal || undefined,
-      };
-      const saved = await updateProfile(payload);
-      setProfileData((prev) => ({
-        ...prev,
-        name: saved.name || prev.name,
-        email: saved.email,
-        course: saved.course || '',
-        educationLevel: saved.educationLevel || prev.educationLevel,
-        mainArea: saved.mainArea || '',
-        subAreas: saved.subAreas || '',
-        languages: saved.languages?.length ? saved.languages : prev.languages,
-        materialLevels: saved.materialLevels?.length ? saved.materialLevels : prev.materialLevels,
-        wantsBooks: saved.wantsBooks,
-        wantsArticles: saved.wantsArticles,
-        wantsOpenAccessOnly: saved.wantsOpenAccessOnly,
-        interests: saved.interests?.length ? saved.interests : prev.interests,
-        academicGoal: saved.academicGoal || '',
-        avatarUrl: saved.avatarUrl ?? prev.avatarUrl,
-        uiLocale: saved.uiLocale ?? prev.uiLocale,
-        hasCompletedOnboarding: saved.hasCompletedOnboarding,
-        onboardingCompletedAt: saved.onboardingCompletedAt,
-      }));
+      // A mutation grava o perfil salvo no cache `['profile']`; `useSessionProfile`
+      // reidrata `profileData` a partir dele. Aqui só sincronizamos o AuthContext
+      // (nome/idioma alimentam o roteamento e a navbar).
+      const saved = await saveProfile(payload);
       updateUser({
         name: saved.name,
         ...(saved.uiLocale !== undefined ? { uiLocale: saved.uiLocale } : {}),
@@ -212,8 +196,6 @@ export const Profile = () => {
       toast.success(t('toast.saved'));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('errors.save'));
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -223,10 +205,7 @@ export const Profile = () => {
   };
 
   const handleAvatarUpdated = (updated: UserProfile) => {
-    setProfileData((prev) => ({
-      ...prev,
-      avatarUrl: updated.avatarUrl,
-    }));
+    syncProfileCache(updated);
     updateUser({ avatarUrl: updated.avatarUrl });
   };
 
