@@ -13,6 +13,8 @@ export interface UserAiProfileInput {
   academicGoal?: string | null;
   materialLevels?: string[] | null;
   languages?: string[] | null;
+  wantsBooks?: boolean | null;
+  wantsArticles?: boolean | null;
 }
 
 type ProfileField = {
@@ -37,6 +39,15 @@ const topicLabelsJoined = (ids: string[] | null | undefined): string | null => {
   return (labels.length ? labels : resolved).join(', ') || null;
 };
 
+/** "Books, Articles" — omite a linha se o usuário não tem formatos definidos. */
+const formatsLabel = (user: UserAiProfileInput): string | null => {
+  if (user.wantsBooks == null && user.wantsArticles == null) return null;
+  const formats: string[] = [];
+  if (user.wantsBooks) formats.push('Books');
+  if (user.wantsArticles) formats.push('Articles');
+  return formats.length ? formats.join(', ') : null;
+};
+
 /**
  * FONTE ÚNICA da composição do resumo do usuário para a IA.
  *
@@ -54,6 +65,7 @@ const AI_PROFILE_FIELDS: ProfileField[] = [
   { label: 'Academic goal', resolve: u => u.academicGoal },
   { label: 'Preferred material level', resolve: u => u.materialLevels?.join(', ') },
   { label: 'Languages', resolve: u => u.languages?.join(', ') },
+  { label: 'Desired formats', resolve: u => formatsLabel(u) },
 ];
 
 const PROFILE_UNAVAILABLE = 'User profile not available.';
@@ -61,6 +73,7 @@ const PROFILE_UNAVAILABLE = 'User profile not available.';
 /**
  * Monta o texto do perfil do usuário para o prompt. Saída determinística
  * (ordem fixa, só linhas com valor) — importante para o cache de `system`.
+ * Sem indentação/padding: o chamador insere onde precisar.
  */
 export const buildUserAiProfile = (user: UserAiProfileInput | null | undefined): string => {
   if (!user) return PROFILE_UNAVAILABLE;
@@ -68,14 +81,9 @@ export const buildUserAiProfile = (user: UserAiProfileInput | null | undefined):
   const lines = AI_PROFILE_FIELDS
     .map(field => ({ label: field.label, value: field.resolve(user)?.trim() }))
     .filter((field): field is { label: string; value: string } => !!field.value)
-    .map(field => `      - ${field.label}: ${field.value}`);
+    .map(field => `- ${field.label}: ${field.value}`);
 
   if (lines.length === 0) return PROFILE_UNAVAILABLE;
 
-  return [
-    '',
-    '      USER PROFILE (values preserved in their original language):',
-    ...lines,
-    '    ',
-  ].join('\n');
+  return ['USER PROFILE (values preserved in their original language):', ...lines].join('\n');
 };

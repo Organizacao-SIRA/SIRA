@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MaterialsService } from '../materials/materials.service';
 import { MaterialDto, MaterialType } from '../materials/dto/material.dto';
 import { getPreferenceTopicKeywords, getPreferenceTopicLabels } from '../users/preferences-options';
+import { buildUserAiProfile } from '../users/ai/user-ai-profile';
 import { AiProvider } from '../ai/ai-provider.abstract';
 import { normalizeUiLocale } from '../common/constants/ui-locale';
 import { aiOutputInstruction, aiOutputLanguageLabel } from '../common/constants/ai-output-language';
@@ -308,7 +309,7 @@ export class RecommendationsService {
     // Profile in system: changes only when the user edits onboarding — cached by Anthropic across generations.
     // Favorites/searches/candidates in user: change every generation — not cacheable.
     // The locale instruction suffix stays at the end so the cacheable prefix is preserved when the user switches language.
-    const systemPrompt = `You are an academic recommendation system. Return ONLY valid JSON, no markdown, no extra text outside the JSON.\n\nUSER PROFILE (values preserved in their original language):\n${this.buildPreferencesText(user)}\n\n${aiOutputInstruction(uiLocale)}`;
+    const systemPrompt = `You are an academic recommendation system. Return ONLY valid JSON, no markdown, no extra text outside the JSON.\n\n${buildUserAiProfile(user)}\n\n${aiOutputInstruction(uiLocale)}`;
 
     try {
       const raw = await this.ai.complete({
@@ -354,23 +355,4 @@ export class RecommendationsService {
     }
   }
 
-  private buildPreferencesText(user: RecommendationUser) {
-    const interestLabels = getPreferenceTopicLabels(user.interests || []);
-    const formats = [
-      user.wantsBooks ? 'books' : null,
-      user.wantsArticles ? 'articles' : null,
-    ].filter(Boolean);
-
-    return [
-      `- Course: ${user.course || 'Not informed'}`,
-      `- Education level: ${user.educationLevel || 'Not informed'}`,
-      `- Main area: ${user.mainArea || 'Not informed'}`,
-      `- Subareas: ${user.subAreas || 'Not informed'}`,
-      `- Interests: ${interestLabels.join(', ') || 'Not informed'}`,
-      `- Preferred languages: ${(user.languages || []).join(', ') || 'Not informed'}`,
-      `- Material level: ${(user.materialLevels || []).join(', ') || 'Not informed'}`,
-      `- Desired formats: ${formats.join(', ') || 'Not informed'}`,
-      `- Academic goal: ${user.academicGoal || 'Not informed'}`,
-    ].join('\n');
-  }
 }
