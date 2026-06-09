@@ -1,11 +1,11 @@
 export const onboarding = {
   steps: {
-    welcome: { label: 'Welcome', short: 'Start' },
-    academicProfile: { label: 'Academic profile', short: 'Profile' },
-    interestAreas: { label: 'Interest areas', short: 'Interests' },
-    contentPreferences: { label: 'Preferences', short: 'Preferences' },
-    academicGoal: { label: 'Goal', short: 'Goal' },
-    review: { label: 'Review', short: 'Review' },
+    welcome: { label: 'Welcome' },
+    academicProfile: { label: 'Academic profile' },
+    interestAreas: { label: 'Interest areas' },
+    contentPreferences: { label: 'Preferences' },
+    academicGoal: { label: 'Goal' },
+    review: { label: 'Review' },
   },
   progress: {
     label: 'Step {{current}} of {{total}}',

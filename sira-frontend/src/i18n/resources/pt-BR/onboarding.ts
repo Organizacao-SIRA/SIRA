@@ -1,11 +1,11 @@
 export const onboarding = {
   steps: {
-    welcome: { label: 'Boas-vindas', short: 'Início' },
-    academicProfile: { label: 'Perfil acadêmico', short: 'Perfil' },
-    interestAreas: { label: 'Áreas de interesse', short: 'Interesses' },
-    contentPreferences: { label: 'Preferências', short: 'Preferências' },
-    academicGoal: { label: 'Objetivo', short: 'Objetivo' },
-    review: { label: 'Revisão', short: 'Revisão' },
+    welcome: { label: 'Boas-vindas' },
+    academicProfile: { label: 'Perfil acadêmico' },
+    interestAreas: { label: 'Áreas de interesse' },
+    contentPreferences: { label: 'Preferências' },
+    academicGoal: { label: 'Objetivo' },
+    review: { label: 'Revisão' },
   },
   progress: {
     label: 'Etapa {{current}} de {{total}}',

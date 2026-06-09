@@ -5,15 +5,17 @@ import {
   Briefcase, Lightbulb, FlaskConical, ScrollText, X,
 } from 'lucide-react';
 import { preferenceValueLabel } from '@/i18n/preferenceLabels';
-import { ACADEMIC_GOALS } from '@/i18n/preferenceValues';
 
+// Ícone por objetivo, indexado pelo valor canônico (não pela posição na lista),
+// para não quebrar se a constante for reordenada. Valores desconhecidos caem no
+// fallback `Target`.
 const GOAL_ICONS: Record<string, React.ElementType> = {
-  [ACADEMIC_GOALS[0]]: ScrollText,
-  [ACADEMIC_GOALS[1]]: FlaskConical,
-  [ACADEMIC_GOALS[2]]: Lightbulb,
-  [ACADEMIC_GOALS[3]]: GraduationCap,
-  [ACADEMIC_GOALS[4]]: Briefcase,
-  [ACADEMIC_GOALS[5]]: Rocket,
+  'TCC': ScrollText,
+  'Pesquisa científica': FlaskConical,
+  'Estudo introdutório': Lightbulb,
+  'Aprofundamento técnico': GraduationCap,
+  'Concursos': Briefcase,
+  'Trabalho profissional': Rocket,
 };
 
 interface AcademicGoalStepProps {
