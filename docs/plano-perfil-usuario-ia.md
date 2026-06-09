@@ -99,12 +99,13 @@ Todo campo novo flui pelo contrato único do frontend (`domain/academicPreferenc
 - [x] Migrar `recommendations.service` para consumir `buildUserAiProfile` (remove o `buildPreferencesText` duplicado; corrige `mainArea` que ia como ID cru também ali).
 - [x] Decisão: **manter o código unificado e pronto para reativar** (UI de recomendações **não** reativada agora).
 
-### Fase 3 — Nova taxonomia de áreas
-- [ ] Definir a taxonomia como dado único compartilhado (evitar a duplicação atual FE×BE; ex.: gerar a lista do FE a partir da fonte do BE ou um módulo compartilhado).
-- [ ] Atualizar `preferences-options.ts` (BE) e os valores do FE (`i18n/preferenceValues`, contrato Zod).
-- [ ] Ajustar onboarding (`AcademicProfileStep`, `InterestAreasStep`) e configurações (`AcademicProfileCard`, `InterestAreasCard`) para a nova taxonomia (incl. subáreas filtradas por grande área, se adotado).
-- [ ] **Migração de dados:** mapear IDs antigos (`ia, gp, dir, cd, edu, sau, eco, soc, amb`) para as novas categorias; migration Prisma + script de backfill; tratar perfis sem correspondência.
-- [ ] Revisar a validação (`@IsIn(PREFERENCE_TOPIC_IDS)`) para a nova lista.
+### Fase 3 — Expansão da taxonomia de áreas ✅
+Abordagem escolhida: **expandir** (manter as 9 originais + adicionar 21), evitando migração e mudança de contrato.
+- [x] Expandir `PREFERENCE_TOPICS` (BE) de 9 → 30 áreas cobrindo as grandes áreas CNPq (label/description/keywords).
+- [x] i18n pt/en (`topics.<id>`) e `TOPIC_ICONS` em paridade (30/30/30/30).
+- [x] **Sem migração** (IDs antigos seguem válidos) e **sem mudar o contrato Zod** (mainArea/interests são string validada contra `PREFERENCE_TOPIC_IDS`, que auto-estende). Onboarding/config mapeiam tópicos dinamicamente — não precisaram de ajuste.
+- [ ] *(Deferido)* Eliminar a duplicação FE×BE das listas (módulo/fonte compartilhada).
+- [ ] *(Deferido, opcional)* Taxonomia em 2 níveis (grande área → subáreas filtradas) para reduzir o tamanho do grid de interesses.
 
 ### Fase 4 — Campo "trabalho atual"
 - [ ] Schema Prisma + migration (`currentWork String?`).
