@@ -31,6 +31,10 @@ const readDraft = (): Partial<OnboardingFormData> | null => {
   }
 };
 
+/** O usuário já tem progresso real (campos-chave preenchidos)? */
+const hasMeaningfulContent = (d: Partial<OnboardingFormData> | null | undefined): boolean =>
+  !!(d && (d.course || d.mainArea || (d.interests?.length ?? 0) > 0));
+
 const readPersistedStep = (key: string, max: number): number => {
   const raw = sessionStorage.getItem(key);
   const parsed = raw ? parseInt(raw, 10) : 0;
@@ -76,10 +80,25 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     Math.max(readPersistedStep(STEP_KEY, maxStep), readPersistedStep(MAX_STEP_KEY, maxStep)),
   );
 
+  // Controle da semeadura tardia do perfil:
+  // - userTouched: o usuário já editou algo neste fluxo;
+  // - hadDraft: já havia um rascunho retomável no mount.
+  // Em qualquer um dos casos, o dado do usuário tem precedência e o perfil que
+  // chega depois NÃO sobrescreve (consistente com a precedência do `hydrate`).
+  const userTouchedRef = useRef(false);
+  const hadDraftRef = useRef<boolean | null>(null);
+  if (hadDraftRef.current === null) {
+    hadDraftRef.current = hasMeaningfulContent(readDraft());
+  }
+
   const hydratedFromProps = useRef(false);
   useEffect(() => {
-    if (!initialData || hydratedFromProps.current) return;
-    if (initialData.course || initialData.mainArea || initialData.interests?.length) {
+    if (hydratedFromProps.current) return;
+    if (userTouchedRef.current || hadDraftRef.current) {
+      hydratedFromProps.current = true;
+      return;
+    }
+    if (hasMeaningfulContent(initialData)) {
       queueMicrotask(() => {
         if (hydratedFromProps.current) return;
         setData((prev) => ({ ...prev, ...initialData }));
@@ -101,11 +120,13 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   }, [maxReached]);
 
   const setField = useCallback(<K extends keyof OnboardingFormData>(field: K, value: OnboardingFormData[K]) => {
+    userTouchedRef.current = true;
     setData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const toggleArrayField = useCallback(
     <K extends 'interests' | 'languages' | 'materialLevels'>(field: K, value: string) => {
+      userTouchedRef.current = true;
       setData((prev) => {
         const current = prev[field];
         const next = current.includes(value)
