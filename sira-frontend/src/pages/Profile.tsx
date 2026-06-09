@@ -185,11 +185,14 @@ export const Profile = () => {
     };
     try {
       // A mutation grava o perfil salvo no cache `['profile']`; `useSessionProfile`
-      // reidrata `profileData` a partir dele. Aqui só sincronizamos o AuthContext
-      // (nome/idioma alimentam o roteamento e a navbar).
+      // reidrata `profileData` a partir dele. Aqui sincronizamos o AuthContext
+      // (nome/idioma alimentam navbar/roteamento; e hasCompletedOnboarding pode
+      // ter virado true se o salvamento completou os dados essenciais — o que
+      // dispensa o banner de reconvite).
       const saved = await saveProfile(payload);
       updateUser({
         name: saved.name,
+        hasCompletedOnboarding: saved.hasCompletedOnboarding,
         ...(saved.uiLocale !== undefined ? { uiLocale: saved.uiLocale } : {}),
       });
       setIsEditing(false);

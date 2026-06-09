@@ -12,6 +12,7 @@ import {
   EDUCATION_LEVEL_LIST,
   LANGUAGE_LIST,
   MATERIAL_LEVEL_LIST,
+  MIN_INTEREST_AREAS,
   PREFERENCE_TOPIC_IDS,
 } from '../preferences-options';
 import { UI_LOCALES } from '../../common/constants/ui-locale';
@@ -53,7 +54,7 @@ export class CompleteOnboardingDto {
   wantsOpenAccessOnly: boolean;
 
   @IsArray()
-  @ArrayMinSize(3)
+  @ArrayMinSize(MIN_INTEREST_AREAS)
   @IsIn(PREFERENCE_TOPIC_IDS, { each: true })
   interests: string[];
 
