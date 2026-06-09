@@ -89,11 +89,11 @@ Todo campo novo flui pelo contrato único do frontend (`domain/academicPreferenc
 - [ ] Aprovar a taxonomia de áreas (CNPq grandes áreas + subáreas) e a lista de subáreas/temas.
 - [ ] Aprovar o campo "trabalho atual" e os ajustes de objetivos.
 
-### Fase 1 — Construtor único + conserto da trilha ativa (ganho rápido, sem mudar dados)
-- [ ] Criar `buildUserAiProfile` (Seção 2.1) como fonte única do resumo.
-- [ ] Incluir `subAreas: true` no `select` de `getUserForChat` (`material-persistence.service`) — hoje não é carregado.
-- [ ] Ligar `materials-orchestrator.service` a ele → passa a enviar **labels** (não IDs), incluir **subAreas** e (opcional) descrições/keywords.
-- [ ] Cobrir com teste de snapshot do texto do resumo (garante estabilidade p/ cache).
+### Fase 1 — Construtor único + conserto da trilha ativa (ganho rápido, sem mudar dados) ✅
+- [x] Criar `buildUserAiProfile` (Seção 2.1) como fonte única do resumo. → `users/ai/user-ai-profile.ts`
+- [x] Incluir `subAreas: true` no `select` de `getUserForChat` (`material-persistence.service`).
+- [x] Ligar `materials-orchestrator.service` a ele → envia **labels** (não IDs) e inclui **subAreas**. (descrições/keywords: opcional, adiado.)
+- [ ] Cobrir com teste de snapshot do resumo. **Bloqueado:** backend sem infra de testes (sem jest). Validado por ora via `tsx` manual.
 
 ### Fase 2 — Unificar as trilhas
 - [ ] Migrar `recommendations.service` para consumir `buildUserAiProfile` (remove duplicação/drift).
