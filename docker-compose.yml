@@ -1,3 +1,9 @@
+# Docker Compose — APENAS INFRAESTRUTURA.
+#
+# Backend (NestJS) e Frontend (React/Vite) NÃO sobem aqui: rodam localmente
+# na máquina do dev com hot reload nativo (veja o README → "Como Executar").
+# Este arquivo provê somente os serviços de infra: PostgreSQL e, opcionalmente,
+# o pgAdmin.
 services:
   # Banco de Dados PostgreSQL
   postgres:
@@ -21,107 +27,8 @@ services:
     networks:
       - sira-network
 
-  # API Backend (NestJS)
-  backend:
-    build:
-      context: ./sira-backend
-      dockerfile: Dockerfile
-      target: development
-    container_name: sira-backend
-    env_file:
-      - ./sira-backend/.env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-sira_user}:${POSTGRES_PASSWORD:-sira_password}@postgres:5432/${POSTGRES_DB:-sira_db}?schema=public
-      PORT: 3000
-      NODE_ENV: development
-    ports:
-      - "3002:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy # Aguarda o healthcheck do postgres passar
-    develop:
-      watch:
-        - path: ./sira-backend/src
-          action: sync
-          target: /app/src
-          initial_sync: true
-        - path: ./sira-backend/nest-cli.json
-          action: sync+restart
-          target: /app/nest-cli.json
-        - path: ./sira-backend/tsconfig.json
-          action: sync+restart
-          target: /app/tsconfig.json
-        - path: ./sira-backend/prisma.config.ts
-          action: sync+restart
-          target: /app/prisma.config.ts
-        - path: ./sira-backend/prisma
-          action: rebuild
-        - path: ./sira-backend/package.json
-          action: rebuild
-        - path: ./sira-backend/package-lock.json
-          action: rebuild
-        - path: ./sira-backend/Dockerfile
-          action: rebuild
-    networks:
-      - sira-network
-    restart: always
-
-  # Aplicação Frontend (React + Vite)
-  frontend:
-    build:
-      context: ./sira-frontend
-      dockerfile: Dockerfile
-      target: development
-    container_name: sira-frontend
-    env_file:
-      - ./sira-frontend/.env
-    environment:
-      VITE_API_URL: http://localhost:3002
-    ports:
-      - "5173:5173"
-    develop:
-      watch:
-        - path: ./sira-frontend/src
-          action: sync
-          target: /app/src
-          initial_sync: true
-        - path: ./sira-frontend/public
-          action: sync
-          target: /app/public
-          initial_sync: true
-        - path: ./sira-frontend/index.html
-          action: sync
-          target: /app/index.html
-        - path: ./sira-frontend/vite.config.ts
-          action: sync+restart
-          target: /app/vite.config.ts
-        - path: ./sira-frontend/tsconfig.json
-          action: sync+restart
-          target: /app/tsconfig.json
-        - path: ./sira-frontend/tsconfig.app.json
-          action: sync+restart
-          target: /app/tsconfig.app.json
-        - path: ./sira-frontend/tsconfig.node.json
-          action: sync+restart
-          target: /app/tsconfig.node.json
-        - path: ./sira-frontend/tailwind.config.js
-          action: sync+restart
-          target: /app/tailwind.config.js
-        - path: ./sira-frontend/postcss.config.js
-          action: sync+restart
-          target: /app/postcss.config.js
-        - path: ./sira-frontend/package.json
-          action: rebuild
-        - path: ./sira-frontend/package-lock.json
-          action: rebuild
-        - path: ./sira-frontend/Dockerfile
-          action: rebuild
-    networks:
-      - sira-network
-    restart: always
-
   # pgAdmin - Interface gráfica para o PostgreSQL (opcional)
-  # Para subir: docker-compose --profile tools up
+  # Para subir: docker compose --profile tools up -d pgadmin
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: sira-pgadmin
