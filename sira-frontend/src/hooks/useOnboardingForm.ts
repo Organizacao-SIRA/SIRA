@@ -20,6 +20,7 @@ const VALIDATION_KEY_BY_FIELD: Partial<Record<keyof OnboardingFormData, string>>
 
 const DRAFT_KEY = '@sira:onboardingDraft';
 const STEP_KEY = '@sira:onboardingStep';
+const MAX_STEP_KEY = '@sira:onboardingMaxStep';
 
 const readDraft = (): Partial<OnboardingFormData> | null => {
   try {
@@ -30,8 +31,8 @@ const readDraft = (): Partial<OnboardingFormData> | null => {
   }
 };
 
-const readStep = (max: number): number => {
-  const raw = sessionStorage.getItem(STEP_KEY);
+const readPersistedStep = (key: string, max: number): number => {
+  const raw = sessionStorage.getItem(key);
   const parsed = raw ? parseInt(raw, 10) : 0;
   if (Number.isNaN(parsed)) return 0;
   return Math.min(Math.max(parsed, 0), max);
@@ -68,7 +69,12 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   const maxStep = ONBOARDING_STEPS.length - 1;
 
   const [data, setData] = useState<OnboardingFormData>(() => hydrate(initialData));
-  const [step, setStep] = useState<number>(() => readStep(maxStep));
+  const [step, setStep] = useState<number>(() => readPersistedStep(STEP_KEY, maxStep));
+  // Passo mais distante já alcançado — habilita pular livremente entre steps já
+  // visitados (e válidos) pelos pontinhos do progresso.
+  const [maxReached, setMaxReached] = useState<number>(() =>
+    Math.max(readPersistedStep(STEP_KEY, maxStep), readPersistedStep(MAX_STEP_KEY, maxStep)),
+  );
 
   const hydratedFromProps = useRef(false);
   useEffect(() => {
@@ -89,6 +95,10 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   useEffect(() => {
     sessionStorage.setItem(STEP_KEY, String(step));
   }, [step]);
+
+  useEffect(() => {
+    sessionStorage.setItem(MAX_STEP_KEY, String(maxReached));
+  }, [maxReached]);
 
   const setField = useCallback(<K extends keyof OnboardingFormData>(field: K, value: OnboardingFormData[K]) => {
     setData((prev) => ({ ...prev, [field]: value }));
@@ -141,19 +151,36 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
 
   const next = useCallback(() => {
     if (!isStepValid(step)) return;
-    setStep((prev) => Math.min(prev + 1, maxStep));
+    const nextStep = Math.min(step + 1, maxStep);
+    setStep(nextStep);
+    setMaxReached((prev) => Math.max(prev, nextStep));
   }, [step, isStepValid, maxStep]);
 
   const back = useCallback(() => {
     setStep((prev) => Math.max(prev - 1, 0));
   }, []);
 
+  // Pode navegar para um step se: for o atual/anterior (voltar é sempre permitido
+  // para corrigir); ou já foi alcançado e todos os steps antes dele estão válidos.
+  const canNavigateTo = useCallback(
+    (target: number) => {
+      if (target < 0 || target > maxStep) return false;
+      if (target <= step) return true;
+      if (target > maxReached) return false;
+      for (let i = 0; i < target; i += 1) {
+        if (Object.keys(stepErrors[i] || {}).length > 0) return false;
+      }
+      return true;
+    },
+    [step, maxReached, maxStep, stepErrors],
+  );
+
   const goTo = useCallback(
     (target: number) => {
       const safe = Math.min(Math.max(target, 0), maxStep);
-      setStep(safe);
+      if (canNavigateTo(safe)) setStep(safe);
     },
-    [maxStep],
+    [maxStep, canNavigateTo],
   );
 
   const submit = useCallback(async () => {
@@ -182,6 +209,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       updateUser({ hasCompletedOnboarding: true });
       sessionStorage.removeItem(DRAFT_KEY);
       sessionStorage.removeItem(STEP_KEY);
+      sessionStorage.removeItem(MAX_STEP_KEY);
       onSuccess(profile);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('validation.submit'));
@@ -196,6 +224,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     next,
     back,
     goTo,
+    canNavigateTo,
     canAdvance,
     isStepValid,
     stepErrors,

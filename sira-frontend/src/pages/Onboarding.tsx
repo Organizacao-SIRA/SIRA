@@ -142,6 +142,7 @@ export const Onboarding = () => {
         <OnboardingProgress
           currentStep={onboarding.step}
           onJumpTo={goToStep}
+          canNavigateTo={onboarding.canNavigateTo}
         />
       }
       actions={
