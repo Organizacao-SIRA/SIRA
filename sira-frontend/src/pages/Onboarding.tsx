@@ -136,14 +136,6 @@ export const Onboarding = () => {
     }
   };
 
-  const stepHint = (() => {
-    if (onboarding.step === 2) {
-      const count = onboarding.data.interests.length;
-      return t('interests.hint', { count, min: MIN_INTERESTS });
-    }
-    return null;
-  })();
-
   return (
     <OnboardingLayout
       progress={
@@ -161,7 +153,6 @@ export const Onboarding = () => {
           onBack={goBack}
           onNext={goNext}
           onSubmit={onboarding.submit}
-          hint={stepHint}
         />
       }
     >

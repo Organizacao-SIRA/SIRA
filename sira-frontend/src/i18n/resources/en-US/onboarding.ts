@@ -52,7 +52,6 @@ export const onboarding = {
     selected_other: '{{selected}} of {{min}} min. selected',
     done: 'All set!',
     missing: '{{count}} missing',
-    hint: '{{count}} / {{min}} min. selected',
   },
   preferences: {
     title: 'Content preferences',
