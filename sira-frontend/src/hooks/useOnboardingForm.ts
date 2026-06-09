@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useCompleteOnboarding } from '../queries/useProfileMutations';
+import { clearOnboardingDeferral } from '../app/onboardingDeferral';
 import { MIN_INTERESTS, academicPreferencesSchema, createDefaultAcademicPreferences } from '../domain/academicPreferences';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
 import { ONBOARDING_STEPS, ONBOARDING_STEP_FIELDS } from '../types/onboarding';
@@ -68,7 +69,7 @@ interface UseOnboardingFormParams {
 
 export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormParams) {
   const { t } = useTranslation('onboarding');
-  const { updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const { mutateAsync: completeOnboardingAsync, isPending: isSaving } = useCompleteOnboarding();
   const maxStep = ONBOARDING_STEPS.length - 1;
 
@@ -228,6 +229,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
       });
 
       updateUser({ hasCompletedOnboarding: true });
+      if (user) clearOnboardingDeferral(user.id);
       sessionStorage.removeItem(DRAFT_KEY);
       sessionStorage.removeItem(STEP_KEY);
       sessionStorage.removeItem(MAX_STEP_KEY);
@@ -235,7 +237,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('validation.submit'));
     }
-  }, [data, stepErrors, updateUser, onSuccess, t, completeOnboardingAsync]);
+  }, [data, stepErrors, user, updateUser, onSuccess, t, completeOnboardingAsync]);
 
   return {
     data,

@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
 import { MIN_INTERESTS } from '../domain/academicPreferences';
+import { deferOnboarding } from '../app/onboardingDeferral';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
@@ -39,6 +40,13 @@ export const Onboarding = () => {
     initialData: profileData,
     onSuccess: () => navigate('/'),
   });
+
+  // "Fazer isso depois": registra o adiamento e entra no app; o banner em
+  // AppShell segue reconvidando até o onboarding ser concluído.
+  const handleSkip = () => {
+    if (user) deferOnboarding(user.id);
+    navigate('/');
+  };
 
   const [direction, setDirection] = useState(1);
   const goToStep = (target: number) => {
@@ -85,7 +93,7 @@ export const Onboarding = () => {
   const renderStep = () => {
     switch (onboarding.step) {
       case 0:
-        return <WelcomeStep userName={user?.name} />;
+        return <WelcomeStep userName={user?.name} onSkip={handleSkip} />;
       case 1:
         return (
           <AcademicProfileStep

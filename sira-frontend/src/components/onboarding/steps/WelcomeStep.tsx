@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 interface WelcomeStepProps {
   userName?: string | null;
+  onSkip?: () => void;
 }
 
 const HIGHLIGHTS = [
@@ -11,7 +12,7 @@ const HIGHLIGHTS = [
   { icon: BrainCircuit, labelKey: 'welcome.highlights.aiSearch' },
 ];
 
-export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
+export const WelcomeStep = ({ userName, onSkip }: WelcomeStepProps) => {
   const { t } = useTranslation('onboarding');
   const firstName = userName?.trim().split(' ')[0];
 
@@ -41,6 +42,16 @@ export const WelcomeStep = ({ userName }: WelcomeStepProps) => {
           </li>
         ))}
       </ul>
+
+      {onSkip && (
+        <button
+          type="button"
+          onClick={onSkip}
+          className="mt-6 text-sm font-semibold text-text-muted hover:text-link transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 rounded-md px-2 py-1"
+        >
+          {t('welcome.skip')}
+        </button>
+      )}
     </div>
   );
 };

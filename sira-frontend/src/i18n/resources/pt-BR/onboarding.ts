@@ -33,6 +33,7 @@ export const onboarding = {
       library: 'Livros e artigos científicos curados para suas áreas de interesse.',
       aiSearch: 'Busca conversacional com IA para encontrar exatamente o que precisa.',
     },
+    skip: 'Prefiro fazer isso depois',
   },
   academicProfile: {
     title: 'Seu perfil acadêmico',

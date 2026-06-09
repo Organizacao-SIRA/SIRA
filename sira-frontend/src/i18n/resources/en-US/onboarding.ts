@@ -33,6 +33,7 @@ export const onboarding = {
       library: 'Books and scientific articles curated for your interest areas.',
       aiSearch: 'Conversational AI search to find exactly what you need.',
     },
+    skip: "I'd rather do this later",
   },
   academicProfile: {
     title: 'Your academic profile',
