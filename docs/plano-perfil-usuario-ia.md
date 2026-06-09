@@ -84,7 +84,7 @@ Todo campo novo flui pelo contrato único do frontend (`domain/academicPreferenc
 
 > **Sequenciamento:** as **Fases 1–2 são independentes da decisão de produto** (Fase 0) — corrigem a arquitetura e o vazamento de sinal sem mudar a taxonomia nem o schema, então podem começar imediatamente e já entregam ganho. As **Fases 3–4** (nova taxonomia e campo novo) dependem da Fase 0.
 
-### Fase 0 — Decisões de produto
+### Fase 0 — Decisões de produto ⏸️ (pendente — bloqueia Fase 3 e 4)
 - [ ] Confirmar público-alvo (geral acadêmico vs. concursos/setor público) → define a taxonomia.
 - [ ] Aprovar a taxonomia de áreas (CNPq grandes áreas + subáreas) e a lista de subáreas/temas.
 - [ ] Aprovar o campo "trabalho atual" e os ajustes de objetivos.
@@ -95,9 +95,9 @@ Todo campo novo flui pelo contrato único do frontend (`domain/academicPreferenc
 - [x] Ligar `materials-orchestrator.service` a ele → envia **labels** (não IDs) e inclui **subAreas**. (descrições/keywords: opcional, adiado.)
 - [ ] Cobrir com teste de snapshot do resumo. **Bloqueado:** backend sem infra de testes (sem jest). Validado por ora via `tsx` manual.
 
-### Fase 2 — Unificar as trilhas
-- [ ] Migrar `recommendations.service` para consumir `buildUserAiProfile` (remove duplicação/drift).
-- [ ] Decidir o futuro da trilha de recomendações: reativar na UI ou remover o código órfão (não deixar meio-ligado).
+### Fase 2 — Unificar as trilhas ✅
+- [x] Migrar `recommendations.service` para consumir `buildUserAiProfile` (remove o `buildPreferencesText` duplicado; corrige `mainArea` que ia como ID cru também ali).
+- [x] Decisão: **manter o código unificado e pronto para reativar** (UI de recomendações **não** reativada agora).
 
 ### Fase 3 — Nova taxonomia de áreas
 - [ ] Definir a taxonomia como dado único compartilhado (evitar a duplicação atual FE×BE; ex.: gerar a lista do FE a partir da fonte do BE ou um módulo compartilhado).
