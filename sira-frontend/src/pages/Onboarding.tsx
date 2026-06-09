@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useOnboardingForm } from '../hooks/useOnboardingForm';
+import { MIN_INTERESTS } from '../domain/academicPreferences';
 import { usePreferenceOptions } from '../queries/usePreferenceOptions';
 import { OnboardingLayout } from '../components/onboarding/OnboardingLayout';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
@@ -101,6 +102,7 @@ export const Onboarding = () => {
             selected={onboarding.data.interests}
             onToggle={(id) => onboarding.toggleArrayField('interests', id)}
             error={onboarding.stepErrors[2].interests}
+            minSelected={MIN_INTERESTS}
           />
         );
       case 3:
@@ -137,7 +139,7 @@ export const Onboarding = () => {
   const stepHint = (() => {
     if (onboarding.step === 2) {
       const count = onboarding.data.interests.length;
-      return t('interests.hint', { count });
+      return t('interests.hint', { count, min: MIN_INTERESTS });
     }
     return null;
   })();

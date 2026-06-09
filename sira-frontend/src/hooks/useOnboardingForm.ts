@@ -4,9 +4,20 @@ import { toast } from '../toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useCompleteOnboarding } from '../queries/useProfileMutations';
 import { DEFAULT_EDUCATION_LEVEL, DEFAULT_LANGUAGES, DEFAULT_MATERIAL_LEVELS } from '../i18n/preferenceValues';
+import { MIN_INTERESTS, onboardingPreferencesSchema } from '../domain/academicPreferences';
 import type { OnboardingFormData, StepFieldErrors } from '../types/onboarding';
-import { ONBOARDING_STEPS } from '../types/onboarding';
+import { ONBOARDING_STEPS, ONBOARDING_STEP_FIELDS } from '../types/onboarding';
 import type { UserProfile, ProfileData } from '../types';
+
+/** Campo do formulário → chave i18n da mensagem de validação. */
+const VALIDATION_KEY_BY_FIELD: Partial<Record<keyof OnboardingFormData, string>> = {
+  course: 'validation.course',
+  mainArea: 'validation.mainArea',
+  interests: 'validation.interests',
+  languages: 'validation.languages',
+  materialLevels: 'validation.materialLevels',
+  wantsBooks: 'validation.formats', // refine "ao menos um formato" reporta em wantsBooks
+};
 
 const DRAFT_KEY = '@sira:onboardingDraft';
 const STEP_KEY = '@sira:onboardingStep';
@@ -109,30 +120,28 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   );
 
   const stepErrors = useMemo<StepFieldErrors[]>(() => {
-    const errors: StepFieldErrors[] = ONBOARDING_STEPS.map(() => ({}));
-
-    if (!data.course.trim() || data.course.trim().length < 2) {
-      errors[1].course = t('validation.course');
-    }
-    if (!data.mainArea.trim()) {
-      errors[1].mainArea = t('validation.mainArea');
-    }
-
-    if (data.interests.length < 3) {
-      errors[2].interests = t('validation.interests');
-    }
-
-    if (data.languages.length === 0) {
-      errors[3].languages = t('validation.languages');
-    }
-    if (data.materialLevels.length === 0) {
-      errors[3].materialLevels = t('validation.materialLevels');
-    }
-    if (!data.wantsBooks && !data.wantsArticles) {
-      errors[3].wantsBooks = t('validation.formats');
+    // Valida pelo schema do contrato e mapeia cada issue para a mensagem i18n
+    // do campo correspondente.
+    const result = onboardingPreferencesSchema.safeParse(data);
+    const fieldErrors: StepFieldErrors = {};
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof OnboardingFormData;
+        const key = VALIDATION_KEY_BY_FIELD[field];
+        if (key && !fieldErrors[field]) {
+          fieldErrors[field] = t(key, { count: MIN_INTERESTS });
+        }
+      }
     }
 
-    return errors;
+    // Agrupa os erros por step a partir do mapa declarativo (sem índices mágicos).
+    return ONBOARDING_STEPS.map((stepMeta) => {
+      const errors: StepFieldErrors = {};
+      for (const field of ONBOARDING_STEP_FIELDS[stepMeta.id]) {
+        if (fieldErrors[field]) errors[field] = fieldErrors[field];
+      }
+      return errors;
+    });
   }, [data, t]);
 
   const isStepValid = useCallback(
@@ -160,11 +169,11 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
   );
 
   const submit = useCallback(async () => {
-    for (let i = 1; i <= 3; i += 1) {
-      if (!isStepValid(i)) {
-        setStep(i);
-        return;
-      }
+    // Vai para o primeiro step com erro (se houver) antes de enviar.
+    const firstInvalidStep = stepErrors.findIndex((errors) => Object.keys(errors).length > 0);
+    if (firstInvalidStep !== -1) {
+      setStep(firstInvalidStep);
+      return;
     }
 
     try {
@@ -188,7 +197,7 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('validation.submit'));
     }
-  }, [data, isStepValid, updateUser, onSuccess, t, completeOnboardingAsync]);
+  }, [data, stepErrors, updateUser, onSuccess, t, completeOnboardingAsync]);
 
   return {
     data,

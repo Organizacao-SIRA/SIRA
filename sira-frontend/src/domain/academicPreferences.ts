@@ -48,6 +48,15 @@ export const academicPreferencesSchema = academicPreferencesShape.refine(
   { path: ['wantsBooks'] },
 );
 
+/**
+ * Schema de validação do onboarding. Hoje é o contrato SEM `wantsOpenAccessOnly`
+ * (o onboarding ainda não coleta esse campo). A regra "ao menos um formato"
+ * (livros ou artigos) é reportada no caminho `wantsBooks`.
+ */
+export const onboardingPreferencesSchema = academicPreferencesShape
+  .omit({ wantsOpenAccessOnly: true })
+  .refine((data) => data.wantsBooks || data.wantsArticles, { path: ['wantsBooks'] });
+
 export type AcademicPreferences = z.infer<typeof academicPreferencesShape>;
 
 /** Campo de preferência acadêmica (chave do contrato). */

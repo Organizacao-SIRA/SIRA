@@ -52,7 +52,7 @@ export const onboarding = {
     selected_other: '{{selected}} de {{min}} mín. selecionados',
     done: 'Tudo certo!',
     missing: 'Faltam {{count}}',
-    hint: '{{count}} / 3 mín. selecionados',
+    hint: '{{count}} / {{min}} mín. selecionados',
   },
   preferences: {
     title: 'Preferências de conteúdo',
@@ -92,7 +92,7 @@ export const onboarding = {
   validation: {
     course: 'Informe o curso (mínimo 2 caracteres).',
     mainArea: 'Selecione a área principal.',
-    interests: 'Selecione pelo menos 3 áreas de interesse.',
+    interests: 'Selecione pelo menos {{count}} áreas de interesse.',
     languages: 'Selecione pelo menos 1 idioma.',
     materialLevels: 'Selecione pelo menos 1 nível de material.',
     formats: 'Selecione pelo menos um formato (livros ou artigos).',

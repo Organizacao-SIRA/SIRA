@@ -28,3 +28,17 @@ export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
 ];
 
 export type StepFieldErrors = Partial<Record<keyof OnboardingFormData, string>>;
+
+/**
+ * Campos de preferência validados por cada step. Mapeia o `id` do step (não o
+ * índice) para os campos do contrato — assim a validação acompanha qualquer
+ * reordenação/inserção de steps sem números mágicos espalhados pelo código.
+ */
+export const ONBOARDING_STEP_FIELDS: Record<OnboardingStepId, (keyof OnboardingFormData)[]> = {
+  'welcome': [],
+  'academic-profile': ['course', 'educationLevel', 'mainArea', 'subAreas'],
+  'interest-areas': ['interests'],
+  'content-preferences': ['languages', 'materialLevels', 'wantsBooks', 'wantsArticles'],
+  'academic-goal': ['academicGoal'],
+  'review': [],
+};
