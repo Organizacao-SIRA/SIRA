@@ -19,6 +19,12 @@ export const onboarding = {
     saving: 'Saving...',
     finish: 'Finish setup',
   },
+  nudge: {
+    title: 'Complete your profile',
+    description: 'It takes a minute and makes your recommendations much better.',
+    cta: 'Complete now',
+    dismiss: 'Dismiss',
+  },
   loading: {
     options: 'Loading options...',
     errorTitle: 'Unable to load options',

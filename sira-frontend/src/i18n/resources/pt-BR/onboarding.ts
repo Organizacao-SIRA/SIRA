@@ -19,6 +19,12 @@ export const onboarding = {
     saving: 'Salvando...',
     finish: 'Finalizar configuração',
   },
+  nudge: {
+    title: 'Complete seu perfil',
+    description: 'Leva 1 minuto e deixa suas recomendações muito melhores.',
+    cta: 'Completar agora',
+    dismiss: 'Dispensar',
+  },
   loading: {
     options: 'Carregando opções...',
     errorTitle: 'Erro ao carregar opções',

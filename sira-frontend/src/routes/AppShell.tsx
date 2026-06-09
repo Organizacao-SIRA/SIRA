@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
+import { OnboardingNudge } from '../components/OnboardingNudge';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageErrorBoundary } from '../components/ui/PageErrorBoundary';
 import { SearchProvider } from '../contexts/SearchProvider';
@@ -44,6 +45,7 @@ export const AppShell = () => {
             tabIndex={-1}
             className="sira-scrollbar flex-1 overflow-y-auto w-full relative [scrollbar-gutter:stable] focus:outline-none"
           >
+            <OnboardingNudge />
             <PageErrorBoundary
               resetKey={location.pathname}
               fallback={
