@@ -16,8 +16,6 @@ export const queryKeys = {
   favoritesList: (page: number, type: FavoriteTypeFilter) =>
     ['favorites', 'list', { page, type }] as const,
 
-  recommendations: ['recommendations'] as const,
-
   material: (id: string | undefined) => ['material', id] as const,
 
   catalogSearch: (query: string, category: string, page: number, filters: SearchFilters) =>
