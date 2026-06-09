@@ -1,6 +1,5 @@
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { StatusBadge } from '../ui/StatusBadge';
 import { ProfileAvatar } from './ProfileAvatar';
 import { resolveAvatarUrl } from '../../services/api';
 
@@ -33,13 +32,19 @@ export const ProfileHeaderCard = ({
       <p className="text-text-muted text-sm truncate">{email}</p>
     </div>
     {hasCompletedOnboarding ? (
-      <StatusBadge variant="success" icon={<ShieldCheck className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
-        {t('status.completed')}
-      </StatusBadge>
+      <span className="inline-flex items-center gap-2 flex-shrink-0 rounded-full border border-success-border bg-success-soft py-1 pl-1.5 pr-4">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-success text-white">
+          <ShieldCheck className="h-4 w-4" />
+        </span>
+        <span className="text-sm font-semibold text-success-strong">{t('status.completed')}</span>
+      </span>
     ) : (
-      <StatusBadge variant="warning" icon={<AlertTriangle className="w-4 h-4" />} className="rounded-full px-4 py-2 text-xs flex-shrink-0">
-        {t('status.pending')}
-      </StatusBadge>
+      <span className="inline-flex items-center gap-2 flex-shrink-0 rounded-full border border-warning-border bg-warning-soft py-1 pl-1.5 pr-4">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent text-primary-darker">
+          <AlertTriangle className="h-4 w-4" />
+        </span>
+        <span className="text-sm font-semibold text-warning-strong">{t('status.pending')}</span>
+      </span>
     )}
     </div>
   );
