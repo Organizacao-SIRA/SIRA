@@ -1,15 +1,8 @@
-export type OnboardingFormData = {
-  course: string;
-  educationLevel: string;
-  mainArea: string;
-  subAreas: string;
-  interests: string[];
-  languages: string[];
-  materialLevels: string[];
-  wantsBooks: boolean;
-  wantsArticles: boolean;
-  academicGoal: string;
-};
+import type { AcademicPreferences } from '../domain/academicPreferences';
+
+// Estado do formulário de onboarding. Deriva do contrato de preferências; hoje
+// o onboarding ainda não coleta `wantsOpenAccessOnly` (só as Configurações).
+export type OnboardingFormData = Omit<AcademicPreferences, 'wantsOpenAccessOnly'>;
 
 export type OnboardingStepId =
   | 'welcome'
