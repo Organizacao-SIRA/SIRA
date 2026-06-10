@@ -75,11 +75,10 @@ export const preferences = {
     advanced: 'Advanced',
   },
   goals: {
-    thesis: 'Final paper',
+    thesis: 'Thesis / Final paper',
     scientificResearch: 'Scientific research',
-    introductoryStudy: 'Introductory study',
-    technicalDepth: 'Technical deep dive',
+    subjectStudy: 'Course study',
     exams: 'Public exams',
-    professionalWork: 'Professional work',
+    professionalWork: 'Professional practice',
   },
 };

@@ -44,13 +44,14 @@ export const AcademicProfileStep = ({ data, errors, options, onChange }: Academi
       <Select
         label={t('academicProfile.educationLevel')}
         value={data.educationLevel}
-        onChange={(e) => onChange('educationLevel', e.target.value)}
+        onChange={(value) => onChange('educationLevel', value)}
         options={options.educationLevels.map((level) => ({ value: level, label: preferenceValueLabel(level, tp) }))}
       />
       <Select
         label={t('academicProfile.mainArea')}
+        hint={t('academicProfile.mainAreaHint')}
         value={data.mainArea}
-        onChange={(e) => onChange('mainArea', e.target.value)}
+        onChange={(value) => onChange('mainArea', value)}
         error={errors.mainArea}
         options={[
           { value: '', label: t('academicProfile.selectMainArea') },

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Target, Rocket, GraduationCap,
-  Briefcase, Lightbulb, FlaskConical, ScrollText, X,
+  Target, Rocket, BookOpen,
+  Briefcase, FlaskConical, ScrollText, X,
 } from 'lucide-react';
 import { preferenceValueLabel } from '@/i18n/preferenceLabels';
 
@@ -12,8 +12,7 @@ import { preferenceValueLabel } from '@/i18n/preferenceLabels';
 const GOAL_ICONS: Record<string, React.ElementType> = {
   'TCC': ScrollText,
   'Pesquisa científica': FlaskConical,
-  'Estudo introdutório': Lightbulb,
-  'Aprofundamento técnico': GraduationCap,
+  'Estudo de disciplina': BookOpen,
   'Concursos': Briefcase,
   'Trabalho profissional': Rocket,
 };

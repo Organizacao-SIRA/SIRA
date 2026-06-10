@@ -62,11 +62,11 @@ export const AcademicProfileCard = ({
         }
       </Row>
 
-      <Row label={t('fields.level')}>
+      <Row label={t('fields.educationLevel')}>
         {isEditing ? (
           <Select
             value={editData.educationLevel}
-            onChange={(e) => onChange('educationLevel', e.target.value)}
+            onChange={(value) => onChange('educationLevel', value)}
             options={educationLevelsList.map(l => ({ value: l, label: preferenceValueLabel(l, tp) }))}
           />
         ) : (
@@ -78,7 +78,7 @@ export const AcademicProfileCard = ({
         {isEditing ? (
           <Select
             value={editData.mainArea}
-            onChange={(e) => onChange('mainArea', e.target.value)}
+            onChange={(value) => onChange('mainArea', value)}
             options={[
               { value: '', label: t('values.selectArea') },
               ...topicsList.map(topic => ({ value: topic.id, label: preferenceTopicLabel(topic, tp) })),
@@ -109,7 +109,7 @@ export const AcademicProfileCard = ({
         {isEditing ? (
           <Select
             value={editData.academicGoal || ''}
-            onChange={(e) => onChange('academicGoal', e.target.value)}
+            onChange={(value) => onChange('academicGoal', value)}
             options={[
               { value: '', label: t('values.notInformed') },
               ...academicGoalsList.map(g => ({ value: g, label: preferenceValueLabel(g, tp) })),

@@ -66,7 +66,7 @@ export const ContentPreferencesCard = ({
         </div>
 
         <div>
-          <GroupTitle>{t('fields.level')}</GroupTitle>
+          <GroupTitle>{t('fields.materialLevel')}</GroupTitle>
           <div className="space-y-2">
             {materialLevelsList.map(level => (
               <Checkbox

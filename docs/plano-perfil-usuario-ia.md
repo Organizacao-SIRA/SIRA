@@ -105,7 +105,7 @@ Abordagem escolhida: **expandir** (manter as 9 originais + adicionar 21), evitan
 - [x] i18n pt/en (`topics.<id>`) e `TOPIC_ICONS` em paridade (30/30/30/30).
 - [x] **Sem migração** (IDs antigos seguem válidos) e **sem mudar o contrato Zod** (mainArea/interests são string validada contra `PREFERENCE_TOPIC_IDS`, que auto-estende). Onboarding/config mapeiam tópicos dinamicamente — não precisaram de ajuste.
 - [ ] *(Deferido)* Eliminar a duplicação FE×BE das listas (módulo/fonte compartilhada).
-- [ ] *(Deferido, opcional)* Taxonomia em 2 níveis (grande área → subáreas filtradas) para reduzir o tamanho do grid de interesses.
+- [x] *(Avaliado e descartado)* Taxonomia em 2 níveis (grande área CNPq → subáreas filtradas). **Decisão: reenquadrar, não reestruturar.** Adotar grandes áreas como `mainArea` *dilui* o sinal da IA (`Main area: Engenharias` < `Main area: Engenharia de Software`), exige migração + manutenção de um mapa 30→9 e contraria a escolha da Fase 3 (expandir a lista plana). Em vez disso, o `mainArea` foi **redefinido** como "Área principal de interesse" (o tema que melhor define o foco de estudo/atuação), com hint no onboarding — a lista plana de 30 tópicos passa a fazer sentido como "escolha seu nº 1", sem ambiguidade de granularidade, sem migração. Mantido independente de `interests` (acoplar `mainArea ∈ interests` traria fragilidade entre os cards do Perfil; custo > benefício). Label da IA segue `Main area` (sinal estável; evita invalidar o cache do `system`).
 
 ### Fase 4 — Campo "trabalho atual" ✅
 - [x] Schema Prisma (`currentWork String?`), aplicado via `db push` (fluxo do projeto).
@@ -113,13 +113,13 @@ Abordagem escolhida: **expandir** (manter as 9 originais + adicionar 21), evitan
 - [x] UI: campo no onboarding (`AcademicProfileStep` + Review) e nas Configurações (`AcademicProfileCard`), com placeholder/exemplos e i18n pt/en.
 - [x] Incluído no `buildUserAiProfile` ("Currently working on") + selects da busca e recomendações.
 
-### Fase 5 — Refinos de conteúdo
-- [ ] Reorganizar **objetivos** (separar intenção × entregável × contexto, ou agrupar coerentemente).
-- [ ] Orientar **subAreas** (placeholder com exemplos; avaliar virar multi-tag/estruturado).
-- [ ] Avaliar redundância **nível de formação × nível de material** (manter ambos com rótulos claros ou derivar um do outro).
+### Fase 5 — Refinos de conteúdo ✅
+- [x] Reorganizar **objetivos** → eixo único de **propósito** (5 valores): `TCC / Monografia`, `Pesquisa científica`, `Estudo de disciplina`, `Concursos públicos`, `Atuação profissional`. Os antigos `Estudo introdutório`/`Aprofundamento técnico` (que duplicavam o nível de material) colapsaram em `Estudo de disciplina`. **Migração** `20260609120000_remap_academic_goals` remapeia os valores legados; valores `TCC`/`Concursos`/`Trabalho profissional` foram mantidos no banco (só o rótulo i18n mudou) → migração mínima.
+- [x] Orientar **subAreas** — placeholder com exemplos (`Ex: Machine Learning, NLP`) já presente no onboarding. *(Multi-tag/estruturado: deferido.)*
+- [x] Avaliar redundância **nível de formação × nível de material** → **manter ambos** (sinais distintos). Rótulos clareados: no perfil, `fields.level` (ambíguo, usado nos dois cards) virou `educationLevel` ("Nível de formação") e `materialLevel` ("Nível do material"); descrição da profundidade no onboarding explicita "independente da sua formação".
 
 ### Fase 6 — Verificação
-- [ ] `tsc` FE + BE e ESLint verdes.
+- [x] `tsc` FE + BE verdes; **ESLint FE** verde. *(Backend não tem config de ESLint — `lint` script aponta para um config inexistente; gate de correção do BE é o `tsc`.)*
 - [ ] Teste manual: perfis variados geram resumos legíveis (labels, subáreas, trabalho atual) no prompt.
 - [ ] Comparar qualidade das recomendações antes/depois (amostra de buscas reais).
 - [ ] Conferir que o cache de prompt continua estável (resumo determinístico).

@@ -8,6 +8,10 @@ export const common = {
     signIn: 'Sign in',
     backToLogin: 'Back to sign in',
   },
+  select: {
+    searchPlaceholder: 'Search…',
+    noResults: 'No results',
+  },
   toast: {
     linkCopied: 'Link copied',
     citationCopied: 'Citation copied',

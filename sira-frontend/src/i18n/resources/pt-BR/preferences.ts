@@ -75,11 +75,10 @@ export const preferences = {
     advanced: 'Avançado',
   },
   goals: {
-    thesis: 'TCC',
+    thesis: 'TCC / Monografia',
     scientificResearch: 'Pesquisa científica',
-    introductoryStudy: 'Estudo introdutório',
-    technicalDepth: 'Aprofundamento técnico',
-    exams: 'Concursos',
-    professionalWork: 'Trabalho profissional',
+    subjectStudy: 'Estudo de disciplina',
+    exams: 'Concursos públicos',
+    professionalWork: 'Atuação profissional',
   },
 };

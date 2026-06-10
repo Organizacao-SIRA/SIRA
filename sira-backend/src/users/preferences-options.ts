@@ -192,11 +192,14 @@ export const PREFERENCE_TOPICS = [
 export const EDUCATION_LEVELS = ['Graduação', 'Especialização', 'Mestrado', 'Doutorado'] as const;
 export const LANGUAGES = ['Português', 'Inglês', 'Espanhol'] as const;
 export const MATERIAL_LEVELS = ['Introdutório', 'Intermediário', 'Avançado'] as const;
+// Eixo único de "propósito": o que o usuário quer alcançar. A profundidade
+// (introdutório/intermediário/avançado) vive em MATERIAL_LEVELS — por isso os
+// antigos 'Estudo introdutório'/'Aprofundamento técnico' saíram daqui (migração
+// remapeia os valores legados para 'Estudo de disciplina').
 export const ACADEMIC_GOALS = [
   'TCC',
   'Pesquisa científica',
-  'Estudo introdutório',
-  'Aprofundamento técnico',
+  'Estudo de disciplina',
   'Concursos',
   'Trabalho profissional',
 ] as const;
