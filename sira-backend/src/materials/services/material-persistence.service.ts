@@ -81,6 +81,8 @@ export class MaterialPersistenceService {
         course: true,
         educationLevel: true,
         mainArea: true,
+        subAreas: true,
+        currentWork: true,
         interests: true,
         academicGoal: true,
         materialLevels: true,

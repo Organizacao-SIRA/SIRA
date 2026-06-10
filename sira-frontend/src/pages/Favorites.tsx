@@ -43,8 +43,11 @@ export const Favorites = () => {
     ? 'grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),20rem))] justify-center items-stretch gap-4 sm:gap-6'
     : 'space-y-4';
 
-  const isEmpty = !isInitialLoading && counts.all === 0;
-  const isFilteredEmpty = !isInitialLoading && counts.all > 0 && total === 0;
+  // Erro tem precedência: numa falha de carregamento, `counts.all === 0` é só
+  // ausência de dados (nada carregou), não "sem favoritos". Sem este guarda, o
+  // empty state e o ErrorState apareciam juntos na mesma tela.
+  const isEmpty = !isInitialLoading && !error && counts.all === 0;
+  const isFilteredEmpty = !isInitialLoading && !error && counts.all > 0 && total === 0;
   const hasMore = page + 1 < totalPages;
 
   const bookCount = counts.book;

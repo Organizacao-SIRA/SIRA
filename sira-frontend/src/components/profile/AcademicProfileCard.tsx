@@ -6,7 +6,7 @@ import { SectionCard } from './SectionCard';
 import { preferenceTopicLabel, preferenceValueLabel } from '../../i18n/preferenceLabels';
 import type { PreferenceTopic } from '../../types';
 
-type AcademicProfileField = 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'academicGoal';
+type AcademicProfileField = 'course' | 'educationLevel' | 'mainArea' | 'subAreas' | 'currentWork' | 'academicGoal';
 
 interface AcademicProfileCardProps {
   isEditing: boolean;
@@ -15,6 +15,7 @@ interface AcademicProfileCardProps {
     educationLevel: string;
     mainArea: string;
     subAreas: string;
+    currentWork: string;
     academicGoal: string;
   };
   editData: {
@@ -22,6 +23,7 @@ interface AcademicProfileCardProps {
     educationLevel: string;
     mainArea: string;
     subAreas: string;
+    currentWork: string;
     academicGoal: string;
   };
   onChange: (field: AcademicProfileField, value: string) => void;
@@ -60,11 +62,11 @@ export const AcademicProfileCard = ({
         }
       </Row>
 
-      <Row label={t('fields.level')}>
+      <Row label={t('fields.educationLevel')}>
         {isEditing ? (
           <Select
             value={editData.educationLevel}
-            onChange={(e) => onChange('educationLevel', e.target.value)}
+            onChange={(value) => onChange('educationLevel', value)}
             options={educationLevelsList.map(l => ({ value: l, label: preferenceValueLabel(l, tp) }))}
           />
         ) : (
@@ -76,7 +78,7 @@ export const AcademicProfileCard = ({
         {isEditing ? (
           <Select
             value={editData.mainArea}
-            onChange={(e) => onChange('mainArea', e.target.value)}
+            onChange={(value) => onChange('mainArea', value)}
             options={[
               { value: '', label: t('values.selectArea') },
               ...topicsList.map(topic => ({ value: topic.id, label: preferenceTopicLabel(topic, tp) })),
@@ -96,11 +98,18 @@ export const AcademicProfileCard = ({
         }
       </Row>
 
+      <Row label={t('fields.currentWork')}>
+        {isEditing
+          ? <Input value={editData.currentWork} onChange={(e) => onChange('currentWork', e.target.value)} />
+          : <span className="text-text font-bold break-words">{data.currentWork || t('values.notInformed')}</span>
+        }
+      </Row>
+
       <Row label={t('fields.objective')}>
         {isEditing ? (
           <Select
             value={editData.academicGoal || ''}
-            onChange={(e) => onChange('academicGoal', e.target.value)}
+            onChange={(value) => onChange('academicGoal', value)}
             options={[
               { value: '', label: t('values.notInformed') },
               ...academicGoalsList.map(g => ({ value: g, label: preferenceValueLabel(g, tp) })),

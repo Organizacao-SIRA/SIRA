@@ -16,6 +16,7 @@ import { OpenAlexClient } from '../clients/openalex.client';
 import { MaterialsCacheService } from '../cache/materials-cache.service';
 import { MaterialPersistenceService } from './material-persistence.service';
 import { parseAiJson, isAiSynthesisResponse } from '../parsing/ai-json-parser';
+import { buildUserAiProfile } from '../../users/ai/user-ai-profile';
 
 /**
  * Coordena a busca em múltiplas fontes: chama os clients, lida com falha parcial
@@ -101,16 +102,9 @@ export class MaterialsOrchestratorService {
       this.persistence.saveSearchHistory(userId, prompt.trim()).catch(() => {});
     }
 
-    const userProfileText = user ? `
-      USER PROFILE (values preserved in their original language):
-      - Course: ${user.course}
-      - Education level: ${user.educationLevel}
-      - Main area: ${user.mainArea}
-      - Interests: ${user.interests?.join(', ')}
-      - Academic goal: ${user.academicGoal}
-      - Preferred material level: ${user.materialLevels?.join(', ')}
-      - Languages: ${user.languages?.join(', ')}
-    ` : 'User profile not available.';
+    // Resumo do usuário montado pela fonte única (resolve IDs->labels, inclui
+    // subáreas e omite campos vazios). Ver users/ai/user-ai-profile.
+    const userProfileText = buildUserAiProfile(user);
 
     // Fase 1: Interpretação de Intenção
     let queries: string[] = [];

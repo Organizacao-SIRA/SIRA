@@ -32,6 +32,7 @@ export type UserProfile = {
   educationLevel: string | null;
   mainArea: string | null;
   subAreas: string | null;
+  currentWork: string | null;
   languages: string[];
   materialLevels: string[];
   wantsBooks: boolean;
@@ -48,9 +49,10 @@ export type UserProfile = {
 // Payload enviado ao concluir o onboarding. Deriva do contrato de preferências;
 // `subAreas`/`academicGoal` são opcionais (o cliente envia `undefined` quando vazios).
 export type CompleteOnboardingPayload =
-  Omit<AcademicPreferences, 'subAreas' | 'academicGoal'> & {
+  Omit<AcademicPreferences, 'subAreas' | 'academicGoal' | 'currentWork'> & {
     subAreas?: string;
     academicGoal?: string;
+    currentWork?: string;
   };
 
 // Espelho editável do perfil: as preferências acadêmicas (contrato) + os campos

@@ -20,10 +20,9 @@ const valueKeys: Record<string, string> = {
   [MATERIAL_LEVELS[2]]: 'materialLevels.advanced',
   [ACADEMIC_GOALS[0]]: 'goals.thesis',
   [ACADEMIC_GOALS[1]]: 'goals.scientificResearch',
-  [ACADEMIC_GOALS[2]]: 'goals.introductoryStudy',
-  [ACADEMIC_GOALS[3]]: 'goals.technicalDepth',
-  [ACADEMIC_GOALS[4]]: 'goals.exams',
-  [ACADEMIC_GOALS[5]]: 'goals.professionalWork',
+  [ACADEMIC_GOALS[2]]: 'goals.subjectStudy',
+  [ACADEMIC_GOALS[3]]: 'goals.exams',
+  [ACADEMIC_GOALS[4]]: 'goals.professionalWork',
 };
 
 export const preferenceValueLabel = (value: string, t: TFunction<'preferences'>) => {

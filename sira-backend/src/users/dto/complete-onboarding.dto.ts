@@ -34,6 +34,10 @@ export class CompleteOnboardingDto {
   @IsString()
   subAreas?: string;
 
+  @IsOptional()
+  @IsString()
+  currentWork?: string;
+
   @IsArray()
   @ArrayMinSize(1)
   @IsIn(LANGUAGE_LIST, { each: true })
