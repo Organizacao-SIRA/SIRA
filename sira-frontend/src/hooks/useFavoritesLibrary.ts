@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchFavorites, type FavoriteTypeFilter } from '../services/api';
 import { usePersistedState } from './usePersistedState';
 import { createSessionCache } from '../utils/sessionCache';
+import { useFavorites } from '../queries/useFavorites';
 import type { CatalogItem } from '../types';
 
 export const FAVORITES_PAGE_SIZE = 20;
@@ -18,6 +19,7 @@ export type FavoriteCounts = Record<FavoriteTabId, number>;
 const FAVORITES_VERSION = 'v1';
 const FAVORITES_STATE_KEY = `@sira:favorites:${FAVORITES_VERSION}:state`;
 const EMPTY_COUNTS: FavoriteCounts = { all: 0, book: 0, article: 0 };
+const EMPTY_ITEMS: CatalogItem[] = [];
 
 interface FavoritesStoredState {
   activeTab: FavoriteTabId;
@@ -89,6 +91,12 @@ export const useFavoritesLibrary = () => {
     { activeTab: 'all' },
     { validate: validateFavoritesState },
   );
+  // Conjunto global de IDs favoritos (já carregado pela navegação anterior).
+  // `knownEmpty` = sabemos, sem fetch próprio, que a biblioteca está vazia —
+  // o que permite ir direto ao empty state sem o skeleton piscar antes.
+  const { favoriteIds, favoritesLoaded } = useFavorites();
+  const knownEmpty = favoritesLoaded && favoriteIds.size === 0;
+
   const [initialSnapshot] = useState(() => readInitialSnapshot(storedState));
   const [activeTab, setActiveTabState] = useState<FavoriteTabId>(initialSnapshot.activeTab);
   const [items, setItems] = useState<CatalogItem[]>(initialSnapshot.items);
@@ -171,6 +179,12 @@ export const useFavoritesLibrary = () => {
   }, [storeSnapshot]);
 
   useEffect(() => {
+    // Já sabemos que não há favoritos (conjunto global de IDs vazio): não dispara
+    // o fetch. O estado "vazio" é derivado no return — sem setState aqui, o que
+    // evita o skeleton e mantém o efeito sem efeitos colaterais de estado. O
+    // efeito re-roda quando `knownEmpty` muda (ex.: o 1º favorito é adicionado).
+    if (knownEmpty) return;
+
     const controller = new AbortController();
     let isActive = true;
 
@@ -182,7 +196,7 @@ export const useFavoritesLibrary = () => {
       isActive = false;
       controller.abort();
     };
-  }, [activeTab, loadFavoritesPage]);
+  }, [activeTab, loadFavoritesPage, knownEmpty]);
 
   const setActiveTab = (tab: FavoriteTabId) => {
     const hit = favoritesCache.get(cacheKeyFor(tab));
@@ -255,17 +269,21 @@ export const useFavoritesLibrary = () => {
     }
   }, [activeTab, loadFavoritesPage]);
 
+  // Quando os IDs globais garantem que a biblioteca está vazia, expõe o estado
+  // "vazio" derivado (sem skeleton e sem esperar o fetch próprio). O estado
+  // interno fica intocado e volta a valer assim que `knownEmpty` deixa de ser
+  // verdade. `error` também é mascarado: um conjunto vazio é sucesso conhecido.
   return {
     activeTab,
     setActiveTab,
-    items,
-    counts,
-    page,
-    total,
-    totalPages,
-    isInitialLoading,
+    items: knownEmpty ? EMPTY_ITEMS : items,
+    counts: knownEmpty ? EMPTY_COUNTS : counts,
+    page: knownEmpty ? 0 : page,
+    total: knownEmpty ? 0 : total,
+    totalPages: knownEmpty ? 0 : totalPages,
+    isInitialLoading: knownEmpty ? false : isInitialLoading,
     isLoadingMore,
-    error,
+    error: knownEmpty ? null : error,
     loadFavoritesPage,
     removeFavoriteLocally,
     resetFavoritesHome,

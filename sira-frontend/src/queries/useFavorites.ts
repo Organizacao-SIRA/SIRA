@@ -33,7 +33,7 @@ export const useFavorites = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useTranslation('common');
 
-  const { data: favoriteIds } = useQuery({
+  const { data: favoriteIds, isSuccess } = useQuery({
     queryKey: queryKeys.favoriteIds,
     queryFn: fetchFavoriteIds,
     enabled: isAuthenticated,
@@ -42,6 +42,10 @@ export const useFavorites = () => {
   });
 
   const ids = favoriteIds ?? EMPTY_IDS;
+  // `true` quando o conjunto de IDs já é autoritativo (query resolvida). Permite
+  // a consumidores decidir "0 favoritos" sem um fetch próprio — ex.: a tela de
+  // Favoritos pula o skeleton quando já se sabe que a biblioteca está vazia.
+  const favoritesLoaded = isSuccess;
 
   const { mutateAsync } = useMutation<unknown, Error, ToggleVars, ToggleContext>({
     mutationFn: ({ item, isFav }) => (isFav ? removeFavoriteApi(item.id) : addFavorite(item)),
@@ -86,5 +90,5 @@ export const useFavorites = () => {
 
   const isFavorite = useCallback((id: string) => ids.has(id), [ids]);
 
-  return { favoriteIds: ids, isFavorite, toggleFavorite };
+  return { favoriteIds: ids, favoritesLoaded, isFavorite, toggleFavorite };
 };
