@@ -256,7 +256,10 @@ export const Profile = () => {
         )}
       </div>
 
-      <div className="space-y-6">
+      {/* overflow-anchor:none — ao expandir o card de áreas de interesse, evita
+          que o scroll anchoring do navegador empurre o topo para cima; assim o
+          conteúdo cresce para baixo com o topo fixo. */}
+      <div className="space-y-6 [overflow-anchor:none]">
         <ProfileHeaderCard
           name={profileData.name}
           email={profileData.email}

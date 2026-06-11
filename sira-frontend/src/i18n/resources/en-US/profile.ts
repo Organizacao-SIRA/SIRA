@@ -61,6 +61,8 @@ export const profile = {
   },
   actions: {
     saveChanges: 'Save Changes',
+    showMore: 'Show {{count}} more areas',
+    showLess: 'Show less',
   },
   toast: {
     saved: 'Profile updated successfully.',
