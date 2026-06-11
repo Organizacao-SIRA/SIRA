@@ -52,10 +52,6 @@ export class UpdateProfileDto {
   wantsArticles?: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  wantsOpenAccessOnly?: boolean;
-
-  @IsOptional()
   @IsIn(UI_LOCALES)
   uiLocale?: string;
 

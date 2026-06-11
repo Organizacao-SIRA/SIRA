@@ -23,7 +23,6 @@ export const profile = {
     objective: 'Goal',
     languages: 'Languages',
     formats: 'Formats',
-    access: 'Access',
   },
   values: {
     notInformed: 'Not informed',
@@ -41,8 +40,9 @@ export const profile = {
   content: {
     books: 'Books',
     articles: 'Articles',
-    openAccessOnly: 'Open access only',
-    openAccessHint: 'Recommendations will include only free materials.',
+    languagesHint: 'Languages you prefer to receive materials in.',
+    materialLevelHint: 'Depth of the recommended content.',
+    formatsHint: 'Types of material you want to receive.',
   },
   avatar: {
     title: 'Profile photo',

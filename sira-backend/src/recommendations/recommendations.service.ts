@@ -30,7 +30,6 @@ type RecommendationUser = {
   materialLevels: string[];
   wantsBooks: boolean;
   wantsArticles: boolean;
-  wantsOpenAccessOnly: boolean;
   interests: string[];
   academicGoal: string | null;
   onboardingCompletedAt: Date | null;
@@ -100,7 +99,6 @@ export class RecommendationsService {
           materialLevels: true,
           wantsBooks: true,
           wantsArticles: true,
-          wantsOpenAccessOnly: true,
           interests: true,
           academicGoal: true,
           onboardingCompletedAt: true,
@@ -141,7 +139,7 @@ export class RecommendationsService {
     const searchFilters = {
       types: [],
       area: null,
-      openAccessOnly: user.wantsOpenAccessOnly,
+      openAccessOnly: false,
       yearFrom: null,
       languages: user.languages?.length ? user.languages : [],
     };

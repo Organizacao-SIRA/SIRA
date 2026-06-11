@@ -37,7 +37,7 @@ export const ONBOARDING_STEP_FIELDS: Record<OnboardingStepId, (keyof OnboardingF
   'welcome': [],
   'academic-profile': ['course', 'educationLevel', 'mainArea', 'subAreas'],
   'interest-areas': ['interests'],
-  'content-preferences': ['languages', 'materialLevels', 'wantsBooks', 'wantsArticles', 'wantsOpenAccessOnly'],
+  'content-preferences': ['languages', 'materialLevels', 'wantsBooks', 'wantsArticles'],
   'academic-goal': ['academicGoal'],
   'review': [],
 };

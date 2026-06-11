@@ -1,7 +1,7 @@
-import { Settings, Languages, BarChart3, BookCopy, Unlock } from 'lucide-react';
+import { Settings, Languages, BarChart3, BookCopy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SelectableChip } from '../SelectableChip';
-import { PreferenceGroup } from '../PreferenceGroup';
+import { SelectableChip } from '@/components/ui/SelectableChip';
+import { PreferenceGroup } from '@/components/ui/PreferenceGroup';
 import { preferenceValueLabel } from '@/i18n/preferenceLabels';
 import type { OnboardingFormData, StepFieldErrors } from '@/types/onboarding';
 import type { PreferenceOptions } from '@/types';
@@ -85,18 +85,6 @@ export const ContentPreferencesStep = ({
         label={t('preferences.articles')}
         selected={data.wantsArticles}
         onToggle={() => onChange('wantsArticles', !data.wantsArticles)}
-      />
-    </PreferenceGroup>
-
-    <PreferenceGroup
-      title={t('preferences.openAccessTitle')}
-      description={t('preferences.openAccessDescription')}
-      icon={<Unlock className="w-4 h-4" aria-hidden="true" />}
-    >
-      <SelectableChip
-        label={t('preferences.openAccessLabel')}
-        selected={data.wantsOpenAccessOnly}
-        onToggle={() => onChange('wantsOpenAccessOnly', !data.wantsOpenAccessOnly)}
       />
     </PreferenceGroup>
     </div>

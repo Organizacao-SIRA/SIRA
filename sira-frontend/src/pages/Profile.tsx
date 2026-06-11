@@ -191,7 +191,6 @@ export const Profile = () => {
           materialLevels: editData.materialLevels,
           wantsBooks: editData.wantsBooks,
           wantsArticles: editData.wantsArticles,
-          wantsOpenAccessOnly: editData.wantsOpenAccessOnly,
           interests: editData.interests,
           academicGoal: editData.academicGoal || undefined,
         }

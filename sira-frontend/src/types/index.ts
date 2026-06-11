@@ -37,7 +37,6 @@ export type UserProfile = {
   materialLevels: string[];
   wantsBooks: boolean;
   wantsArticles: boolean;
-  wantsOpenAccessOnly: boolean;
   interests: string[];
   academicGoal: string | null;
   avatarUrl: string | null;

@@ -58,7 +58,6 @@ const hydrate = (initial: Partial<OnboardingFormData> | undefined): OnboardingFo
     materialLevels: source.materialLevels?.length ? source.materialLevels : defaults.materialLevels,
     wantsBooks: source.wantsBooks ?? true,
     wantsArticles: source.wantsArticles ?? true,
-    wantsOpenAccessOnly: source.wantsOpenAccessOnly ?? false,
     academicGoal: source.academicGoal || '',
   };
 };
@@ -225,7 +224,6 @@ export function useOnboardingForm({ initialData, onSuccess }: UseOnboardingFormP
         materialLevels: data.materialLevels,
         wantsBooks: data.wantsBooks,
         wantsArticles: data.wantsArticles,
-        wantsOpenAccessOnly: data.wantsOpenAccessOnly,
         interests: data.interests,
         academicGoal: data.academicGoal || undefined,
       });

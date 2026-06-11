@@ -8,6 +8,10 @@ interface PreferenceGroupProps {
   children: React.ReactNode;
 }
 
+/**
+ * Grupo rotulado de preferências (ícone + título + descrição) com os filhos
+ * (chips) em flex-wrap. Compartilhado entre onboarding e configurações.
+ */
 export const PreferenceGroup = ({ title, description, error, icon, children }: PreferenceGroupProps) => (
   <section className="space-y-3">
     <div className="flex items-start gap-2">

@@ -23,7 +23,6 @@ model User {
   materialLevels        String[]
   wantsBooks            Boolean              @default(true)
   wantsArticles         Boolean              @default(true)
-  wantsOpenAccessOnly   Boolean              @default(false)
   uiLocale              String               @default("pt-BR")
   interests             String[]
   academicGoal          String?

@@ -27,7 +27,6 @@ const academicPreferencesShape = z.object({
   materialLevels: z.array(z.string()).min(1),
   wantsBooks: z.boolean(),
   wantsArticles: z.boolean(),
-  wantsOpenAccessOnly: z.boolean(),
   academicGoal: z.string(),
 });
 
@@ -37,8 +36,8 @@ const academicPreferencesShape = z.object({
  *
  * Tipos e validação derivam daqui: incluir um campo neste schema obriga o
  * compilador a tratá-lo em todas as telas, impedindo o "drift" silencioso
- * entre onboarding e configurações (foi assim que `wantsOpenAccessOnly` e
- * `subAreas` ficaram dessincronizados no passado).
+ * entre onboarding e configurações (foi assim que `subAreas` ficou
+ * dessincronizado entre as telas no passado).
  *
  * As mensagens de erro NÃO moram no schema (ele carrega apenas as regras). A
  * tradução por campo acontece na camada de UI, reaproveitando as chaves i18n
@@ -66,7 +65,6 @@ export const createDefaultAcademicPreferences = (): AcademicPreferences => ({
   materialLevels: [...DEFAULT_MATERIAL_LEVELS],
   wantsBooks: true,
   wantsArticles: true,
-  wantsOpenAccessOnly: false,
   academicGoal: '',
 });
 
@@ -94,7 +92,6 @@ export const academicPreferencesFromProfile = (
     materialLevels: profile.materialLevels?.length ? profile.materialLevels : defaults.materialLevels,
     wantsBooks: profile.wantsBooks ?? true,
     wantsArticles: profile.wantsArticles ?? true,
-    wantsOpenAccessOnly: profile.wantsOpenAccessOnly ?? false,
     academicGoal: profile.academicGoal ?? '',
   };
 };

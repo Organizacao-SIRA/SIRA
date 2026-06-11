@@ -54,9 +54,6 @@ export class CompleteOnboardingDto {
   @IsBoolean()
   wantsArticles: boolean;
 
-  @IsBoolean()
-  wantsOpenAccessOnly: boolean;
-
   @IsArray()
   @ArrayMinSize(MIN_INTEREST_AREAS)
   @IsIn(PREFERENCE_TOPIC_IDS, { each: true })
