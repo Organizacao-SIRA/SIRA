@@ -6,7 +6,7 @@ interface AuthLayoutProps {
 }
 
 export const AuthLayout = ({ children }: AuthLayoutProps) => (
-  <div className="min-h-[calc(100vh-68px)] flex bg-surface-muted animate-fadeIn relative">
+  <div className="min-h-screen flex bg-surface-muted animate-fadeIn relative">
     <AuthVisualPanel />
     <div className="flex-1 flex items-center justify-center px-4 py-6 sm:px-6 lg:px-10">
       <div className="w-full max-w-md">
