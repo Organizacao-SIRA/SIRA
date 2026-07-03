@@ -152,6 +152,29 @@ docker compose ps                    # Status dos containers
 
 ---
 
+## 🧪 Testes E2E (Cypress)
+
+A suíte cobre os fluxos de Autenticação/Cadastro, Gestão de Perfil e Gestão de Favoritos. Pesquisa e Recomendação dependem do Claude e são testadas manualmente.
+
+Com o banco (passo 2) e o backend (passo 4) no ar, rode a partir de `sira-frontend`:
+
+```bash
+cd sira-frontend
+npm run cypress:open   # abre a interface interativa do Cypress
+npm run cypress:run    # roda a suíte completa em modo headless
+npm run e2e             # sobe o frontend automaticamente e roda cypress:run
+```
+
+> `cypress:open` e `cypress:run` esperam o frontend já rodando em `http://localhost:5173` (passo 4). Já `e2e` sobe o frontend sozinho antes de rodar os testes, mas o backend e o banco de dados continuam sendo pré-requisitos.
+
+Para apontar os testes para outra URL de API, sobrescreva a variável `apiUrl`:
+
+```bash
+npx cypress run --env apiUrl=http://localhost:3000/api/v1
+```
+
+---
+
 ## 🔧 Solução de Problemas
 
 **Erro `The column ... does not exist in the current database` (ex.: erro 500 no login):**
