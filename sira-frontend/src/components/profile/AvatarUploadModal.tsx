@@ -133,7 +133,7 @@ export const AvatarUploadModal = ({
           <Button variant="secondary" onClick={onClose} disabled={isSaving || isRemoving}>
             {t('common:actions.cancel')}
           </Button>
-          <Button onClick={handleSave} isLoading={isSaving} disabled={!hasSelection || isRemoving}>
+          <Button onClick={handleSave} isLoading={isSaving} disabled={!hasSelection || isRemoving} data-testid="avatar-save-button">
             {t('avatar.savePhoto')}
           </Button>
         </div>
@@ -149,6 +149,7 @@ export const AvatarUploadModal = ({
           onChange={handleFileSelect}
           className="sr-only"
           aria-label={t('avatar.selectFile')}
+          data-testid="avatar-file-input"
         />
 
         <div className="flex flex-col sm:flex-row gap-2 w-full">

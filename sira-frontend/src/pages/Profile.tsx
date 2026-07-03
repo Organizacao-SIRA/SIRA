@@ -248,6 +248,7 @@ export const Profile = () => {
             <Button
               onClick={() => setIsEditing(true)}
               className="h-11 px-5 py-0 text-sm leading-none sm:h-auto sm:px-6 sm:py-2.5 sm:text-base sm:leading-normal"
+              data-testid="profile-edit-button"
             >
               <Pencil className="w-4 h-4" /> {t('header.edit')}
             </Button>

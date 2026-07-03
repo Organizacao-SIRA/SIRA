@@ -19,6 +19,7 @@ export const ProfileAvatar = ({ name, avatarUrl, onChangeRequest }: ProfileAvata
         onClick={onChangeRequest}
         aria-label={t('avatar.changePhoto')}
         title={t('avatar.changeTitle')}
+        data-testid="profile-avatar-trigger"
         className="absolute -bottom-1 -right-1 bg-primary hover:bg-primary-dark text-white p-2.5 rounded-full shadow-md border-2 border-surface transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50 active:opacity-80"
       >
         <Camera className="w-4 h-4" />

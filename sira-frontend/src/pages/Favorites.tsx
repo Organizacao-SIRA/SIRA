@@ -83,6 +83,7 @@ export const Favorites = () => {
             onClick={() => setActiveTab(id)}
             aria-selected={activeTab === id}
             role="tab"
+            data-testid={`favorites-tab-${id}`}
             className={`pb-3 sm:pb-4 px-1 border-b-2 font-bold text-sm transition-all duration-150 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/30 rounded-sm ${
               activeTab === id
                 ? 'border-selected-border text-link'
@@ -140,7 +141,13 @@ export const Favorites = () => {
           <p className="text-text-muted mb-6 sm:mb-8 max-w-xs mx-auto text-sm sm:text-base">
             {activeTab === 'book' ? t('states.filteredBookDescription') : t('states.filteredArticleDescription')}
           </p>
-          <Button variant="secondary" size="lg" onClick={() => setActiveTab('all')} className="mx-auto">
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={() => setActiveTab('all')}
+            className="mx-auto"
+            data-testid="favorites-clear-filters"
+          >
             {t('states.viewAll')}
           </Button>
         </div>

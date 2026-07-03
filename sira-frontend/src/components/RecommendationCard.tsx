@@ -270,6 +270,8 @@ export const RecommendationCard = memo(function RecommendationCard({
       role="button"
       tabIndex={0}
       aria-label={t('materialCard.viewDetails', { title: item.title })}
+      data-testid="material-card"
+      data-material-id={item.id}
       onClick={handleCardClick}
       onKeyDown={e => {
         if (e.key !== 'Enter' && e.key !== ' ') return;

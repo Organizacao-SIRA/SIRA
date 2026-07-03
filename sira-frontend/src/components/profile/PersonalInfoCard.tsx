@@ -20,8 +20,8 @@ export const PersonalInfoCard = ({ isEditing, name, email, editName, onChangeNam
       <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] sm:items-center text-sm border-b border-border pb-3 gap-1 sm:gap-3 sm:min-h-[44px]">
         <span className="text-text-muted">{t('fields.name')}</span>
         {isEditing
-          ? <Input value={editName} onChange={(e) => onChangeName(e.target.value)} />
-          : <span className="text-text font-bold break-words">{name}</span>
+          ? <Input value={editName} onChange={(e) => onChangeName(e.target.value)} data-testid="profile-name-input" />
+          : <span className="text-text font-bold break-words" data-testid="profile-name-display">{name}</span>
         }
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] sm:items-center text-sm gap-1 sm:gap-3 sm:min-h-[44px]">

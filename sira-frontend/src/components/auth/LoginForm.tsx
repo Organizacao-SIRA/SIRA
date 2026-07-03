@@ -73,6 +73,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
         invalid={invalid.email}
         autoComplete="email"
         required
+        data-testid="login-email"
       />
 
       <div className="space-y-2">
@@ -85,6 +86,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
           invalid={invalid.password}
           autoComplete="current-password"
           required
+          data-testid="login-password"
         />
         <div className="flex justify-end">
           <button
@@ -101,6 +103,7 @@ export const LoginForm = ({ onForgotPassword }: LoginFormProps) => {
         type="submit"
         isLoading={isLoading}
         className="w-full mt-1"
+        data-testid="login-submit"
       >
         {t('login.submit')}
         {!isLoading && <ArrowRight className="w-4 h-4" />}

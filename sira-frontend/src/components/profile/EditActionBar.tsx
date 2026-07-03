@@ -13,10 +13,10 @@ export const EditActionBar = ({ isSaving, onCancel, onSave }: EditActionBarProps
   return (
     <div className="flex flex-col items-stretch sm:items-end gap-3 pt-2 pb-6 sm:pb-8">
     <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-      <Button variant="secondary" onClick={onCancel} disabled={isSaving} className="w-full sm:w-auto">
+      <Button variant="secondary" onClick={onCancel} disabled={isSaving} className="w-full sm:w-auto" data-testid="profile-cancel-button">
         {t('common:actions.cancel')}
       </Button>
-      <Button onClick={onSave} isLoading={isSaving} className="w-full sm:w-auto">
+      <Button onClick={onSave} isLoading={isSaving} className="w-full sm:w-auto" data-testid="profile-save-button">
         {t('actions.saveChanges')}
       </Button>
     </div>

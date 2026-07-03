@@ -56,6 +56,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen }: NavbarProps) => {
                 variant="navbarAction"
                 size="sm"
                 disabled={isLoginRoute}
+                data-testid="nav-login-button"
               >
                 {!isLoginRoute && <LogIn className="w-4 h-4" />}
                 {isLoginRoute ? t('auth.signingIn') : t('auth.signIn')}

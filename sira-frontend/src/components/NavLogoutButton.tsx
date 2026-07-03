@@ -27,6 +27,7 @@ export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
         onClick={() => setIsOpen(true)}
         title={t('logout.title')}
         aria-label={t('logout.title')}
+        data-testid="nav-logout-button"
         className="inline-flex items-center justify-center gap-2 bg-danger-fill hover:bg-danger-fill-hover text-white border border-white/15 rounded-full px-3 sm:px-4 h-9 sm:h-10 text-sm font-semibold transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-white/60 active:opacity-75 flex-shrink-0"
       >
         <LogOut className="w-4 h-4" />
@@ -53,6 +54,7 @@ export const NavLogoutButton = ({ onLogout }: NavLogoutButtonProps) => {
               size="sm"
               isLoading={isLoading}
               onClick={handleConfirm}
+              data-testid="nav-logout-confirm"
             >
               <LogOut className="w-4 h-4" />
               {t('logout.confirm')}

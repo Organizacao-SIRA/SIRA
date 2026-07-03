@@ -16,6 +16,11 @@ dist-ssr
 playwright-report
 test-results
 
+# Cypress artifacts
+cypress/videos
+cypress/screenshots
+cypress/downloads
+
 # Environment variables
 .env
 .env.local

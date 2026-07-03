@@ -1,0 +1,1 @@
+Este arquivo não é uma imagem — usado para testar a rejeição de formato invalido no upload de avatar.

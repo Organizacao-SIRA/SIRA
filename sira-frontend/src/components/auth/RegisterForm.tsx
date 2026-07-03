@@ -76,6 +76,7 @@ export const RegisterForm = () => {
         icon={<User className="w-4 h-4" />}
         autoComplete="name"
         required
+        data-testid="register-name"
       />
 
       <Input
@@ -89,6 +90,7 @@ export const RegisterForm = () => {
         invalid={invalid.email}
         autoComplete="email"
         required
+        data-testid="register-email"
       />
 
       <div className="space-y-3">
@@ -101,6 +103,7 @@ export const RegisterForm = () => {
           invalid={invalid.password}
           autoComplete="new-password"
           required
+          data-testid="register-password"
         />
         <PasswordStrengthMeter password={password} />
       </div>
@@ -114,6 +117,7 @@ export const RegisterForm = () => {
         invalid={invalid.confirmPassword}
         autoComplete="new-password"
         required
+        data-testid="register-confirm-password"
       />
 
       <Button
@@ -121,6 +125,7 @@ export const RegisterForm = () => {
         isLoading={isLoading}
         className="w-full mt-1"
         disabled={isLoading}
+        data-testid="register-submit"
       >
         {t('register.submit')}
         {!isLoading && <UserPlus className="w-4 h-4" />}
